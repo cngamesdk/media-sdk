@@ -20,3 +20,15 @@ type CreativeReq struct {
 // CreativeResp 广告创意响应
 type CreativeResp struct {
 }
+
+type GetCreativeReq struct {
+}
+
+type GetCreativeResp struct {
+}
+
+type ListCreativesReq struct {
+}
+
+type ListCreativesResp struct {
+}

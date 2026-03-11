@@ -31,3 +31,15 @@ type Targeting struct {
 // UnitResp 广告组响应
 type UnitResp struct {
 }
+
+type GetUnitReq struct {
+}
+
+type GetUnitResp struct {
+}
+
+type ListUnitsReq struct {
+}
+
+type ListUnitsResp struct {
+}
