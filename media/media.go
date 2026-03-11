@@ -1,11 +1,11 @@
 package media
 
 import (
-	"github.com/cngamesdk/media-sdk/adapter"
-	"go.uber.org/zap"
+	"github.com/cngamesdk/media-sdk/config"
+	"github.com/cngamesdk/media-sdk/utils"
 )
 
 type Media struct {
-	Config adapter.AdapterConfig
-	Logger *zap.Logger
+	Config *config.Config
+	Client *utils.HTTPClient
 }

@@ -33,13 +33,23 @@ type CampaignResp struct {
 }
 
 type GetCampaignReq struct {
+	AdvertiserID string `json:"advertiser_id"`
+	CampaignID   int64  `json:"campaign_id"`
 }
 
 type GetCampaignResp struct {
 }
 
 type ListCampaignsReq struct {
+	AdvertiserID string `json:"advertiser_id"`
+	Page         int    `json:"page"`
+	PageSize     int    `json:"page_size"`
+	Status       string `json:"status"`
 }
 
 type ListCampaignsResp struct {
+	List     []*CampaignResp
+	Total    int `json:"total"`
+	Page     int `json:"page"`
+	PageSize int `json:"page_size"`
 }

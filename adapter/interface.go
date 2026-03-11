@@ -1,12 +1,15 @@
-package media_sdk
+package adapter
 
 import (
 	"context"
+	"github.com/cngamesdk/media-sdk/config"
 	"github.com/cngamesdk/media-sdk/model"
 )
 
 // MediaSDK 媒体SDK统一接口
 type MediaSDK interface {
+	Code() config.MediaType
+	Name() string
 
 	// 账户管理
 	GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error)
@@ -34,11 +37,11 @@ type MediaSDK interface {
 	GetReport(ctx context.Context, req *model.ReportReq) (*model.ReportResp, error)
 
 	// 批量操作
-	BatchCreate(ctx context.Context, req *model.BatchCreateReq) (*model.BatchCreateResp, error)
-	BatchUpdate(ctx context.Context, req *model.BatchUpdateReq) (*model.BatchUpdateResp, error)
+	//BatchCreate(ctx context.Context, req *model.BatchCreateReq) (*model.BatchCreateResp, error)
+	//BatchUpdate(ctx context.Context, req *model.BatchUpdateReq) (*model.BatchUpdateResp, error)
 }
 
 // Factory SDK工厂接口
 type Factory interface {
-	Create(config *Config) (MediaSDK, error)
+	Create(config *config.Config) (MediaSDK, error)
 }

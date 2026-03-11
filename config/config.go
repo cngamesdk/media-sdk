@@ -1,4 +1,4 @@
-package media_sdk
+package config
 
 import "time"
 
