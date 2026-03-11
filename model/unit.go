@@ -30,6 +30,7 @@ type Targeting struct {
 
 // UnitResp 广告组响应
 type UnitResp struct {
+	ID string `json:"ad_id"`
 }
 
 type GetUnitReq struct {
