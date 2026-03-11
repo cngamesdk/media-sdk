@@ -31,3 +31,15 @@ type CampaignResp struct {
 	UpdateTime time.Time       `json:"update_time"`
 	Extra      json.RawMessage `json:"extra,omitempty"`
 }
+
+type GetCampaignReq struct {
+}
+
+type GetCampaignResp struct {
+}
+
+type ListCampaignsReq struct {
+}
+
+type ListCampaignsResp struct {
+}
