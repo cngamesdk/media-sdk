@@ -80,3 +80,23 @@ func TestMultiClient(t *testing.T) {
 		t.Fatal(multiErr)
 	}
 }
+
+func TestAccessToken(t *testing.T) {
+	// 创建巨量引擎客户端
+	mediaConfig := config.DefaultConfig(config.MediaToutiao)
+	mediaConfig.AppID = "123"
+	mediaConfig.AppSecret = "test"
+
+	client, err := NewClient(mediaConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	req := &model.AccessTokenReq{}
+	req.AuthCode = "123"
+	account, accountErr := client.adapter.AccessToken(ctx, req)
+	if accountErr != nil {
+		t.Fatal(accountErr)
+	}
+	println(fmt.Sprintf("%+v", account))
+}

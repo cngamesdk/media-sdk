@@ -10,6 +10,7 @@ import (
 	model2 "github.com/cngamesdk/media-sdk/media/toutiao/model"
 	"github.com/cngamesdk/media-sdk/model"
 	"github.com/cngamesdk/media-sdk/utils"
+	"github.com/spf13/cast"
 )
 
 func init() {
@@ -63,6 +64,27 @@ func (a *ToutiaoAdapter) Auth(req *model.AuthReq) (resp interface{}, err error) 
 	return
 }
 
+// Auth 授权
+func (a *ToutiaoAdapter) AccessToken(ctx context.Context, req *model.AccessTokenReq) (resp *model.AccessTokenResp, err error) {
+	myReq := model2.AccessTokenReq{}
+	myReq.AccessTokenReq = req
+	myReq.AppId = cast.ToInt64(a.Config.AppID)
+	myReq.Secret = a.Config.AppSecret
+	myReq.Format()
+	if validateErr := myReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AccessTokenResp
+	errRequest := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/oauth2/access_token/", myReq, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp, err = result.Convert()
+	return
+}
+
 // GetAccount 获取账户
 func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (resp *model.AccountResp, err error) {
 	myReq := &model2.AccountReq{}
@@ -73,7 +95,6 @@ func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) 
 		return
 	}
 	var result model2.AccountResp
-
 	errRequest := a.RequestGet(ctx, myReq.Headers, a.Config.BaseURL+"/open_api/2/advertiser/info/", myReq, &result)
 	if errRequest != nil {
 		err = errRequest

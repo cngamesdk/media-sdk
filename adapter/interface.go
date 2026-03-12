@@ -12,9 +12,11 @@ type MediaSDK interface {
 	Name() string
 
 	Auth(req *model.AuthReq) (resp interface{}, err error)
+	AccessToken(ctx context.Context, req *model.AccessTokenReq) (*model.AccessTokenResp, error)
+	RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (*model.RefreshTokenResp, error)
+
 	// 账户管理
 	GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error)
-	RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (*model.RefreshTokenResp, error)
 
 	// 广告计划
 	CreateCampaign(ctx context.Context, req *model.CampaignReq) (*model.CampaignResp, error)
