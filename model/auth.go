@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"errors"
+	"strings"
+	"time"
+)
 
 type AuthReq struct {
 	AppId        int64  `json:"app_id"`
@@ -33,5 +37,25 @@ type RefreshTokenReq struct {
 }
 
 type RefreshTokenResp struct {
+	tokenData
+}
+
+type AccessTokenReq struct {
+	AuthCode string `json:"auth_code"`
+}
+
+func (receiver *AccessTokenReq) Format() {
+	receiver.AuthCode = strings.TrimSpace(receiver.AuthCode)
+}
+
+func (receiver AccessTokenReq) Validate() (err error) {
+	if len(receiver.AuthCode) <= 0 {
+		err = errors.New("AuthCode为空")
+		return
+	}
+	return
+}
+
+type AccessTokenResp struct {
 	tokenData
 }
