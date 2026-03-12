@@ -36,6 +36,14 @@ func NewClient(config *config.Config) (*Client, error) {
 	}, nil
 }
 
+// Auth 授权
+func (c *Client) Auth(req *model.AuthReq) (interface{}, error) {
+	if err := c.validateReq(req); err != nil {
+		return nil, err
+	}
+	return c.adapter.Auth(req)
+}
+
 // GetAccount 获取账户信息
 func (c *Client) GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error) {
 	if err := c.validateReq(req); err != nil {
