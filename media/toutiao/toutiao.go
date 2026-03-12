@@ -1,17 +1,15 @@
 package toutiao
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/cngamesdk/media-sdk/adapter"
 	"github.com/cngamesdk/media-sdk/config"
 	"github.com/cngamesdk/media-sdk/media"
+	model2 "github.com/cngamesdk/media-sdk/media/toutiao/model"
 	"github.com/cngamesdk/media-sdk/model"
 	"github.com/cngamesdk/media-sdk/utils"
-	"net/http"
-	"time"
 )
 
 func init() {
@@ -46,66 +44,97 @@ func (a *ToutiaoAdapter) Name() string {
 	return "巨量引擎"
 }
 
+// Auth 授权
+func (a *ToutiaoAdapter) Auth(req *model.AuthReq) (resp interface{}, err error) {
+	myReq := &model2.AuthReq{}
+	myReq.Convert(req)
+	myReq.Format()
+	if validateErr := myReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	convertResult, convertErr := utils.ConvertStructToQueryString(myReq)
+	if convertErr != nil {
+		err = convertErr
+		return
+	}
+	authResp := model2.AuthResp(model2.BaseUrlOpen + "/audit/oauth.html?" + convertResult)
+	resp = authResp
+	return
+}
+
 // GetAccount 获取账户
-func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error) {
-	params := map[string]interface{}{
-		"advertiser_id": req.AdvertiserID,
+func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (resp *model.AccountResp, err error) {
+	myReq := &model2.AccountReq{}
+	myReq.Convert(req)
+	myReq.Format()
+	if validateErr := myReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
 	}
+	var result model2.AccountResp
 
-	var result struct {
-		Code int `json:"code"`
-		Data struct {
-			ID      string  `json:"id"`
-			Name    string  `json:"name"`
-			Balance float64 `json:"balance"`
-			Status  string  `json:"status"`
-		} `json:"data"`
+	errRequest := a.RequestGet(ctx, myReq.Headers, a.Config.BaseURL+"/open_api/2/advertiser/info/", myReq, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
 	}
+	resp, err = result.Convert()
+	return
+}
 
-	err := a.Request(ctx, http.MethodGet, "/open_api/2/advertiser/info/", params, &result)
-	if err != nil {
-		return nil, err
+func (a *ToutiaoAdapter) RequestGet(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
+	var response model2.BaseResp
+	if err = a.Media.RequestGet(ctx, headers, url, data, &response); err != nil {
+		return
 	}
+	err = a.dealResponse(response, result)
+	return
+}
 
-	if result.Code != 0 {
-		return nil, fmt.Errorf("toutiao api error: code=%d", result.Code)
+func (a *ToutiaoAdapter) RequestPostJson(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
+	var response model2.BaseResp
+	if err = a.Media.RequestPostJson(ctx, headers, url, data, &response); err != nil {
+		return
 	}
+	err = a.dealResponse(response, result)
+	return
+}
 
-	return &model.AccountResp{
-		ID:      result.Data.ID,
-		Name:    result.Data.Name,
-		Balance: result.Data.Balance,
-		Status:  result.Data.Status,
-	}, nil
+func (a *ToutiaoAdapter) dealResponse(req model2.BaseResp, result interface{}) (err error) {
+	if req.Code != 0 {
+		err = fmt.Errorf("toutiao api error: code=%d, message:%s, request_id:%s", req.Code, req.Message, req.RequestId)
+		return
+	}
+	dataJson, dataJsonErr := json.Marshal(req.Data)
+	if dataJsonErr != nil {
+		err = fmt.Errorf("toutiao response to json error: %s", dataJsonErr.Error())
+		return
+	}
+	if unJsonErr := json.Unmarshal(dataJson, result); unJsonErr != nil {
+		err = fmt.Errorf("toutiao json to target error: %s", unJsonErr.Error())
+		return
+	}
+	return
 }
 
 // RefreshToken 刷新Token
-func (a *ToutiaoAdapter) RefreshToken(ctx context.Context) error {
+func (a *ToutiaoAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
 	params := map[string]interface{}{
 		"app_id":        a.Config.AppID,
 		"secret":        a.Config.AppSecret,
-		"refresh_token": a.Config.RefreshToken,
+		"refresh_token": req.RefreshToken,
 	}
 
-	var result struct {
-		Code int `json:"code"`
-		Data struct {
-			AccessToken  string `json:"access_token"`
-			RefreshToken string `json:"refresh_token"`
-			ExpiresIn    int64  `json:"expires_in"`
-		} `json:"data"`
+	var result model2.RefreshTokenResp
+
+	requestErr := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/2/oauth2/refresh_token/", params, &result)
+	if requestErr != nil {
+		err = requestErr
+		return
 	}
-
-	err := a.Request(ctx, http.MethodPost, "/open_api/2/oauth2/refresh_token/", params, &result)
-	if err != nil {
-		return err
-	}
-
-	a.Config.AccessToken = result.Data.AccessToken
-	a.Config.RefreshToken = result.Data.RefreshToken
-	a.Config.ExpireTime = time.Now().Add(time.Duration(result.Data.ExpiresIn) * time.Second)
-
-	return nil
+	resp, err = result.Convert()
+	return
 }
 
 // CreateCampaign 创建广告计划
@@ -130,7 +159,7 @@ func (a *ToutiaoAdapter) CreateCampaign(ctx context.Context, req *model.Campaign
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodPost, "/open_api/2/campaign/create/", params, &result)
+	err := a.RequestPostJson(ctx, nil, "/open_api/2/campaign/create/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +186,7 @@ func (a *ToutiaoAdapter) UpdateCampaign(ctx context.Context, req *model.Campaign
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodPost, "/open_api/2/campaign/update/", params, &result)
+	err := a.RequestPostJson(ctx, nil, "/open_api/2/campaign/update/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +216,7 @@ func (a *ToutiaoAdapter) GetCampaign(ctx context.Context, req *model.GetCampaign
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodGet, "/open_api/2/campaign/get/", params, &result)
+	err := a.RequestGet(ctx, nil, a.Config.BaseURL+"/open_api/2/campaign/get/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +250,7 @@ func (a *ToutiaoAdapter) ListCampaigns(ctx context.Context, req *model.ListCampa
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodGet, "/open_api/2/campaign/list/", params, &result)
+	err := a.RequestGet(ctx, nil, a.Config.BaseURL+"/open_api/2/campaign/list/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +295,7 @@ func (a *ToutiaoAdapter) CreateUnit(ctx context.Context, req *model.UnitReq) (*m
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodPost, "/open_api/2/ad/create/", params, &result)
+	err := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/2/ad/create/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +363,7 @@ func (a *ToutiaoAdapter) GetReport(ctx context.Context, req *model.ReportReq) (*
 		} `json:"data"`
 	}
 
-	err := a.Request(ctx, http.MethodGet, "/open_api/2/report/ad/get/", params, &result)
+	err := a.RequestGet(ctx, nil, "/open_api/2/report/ad/get/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -355,26 +384,6 @@ func (a *ToutiaoAdapter) GetReport(ctx context.Context, req *model.ReportReq) (*
 		Page:     result.Data.PageInfo.Page,
 		PageSize: result.Data.PageInfo.PageSize,
 	}, nil
-}
-
-// Req 发送请求
-func (a *ToutiaoAdapter) Request(ctx context.Context, method, path string, params interface{}, result interface{}) error {
-	headers := map[string]string{
-		"Access-Token": a.Config.AccessToken,
-		"Content-Type": "application/json",
-	}
-
-	body, err := json.Marshal(params)
-	if err != nil {
-		return err
-	}
-
-	resp, err := a.Client.Request(ctx, method, a.Config.BaseURL+path, bytes.NewReader(body), headers)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(resp, result)
 }
 
 // buildTargeting 构建定向

@@ -93,8 +93,8 @@ func (c *Client) GetReport(ctx context.Context, req *model.ReportReq) (*model.Re
 }
 
 // RefreshToken 刷新Token
-func (c *Client) RefreshToken(ctx context.Context) error {
-	return c.adapter.RefreshToken(ctx)
+func (c *Client) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
+	return c.adapter.RefreshToken(ctx, req)
 }
 
 // validateReq 验证请求参数

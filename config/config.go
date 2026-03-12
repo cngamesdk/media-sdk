@@ -17,19 +17,16 @@ const (
 
 // Config 通用配置
 type Config struct {
-	MediaType    MediaType     `json:"media_type"`
-	AppID        string        `json:"app_id"`
-	AppSecret    string        `json:"app_secret"`
-	AccessToken  string        `json:"access_token"`
-	RefreshToken string        `json:"refresh_token"`
-	ExpireTime   time.Time     `json:"expire_time"`
-	BaseURL      string        `json:"base_url"`
-	Timeout      time.Duration `json:"timeout"`
-	Proxy        string        `json:"proxy"`
-	RateLimit    int           `json:"rate_limit"` // QPS限制
-	MaxRetries   int           `json:"max_retries"`
-	RetryWait    time.Duration `json:"retry_wait"`
-	Debug        bool          `json:"debug"`
+	MediaType  MediaType     `json:"media_type"`
+	AppID      string        `json:"app_id"`
+	AppSecret  string        `json:"app_secret"`
+	BaseURL    string        `json:"base_url"`
+	Timeout    time.Duration `json:"timeout"`
+	Proxy      string        `json:"proxy"`
+	RateLimit  int           `json:"rate_limit"` // QPS限制
+	MaxRetries int           `json:"max_retries"`
+	RetryWait  time.Duration `json:"retry_wait"`
+	Debug      bool          `json:"debug"`
 }
 
 // DefaultConfig 默认配置
