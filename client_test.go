@@ -11,9 +11,6 @@ import (
 func TestClientToutiao(t *testing.T) {
 	// 创建巨量引擎客户端
 	mediaConfig := config.DefaultConfig(config.MediaToutiao)
-	mediaConfig.AppID = "your_app_id"
-	mediaConfig.AppSecret = "your_app_secret"
-	mediaConfig.AccessToken = "your_access_token"
 
 	client, err := NewClient(mediaConfig)
 	if err != nil {
@@ -21,6 +18,8 @@ func TestClientToutiao(t *testing.T) {
 	}
 	ctx := context.Background()
 	req := &model.AccountReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
 	account, accountErr := client.adapter.GetAccount(ctx, req)
 	if accountErr != nil {
 		t.Fatal(accountErr)
@@ -31,9 +30,6 @@ func TestClientToutiao(t *testing.T) {
 func TestClientTencent(t *testing.T) {
 	// 创建巨量引擎客户端
 	mediaConfig := config.DefaultConfig(config.MediaTencent)
-	mediaConfig.AppID = "your_app_id"
-	mediaConfig.AppSecret = "your_app_secret"
-	mediaConfig.AccessToken = "your_access_token"
 
 	client, err := NewClient(mediaConfig)
 	if err != nil {
@@ -51,18 +47,12 @@ func TestClientTencent(t *testing.T) {
 func TestMultiClient(t *testing.T) {
 
 	mediaConfigToutiao := config.DefaultConfig(config.MediaToutiao)
-	mediaConfigToutiao.AppID = "your_app_id"
-	mediaConfigToutiao.AppSecret = "your_app_secret"
-	mediaConfigToutiao.AccessToken = "your_access_token"
 	clientToutiao, errToutiao := NewClient(mediaConfigToutiao)
 	if errToutiao != nil {
 		t.Fatal(errToutiao)
 	}
 
 	mediaConfigTencent := config.DefaultConfig(config.MediaTencent)
-	mediaConfigTencent.AppID = "your_app_id"
-	mediaConfigTencent.AppSecret = "your_app_secret"
-	mediaConfigTencent.AccessToken = "your_access_token"
 	clientTencent, errTencent := NewClient(mediaConfigTencent)
 	if errTencent != nil {
 		t.Fatal(errTencent)
@@ -78,7 +68,7 @@ func TestMultiClient(t *testing.T) {
 	// 获取所有媒体账户信息
 	multiErr := multiClient.BatchExecute(ctx, func(client *Client) error {
 		account, err := client.GetAccount(ctx, &model.AccountReq{
-			AdvertiserID: "",
+			AdvertiserID: 123,
 		})
 		if err != nil {
 			return err

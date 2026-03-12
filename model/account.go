@@ -6,15 +6,17 @@ import (
 
 // AccountReq 账户请求
 type AccountReq struct {
-	AdvertiserID string `json:"advertiser_id"`
+	AccessToken  string   `json:"access_token,omitempty"`
+	AdvertiserID int64    `json:"advertiser_id,omitempty"`
+	Fields       []string `json:"fields,omitempty"`
 }
 
 // AccountResp 账户响应
 type AccountResp struct {
-	ID           string    `json:"id"`
+	AdvertiserID int64     `json:"advertiser_id"`
 	Name         string    `json:"name"`
-	Balance      float64   `json:"balance"`
+	Role         string    `json:"role"`
 	Status       string    `json:"status"`
-	Rechargeable float64   `json:"rechargeable"`
 	CreateTime   time.Time `json:"create_time"`
+	Extension
 }
