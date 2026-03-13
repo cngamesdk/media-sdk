@@ -11,7 +11,7 @@ type MediaSDK interface {
 	Code() config.MediaType
 	Name() string
 
-	Auth(req *model.AuthReq) (resp interface{}, err error)
+	Auth(ctx context.Context, req *model.AuthReq) (resp interface{}, err error)
 	AccessToken(ctx context.Context, req *model.AccessTokenReq) (*model.AccessTokenResp, error)
 	RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (*model.RefreshTokenResp, error)
 
@@ -21,19 +21,16 @@ type MediaSDK interface {
 	// 广告计划
 	CreateCampaign(ctx context.Context, req *model.CampaignReq) (*model.CampaignResp, error)
 	UpdateCampaign(ctx context.Context, req *model.CampaignReq) (*model.CampaignResp, error)
-	GetCampaign(ctx context.Context, req *model.GetCampaignReq) (*model.GetCampaignResp, error)
 	ListCampaigns(ctx context.Context, req *model.ListCampaignsReq) (*model.ListCampaignsResp, error)
 
 	// 广告组
 	CreateUnit(ctx context.Context, req *model.UnitReq) (*model.UnitResp, error)
 	UpdateUnit(ctx context.Context, req *model.UnitReq) (*model.UnitResp, error)
-	GetUnit(ctx context.Context, req *model.GetUnitReq) (*model.UnitResp, error)
 	ListUnits(ctx context.Context, req *model.ListUnitsReq) (*model.ListUnitsResp, error)
 
 	// 广告创意
 	CreateCreative(ctx context.Context, req *model.CreativeReq) (*model.CreativeResp, error)
 	UpdateCreative(ctx context.Context, req *model.CreativeReq) (*model.CreativeResp, error)
-	GetCreative(ctx context.Context, req *model.GetCreativeReq) (*model.CreativeResp, error)
 	ListCreatives(ctx context.Context, req *model.ListCreativesReq) (*model.ListCreativesResp, error)
 
 	// 数据报表

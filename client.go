@@ -18,14 +18,19 @@ type Client struct {
 	mu      sync.RWMutex
 }
 
+// NewClientDefault 创建默认客户端
+func NewClientDefault(mediaType config.MediaType) (*Client, error) {
+	return NewClient(mediaType, config.DefaultConfig())
+}
+
 // NewClient 创建客户端
-func NewClient(config *config.Config) (*Client, error) {
+func NewClient(mediaType config.MediaType, config *config.Config) (*Client, error) {
 	if config == nil {
 		return nil, errors.ErrInvalidConfig
 	}
 
 	// 创建适配器
-	ad, err := adapter.CreateAdapter(config)
+	ad, err := adapter.CreateAdapter(mediaType, config)
 	if err != nil {
 		return nil, fmt.Errorf("create adapter failed: %w", err)
 	}
@@ -37,11 +42,11 @@ func NewClient(config *config.Config) (*Client, error) {
 }
 
 // Auth 授权
-func (c *Client) Auth(req *model.AuthReq) (interface{}, error) {
+func (c *Client) Auth(ctx context.Context, req *model.AuthReq) (interface{}, error) {
 	if err := c.validateReq(req); err != nil {
 		return nil, err
 	}
-	return c.adapter.Auth(req)
+	return c.adapter.Auth(ctx, req)
 }
 
 // GetAccount 获取账户信息
@@ -66,14 +71,6 @@ func (c *Client) UpdateCampaign(ctx context.Context, req *model.CampaignReq) (*m
 		return nil, err
 	}
 	return c.adapter.UpdateCampaign(ctx, req)
-}
-
-// GetCampaign 获取广告计划
-func (c *Client) GetCampaign(ctx context.Context, req *model.GetCampaignReq) (*model.GetCampaignResp, error) {
-	if err := c.validateReq(req); err != nil {
-		return nil, err
-	}
-	return c.adapter.GetCampaign(ctx, req)
 }
 
 // ListCampaigns 列出广告计划

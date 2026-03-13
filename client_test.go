@@ -8,11 +8,25 @@ import (
 	"testing"
 )
 
-func TestClientToutiao(t *testing.T) {
+func TestClientToutiaoAuth(t *testing.T) {
 	// 创建巨量引擎客户端
-	mediaConfig := config.DefaultConfig(config.MediaToutiao)
+	client, err := NewClientDefault(config.MediaToutiao)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	req := &model.AuthReq{}
+	req.AppId = 123
+	req.RedirectUri = "https://www.test.com"
+	account, accountErr := client.adapter.Auth(ctx, req)
+	if accountErr != nil {
+		t.Fatal(accountErr)
+	}
+	println(fmt.Sprintf("%+v", account))
+}
 
-	client, err := NewClient(mediaConfig)
+func TestClientToutiao(t *testing.T) {
+	client, err := NewClientDefault(config.MediaToutiao)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,10 +42,7 @@ func TestClientToutiao(t *testing.T) {
 }
 
 func TestClientTencent(t *testing.T) {
-	// 创建巨量引擎客户端
-	mediaConfig := config.DefaultConfig(config.MediaTencent)
-
-	client, err := NewClient(mediaConfig)
+	client, err := NewClientDefault(config.MediaTencent)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,14 +57,12 @@ func TestClientTencent(t *testing.T) {
 
 func TestMultiClient(t *testing.T) {
 
-	mediaConfigToutiao := config.DefaultConfig(config.MediaToutiao)
-	clientToutiao, errToutiao := NewClient(mediaConfigToutiao)
+	clientToutiao, errToutiao := NewClientDefault(config.MediaToutiao)
 	if errToutiao != nil {
 		t.Fatal(errToutiao)
 	}
 
-	mediaConfigTencent := config.DefaultConfig(config.MediaTencent)
-	clientTencent, errTencent := NewClient(mediaConfigTencent)
+	clientTencent, errTencent := NewClientDefault(config.MediaTencent)
 	if errTencent != nil {
 		t.Fatal(errTencent)
 	}
@@ -81,13 +90,8 @@ func TestMultiClient(t *testing.T) {
 	}
 }
 
-func TestAccessToken(t *testing.T) {
-	// 创建巨量引擎客户端
-	mediaConfig := config.DefaultConfig(config.MediaToutiao)
-	mediaConfig.AppID = "123"
-	mediaConfig.AppSecret = "test"
-
-	client, err := NewClient(mediaConfig)
+func TestAccessTokenToutiao(t *testing.T) {
+	client, err := NewClientDefault(config.MediaToutiao)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -19,13 +19,13 @@ func Register(mediaType config.MediaType, factory Factory) {
 }
 
 // CreateAdapter 创建适配器
-func CreateAdapter(config *config.Config) (MediaSDK, error) {
+func CreateAdapter(mediaType config.MediaType, config *config.Config) (MediaSDK, error) {
 	mu.RLock()
-	factory, ok := adapters[config.MediaType]
+	factory, ok := adapters[mediaType]
 	mu.RUnlock()
 
 	if !ok {
-		return nil, fmt.Errorf("unsupported media type: %s", config.MediaType)
+		return nil, fmt.Errorf("unsupported media type: %s", mediaType)
 	}
 
 	return factory.Create(config)

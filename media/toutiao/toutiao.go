@@ -10,7 +10,6 @@ import (
 	model2 "github.com/cngamesdk/media-sdk/media/toutiao/model"
 	"github.com/cngamesdk/media-sdk/model"
 	"github.com/cngamesdk/media-sdk/utils"
-	"github.com/spf13/cast"
 )
 
 func init() {
@@ -46,7 +45,8 @@ func (a *ToutiaoAdapter) Name() string {
 }
 
 // Auth 授权
-func (a *ToutiaoAdapter) Auth(req *model.AuthReq) (resp interface{}, err error) {
+func (a *ToutiaoAdapter) Auth(ctx context.Context, req *model.AuthReq) (resp interface{}, err error) {
+	_ = ctx
 	myReq := &model2.AuthReq{}
 	myReq.Convert(req)
 	myReq.Format()
@@ -67,16 +67,14 @@ func (a *ToutiaoAdapter) Auth(req *model.AuthReq) (resp interface{}, err error) 
 // Auth 授权
 func (a *ToutiaoAdapter) AccessToken(ctx context.Context, req *model.AccessTokenReq) (resp *model.AccessTokenResp, err error) {
 	myReq := model2.AccessTokenReq{}
-	myReq.AccessTokenReq = req
-	myReq.AppId = cast.ToInt64(a.Config.AppID)
-	myReq.Secret = a.Config.AppSecret
+	myReq.Convert(req)
 	myReq.Format()
 	if validateErr := myReq.Validate(); validateErr != nil {
 		err = validateErr
 		return
 	}
 	var result model2.AccessTokenResp
-	errRequest := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/oauth2/access_token/", myReq, &result)
+	errRequest := a.RequestPostJson(ctx, nil, model2.BaseUrlApi+"/open_api/oauth2/access_token/", myReq, &result)
 	if errRequest != nil {
 		err = errRequest
 		return
@@ -95,7 +93,7 @@ func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) 
 		return
 	}
 	var result model2.AccountResp
-	errRequest := a.RequestGet(ctx, myReq.Headers, a.Config.BaseURL+"/open_api/2/advertiser/info/", myReq, &result)
+	errRequest := a.RequestGet(ctx, myReq.Headers, model2.BaseUrlAd+"/open_api/2/advertiser/info/", myReq, &result)
 	if errRequest != nil {
 		err = errRequest
 		return
@@ -141,15 +139,16 @@ func (a *ToutiaoAdapter) dealResponse(req model2.BaseResp, result interface{}) (
 
 // RefreshToken 刷新Token
 func (a *ToutiaoAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
-	params := map[string]interface{}{
-		"app_id":        a.Config.AppID,
-		"secret":        a.Config.AppSecret,
-		"refresh_token": req.RefreshToken,
+	myReq := &model2.RefreshTokenReq{}
+	myReq.Convert(req)
+	myReq.Format()
+	if validateErr := myReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
 	}
-
 	var result model2.RefreshTokenResp
 
-	requestErr := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/2/oauth2/refresh_token/", params, &result)
+	requestErr := a.RequestPostJson(ctx, nil, model2.BaseUrlApi+"/open_api/2/oauth2/refresh_token/", myReq, &result)
 	if requestErr != nil {
 		err = requestErr
 		return
@@ -217,34 +216,6 @@ func (a *ToutiaoAdapter) UpdateCampaign(ctx context.Context, req *model.Campaign
 	}, nil
 }
 
-// GetCampaign 获取广告计划
-func (a *ToutiaoAdapter) GetCampaign(ctx context.Context, req *model.GetCampaignReq) (*model.GetCampaignResp, error) {
-	params := map[string]interface{}{
-		"advertiser_id": req.AdvertiserID,
-		"campaign_id":   req.CampaignID,
-	}
-
-	var result struct {
-		Code int `json:"code"`
-		Data struct {
-			ID         string  `json:"campaign_id"`
-			Name       string  `json:"name"`
-			Budget     float64 `json:"budget"`
-			BudgetMode string  `json:"budget_mode"`
-			Status     string  `json:"status"`
-			StartTime  string  `json:"start_time"`
-			EndTime    string  `json:"end_time"`
-		} `json:"data"`
-	}
-
-	err := a.RequestGet(ctx, nil, a.Config.BaseURL+"/open_api/2/campaign/get/", params, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.GetCampaignResp{}, nil
-}
-
 // ListCampaigns 列出广告计划
 func (a *ToutiaoAdapter) ListCampaigns(ctx context.Context, req *model.ListCampaignsReq) (*model.ListCampaignsResp, error) {
 	params := map[string]interface{}{
@@ -271,7 +242,7 @@ func (a *ToutiaoAdapter) ListCampaigns(ctx context.Context, req *model.ListCampa
 		} `json:"data"`
 	}
 
-	err := a.RequestGet(ctx, nil, a.Config.BaseURL+"/open_api/2/campaign/list/", params, &result)
+	err := a.RequestGet(ctx, nil, model2.BaseUrlApi+"/open_api/v3.0/project/list/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +287,7 @@ func (a *ToutiaoAdapter) CreateUnit(ctx context.Context, req *model.UnitReq) (*m
 		} `json:"data"`
 	}
 
-	err := a.RequestPostJson(ctx, nil, a.Config.BaseURL+"/open_api/2/ad/create/", params, &result)
+	err := a.RequestPostJson(ctx, nil, model2.BaseUrlApi+"/open_api/2/ad/create/", params, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -328,11 +299,6 @@ func (a *ToutiaoAdapter) CreateUnit(ctx context.Context, req *model.UnitReq) (*m
 
 // UpdateUnit 更新广告组
 func (a *ToutiaoAdapter) UpdateUnit(ctx context.Context, req *model.UnitReq) (*model.UnitResp, error) {
-	return nil, nil
-}
-
-// UpdateUnit 获取广告组
-func (a *ToutiaoAdapter) GetUnit(ctx context.Context, req *model.GetUnitReq) (*model.UnitResp, error) {
 	return nil, nil
 }
 
