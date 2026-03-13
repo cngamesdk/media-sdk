@@ -177,6 +177,25 @@ func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) 
 	return
 }
 
+// EbpAdvertiserListSelf 获取升级版巨量引擎工作台下账户列表
+// https://open.oceanengine.com/labels/7/docs/1829550825614739?origin=left_nav
+func (a *ToutiaoAdapter) EbpAdvertiserListSelf(ctx context.Context, req *model2.EbpAdvertiserListReq) (resp *model2.EbpAdvertiserListResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EbpAdvertiserListResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/2/ebp/advertiser/list/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 func (a *ToutiaoAdapter) RequestGet(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
 	var response model2.BaseResp
 	if err = a.Media.RequestGet(ctx, headers, url, data, &response); err != nil {

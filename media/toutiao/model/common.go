@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+const (
+	BaseUrlOpen = "https://open.oceanengine.com"
+	BaseUrlApi  = "https://api.oceanengine.com"
+	BaseUrlAd   = "https://ad.oceanengine.com"
+)
+
 type AccountRole string
 
 const (
@@ -28,10 +34,17 @@ const (
 	RolePlatformEnterpriseBPOperator AccountRole = "PLATFORM_ROLE_ENTERPRISE_BP_OPERATOR" // 升级版工作台协作者
 )
 
+// AccountSource 账户类型常量
 const (
-	BaseUrlOpen = "https://open.oceanengine.com"
-	BaseUrlApi  = "https://api.oceanengine.com"
-	BaseUrlAd   = "https://ad.oceanengine.com"
+	AccountSourceAD    = "AD"    // 巨量营销客户账号
+	AccountSourceLOCAL = "LOCAL" // 本地推
+)
+
+// AccountType 账户类型常量
+const (
+	AccountTypeNormal  = "AD_NORMAL" // 普通客户账号
+	AccountTypeDouPlus = "DOU_PLUS"  // DOU+类客户账号
+	AccountTypeLocal   = "LOCAL"     // 本地推客户账号
 )
 
 type accessTokenReq struct {
@@ -62,4 +75,12 @@ type BaseResp struct {
 	Message   string      `json:"message"`
 	Data      interface{} `json:"data"`
 	RequestId string      `json:"request_id"`
+}
+
+// PageInfo 分页信息
+type PageInfo struct {
+	Page        int `json:"page"`         // 页码
+	PageSize    int `json:"page_size"`    // 页面大小
+	TotalPage   int `json:"total_page"`   // 总页数
+	TotalNumber int `json:"total_number"` // 总数
 }

@@ -62,3 +62,17 @@ func TestGetAccount(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// EbpAdvertiserListSelf 测试-自己-获取升级版巨量引擎工作台下账户列表
+func TestEbpAdvertiserListSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EbpAdvertiserListReq{}
+	req.AccessToken = "test"
+	req.EnterpriseOrganizationID = 123
+	resp, err := factory.EbpAdvertiserListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
