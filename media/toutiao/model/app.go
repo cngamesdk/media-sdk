@@ -77,3 +77,75 @@ type BasicAppInfo struct {
 	DownloadURL        string `json:"download_url,omitempty"`         // 下载链接
 	CreateTime         string `json:"create_time"`                    // 创建时间
 }
+
+// EbpAppExtendCreateReq 创建安卓分包请求参数
+type EbpAppExtendCreateReq struct {
+	accessTokenReq
+	AccountID       int64          `json:"account_id"`        // 账户ID (必填)
+	AccountType     string         `json:"account_type"`      // 账户类型，允许值：EBP 升级版巨量引擎工作台 (必填)
+	PackageID       string         `json:"package_id"`        // 母包ID (必填)
+	Mode            string         `json:"mode"`              // 分包模式：AUTO 自动，CUSTOMIZE 自定义，MANUAL 手动 (必填)
+	ChannelCount    int            `json:"channel_count"`     // 自动生成模式下要指定数量 (必填，AUTO模式使用)
+	ChannelInfoList []*ChannelInfo `json:"channel_info_list"` // 自定义模式下必须传入渠道号信息 (必填，CUSTOMIZE模式使用)
+}
+
+func (receiver *EbpAppExtendCreateReq) Format() {
+	receiver.accessTokenReq.Format()
+	receiver.AccountType = strings.TrimSpace(receiver.AccountType)
+	receiver.Mode = strings.TrimSpace(receiver.Mode)
+	receiver.PackageID = strings.TrimSpace(receiver.PackageID)
+}
+
+func (receiver *EbpAppExtendCreateReq) Validate() (err error) {
+	if validateErr := receiver.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if receiver.AccountID <= 0 {
+		err = errors.New("account_id is empty")
+		return
+	}
+	if len(receiver.AccountType) <= 0 {
+		err = errors.New("account_type is empty")
+		return
+	}
+	if len(receiver.PackageID) <= 0 {
+		err = errors.New("package_id is empty")
+		return
+	}
+	if len(receiver.Mode) <= 0 {
+		err = errors.New("mode is empty")
+		return
+	}
+	return
+}
+
+func (receiver *EbpAppExtendCreateReq) GetHeaders() headersMap {
+	headers := receiver.accessTokenReq.GetHeaders()
+	headers.Json()
+	return headers
+}
+
+// ChannelInfo 渠道信息
+type ChannelInfo struct {
+	ChannelID string `json:"channel_id"`       // 渠道号 (必填)
+	Remark    string `json:"remark,omitempty"` // 备注，渠道包含信息，至多20个字符
+}
+
+// 常量定义
+const (
+	// SubpackageMode 分包模式
+	SubpackageModeAuto      = "AUTO"      // 自动
+	SubpackageModeCustomize = "CUSTOMIZE" // 自定义
+	SubpackageModeManual    = "MANUAL"    // 手动
+)
+
+// 验证常量
+const (
+	MaxChannelIDLength = 50 // 渠道号最大长度
+	MaxRemarkLength    = 20 // 备注最大长度
+)
+
+type EbpAppExtendCreateResp struct {
+	PackageId string `json:"package_id"`
+}

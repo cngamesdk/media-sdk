@@ -83,11 +83,21 @@ func (a *accessTokenReq) Validate() (err error) {
 	return
 }
 
-func (a *accessTokenReq) GetHeaders() map[string]string {
-	headers := make(map[string]string)
-	headers["Access-Token"] = a.AccessToken
+func (a *accessTokenReq) GetHeaders() headersMap {
+	headers := make(headersMap)
+	headers.AccessToken(a.AccessToken)
 	a.AccessToken = ""
 	return headers
+}
+
+type headersMap map[string]string
+
+func (receiver headersMap) AccessToken(token string) {
+	receiver["Access-Token"] = token
+}
+
+func (receiver headersMap) Json() {
+	receiver["Content-Type"] = "application/json"
 }
 
 type PageInfoReq struct {
