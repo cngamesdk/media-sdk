@@ -49,6 +49,14 @@ func (c *Client) Auth(ctx context.Context, req *model.AuthReq) (interface{}, err
 	return c.adapter.Auth(ctx, req)
 }
 
+// AccessToken 获取AccessToken
+func (c *Client) AccessToken(ctx context.Context, req *model.AccessTokenReq) (*model.AccessTokenResp, error) {
+	if err := c.validateReq(req); err != nil {
+		return nil, err
+	}
+	return c.adapter.AccessToken(ctx, req)
+}
+
 // GetAccount 获取账户信息
 func (c *Client) GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error) {
 	if err := c.validateReq(req); err != nil {
