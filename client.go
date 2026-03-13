@@ -57,6 +57,14 @@ func (c *Client) AccessToken(ctx context.Context, req *model.AccessTokenReq) (*m
 	return c.adapter.AccessToken(ctx, req)
 }
 
+// RefreshToken 刷新Token
+func (c *Client) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (*model.RefreshTokenResp, error) {
+	if err := c.validateReq(req); err != nil {
+		return nil, err
+	}
+	return c.adapter.RefreshToken(ctx, req)
+}
+
 // GetAccount 获取账户信息
 func (c *Client) GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error) {
 	if err := c.validateReq(req); err != nil {
@@ -103,11 +111,6 @@ func (c *Client) GetReport(ctx context.Context, req *model.ReportReq) (*model.Re
 		return nil, err
 	}
 	return c.adapter.GetReport(ctx, req)
-}
-
-// RefreshToken 刷新Token
-func (c *Client) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
-	return c.adapter.RefreshToken(ctx, req)
 }
 
 // validateReq 验证请求参数
