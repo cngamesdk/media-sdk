@@ -29,6 +29,7 @@ type tokenData struct {
 	ExpireTime             time.Time `json:"expire_time"`
 	RefreshTokenExpireIn   int64     `json:"refresh_token_expire_in"`
 	RefreshTokenExpireTime time.Time `json:"refresh_token_expire_time"`
+	Extension
 }
 
 type RefreshTokenReq struct {
