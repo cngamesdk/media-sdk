@@ -1,18 +1,17 @@
 package model
 
 import (
-	"errors"
 	"strings"
 	"time"
 )
 
 type AuthReq struct {
-	AppId        int64  `json:"app_id"`
-	State        string `json:"state"`
-	Scope        []int  `json:"scope"`
-	RedirectUri  string `json:"redirect_uri"`
-	MaterialAuth int    `json:"material_auth"`
-	AuthType     string `json:"auth_type"`
+	AppId        int64  `json:"app_id,omitempty"`
+	State        string `json:"state,omitempty"`
+	Scope        []int  `json:"scope,omitempty"`
+	RedirectUri  string `json:"redirect_uri,omitempty"`
+	MaterialAuth int    `json:"material_auth,omitempty"`
+	AuthType     string `json:"auth_type,omitempty"`
 }
 
 func (receiver *AuthReq) Format() {
@@ -33,7 +32,9 @@ type tokenData struct {
 }
 
 type RefreshTokenReq struct {
-	RefreshToken string `json:"refresh_token"`
+	AppId        int64  `json:"app_id,omitempty"`
+	Secret       string `json:"secret,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 type RefreshTokenResp struct {
@@ -41,18 +42,17 @@ type RefreshTokenResp struct {
 }
 
 type AccessTokenReq struct {
-	AuthCode string `json:"auth_code"`
+	AppId    int64  `json:"app_id,omitempty"`
+	Secret   string `json:"secret,omitempty"`
+	AuthCode string `json:"auth_code,omitempty"`
 }
 
 func (receiver *AccessTokenReq) Format() {
 	receiver.AuthCode = strings.TrimSpace(receiver.AuthCode)
+	receiver.Secret = strings.TrimSpace(receiver.Secret)
 }
 
 func (receiver AccessTokenReq) Validate() (err error) {
-	if len(receiver.AuthCode) <= 0 {
-		err = errors.New("AuthCode为空")
-		return
-	}
 	return
 }
 

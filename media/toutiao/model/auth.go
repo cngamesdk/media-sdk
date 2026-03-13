@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 	"github.com/cngamesdk/media-sdk/model"
+	"strings"
 	"time"
 )
 
 type AuthReq struct {
-	*model.AuthReq
+	model.AuthReq
 }
 
 func (receiver *AuthReq) Format() {
@@ -31,15 +32,18 @@ func (receiver *AuthReq) Validate() (err error) {
 }
 
 func (receiver *AuthReq) Convert(req *model.AuthReq) {
-	receiver.AuthReq = req
+	receiver.AuthReq = *req
+	return
 }
 
 type AuthResp string
 
 type AccessTokenReq struct {
-	*model.AccessTokenReq
-	AppId  int64  `json:"app_id"`
-	Secret string `json:"secret"`
+	model.AccessTokenReq
+}
+
+func (receiver *AccessTokenReq) Convert(req *model.AccessTokenReq) {
+	receiver.AccessTokenReq = *req
 }
 
 func (receiver *AccessTokenReq) Format() {
@@ -59,6 +63,10 @@ func (receiver *AccessTokenReq) Validate() (err error) {
 		err = errors.New("secret is empty")
 		return
 	}
+	if len(receiver.AuthCode) <= 0 {
+		err = errors.New("AuthCode为空")
+		return
+	}
 	return
 }
 
@@ -71,18 +79,32 @@ func (receiver *AccessTokenResp) Convert() (*model.AccessTokenResp, error) {
 }
 
 type RefreshTokenReq struct {
-	*model.RefreshTokenReq
+	model.RefreshTokenReq
 }
 
 func (receiver *RefreshTokenReq) Format() {
-
+	receiver.Secret = strings.TrimSpace(receiver.Secret)
+	receiver.RefreshToken = strings.TrimSpace(receiver.RefreshToken)
 }
 
 func (receiver *RefreshTokenReq) Validate() (err error) {
+	if receiver.AppId <= 0 {
+		err = errors.New("app_id is empty")
+		return
+	}
+	if len(receiver.Secret) <= 0 {
+		err = errors.New("secret is empty")
+		return
+	}
+	if len(receiver.RefreshToken) <= 0 {
+		err = errors.New("refresh token is empty")
+		return
+	}
 	return
 }
 
-func (receiver *RefreshTokenReq) Convert() (resp interface{}, err error) {
+func (receiver *RefreshTokenReq) Convert(req *model.RefreshTokenReq) {
+	receiver.RefreshTokenReq = *req
 	return
 }
 

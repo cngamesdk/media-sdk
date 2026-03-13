@@ -2,6 +2,8 @@ package model
 
 const (
 	BaseUrlOpen = "https://open.oceanengine.com"
+	BaseUrlApi  = "https://api.oceanengine.com"
+	BaseUrlAd   = "https://ad.oceanengine.com"
 )
 
 type BaseResp struct {
