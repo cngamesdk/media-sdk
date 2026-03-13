@@ -88,6 +88,63 @@ func (a *ToutiaoAdapter) AccessToken(ctx context.Context, req *model.AccessToken
 	return
 }
 
+// RefreshToken 刷新Token
+func (a *ToutiaoAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
+	myReq := &model2.RefreshTokenReq{}
+	myReq.Convert(req)
+	myReq.Format()
+	if validateErr := myReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.RefreshTokenResp
+
+	requestErr := a.RequestPostJson(ctx, nil, model2.BaseUrlApi+"/open_api/2/oauth2/refresh_token/", myReq, &result)
+	if requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp, err = result.Convert()
+	return
+}
+
+// AuthAdvertiserGetSelf 获取已授权账户
+// https://open.oceanengine.com/labels/7/docs/1696710506574848?origin=left_nav
+func (a *ToutiaoAdapter) AuthAdvertiserGetSelf(ctx context.Context, req *model2.AuthAdvertiserGetReq) (resp *model2.AuthAdvertiserGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AuthAdvertiserGetResp
+	requestErr := a.RequestGet(ctx, nil, model2.BaseUrlApi+"/open_api/oauth2/advertiser/get/", req, &result)
+	if requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
+// AuthUserInfoSelf 获取授权User信息
+// https://open.oceanengine.com/labels/7/docs/1696710507039756?origin=left_nav
+func (a *ToutiaoAdapter) AuthUserInfoSelf(ctx context.Context, req *model2.AuthUserInfoReq) (resp *model2.AuthUserInfoResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.AuthUserInfoResp
+	requestErr := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/2/user/info/", req, &result)
+	if requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
 // GetAccount 获取账户
 func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (resp *model.AccountResp, err error) {
 	myReq := &model2.AccountReq{}
@@ -139,44 +196,6 @@ func (a *ToutiaoAdapter) dealResponse(req model2.BaseResp, result interface{}) (
 		err = fmt.Errorf("toutiao json to target error: %s", unJsonErr.Error())
 		return
 	}
-	return
-}
-
-// RefreshToken 刷新Token
-func (a *ToutiaoAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
-	myReq := &model2.RefreshTokenReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model2.RefreshTokenResp
-
-	requestErr := a.RequestPostJson(ctx, nil, model2.BaseUrlApi+"/open_api/2/oauth2/refresh_token/", myReq, &result)
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	resp, err = result.Convert()
-	return
-}
-
-// AuthAdvertiserGetSelf 获取已授权账户
-// https://open.oceanengine.com/labels/7/docs/1696710506574848?origin=left_nav
-func (a *ToutiaoAdapter) AuthAdvertiserGetSelf(ctx context.Context, req *model2.AuthAdvertiserGetReq) (resp *model2.AuthAdvertiserGetResp, err error) {
-	req.Format()
-	if validateErr := req.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model2.AuthAdvertiserGetResp
-	requestErr := a.RequestGet(ctx, nil, model2.BaseUrlApi+"/open_api/oauth2/advertiser/get/", req, &result)
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	resp = &result
 	return
 }
 

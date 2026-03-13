@@ -120,16 +120,16 @@ func (receiver *RefreshTokenResp) Convert() (resp *model.RefreshTokenResp, err e
 }
 
 type AuthAdvertiserGetReq struct {
-	AccessToken string `json:"access_token"`
+	accessTokenReq
 }
 
 func (a *AuthAdvertiserGetReq) Format() {
-	a.AccessToken = strings.TrimSpace(a.AccessToken)
+	a.accessTokenReq.Format()
 }
 
 func (a *AuthAdvertiserGetReq) Validate() (err error) {
-	if len(a.AccessToken) <= 0 {
-		err = errors.New("access token is empty")
+	if validateErr := a.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
 		return
 	}
 	return
@@ -149,4 +149,30 @@ type AuthAdvertiserGetRespListItem struct {
 		CustomerCompanyName string `json:"customer_company_name"`
 	}
 	AccountStringId string `json:"account_string_id"`
+}
+
+type AuthUserInfoReq struct {
+	accessTokenReq
+}
+
+func (a *AuthUserInfoReq) Format() {
+	a.accessTokenReq.Format()
+}
+
+func (a *AuthUserInfoReq) Validate() (err error) {
+	if validateErr := a.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	return
+}
+
+type AuthUserInfoResp struct {
+	DisplayName        string   `json:"display_name"`         // 用户名
+	Email              string   `json:"email"`                // 邮箱（脱敏结果）
+	ID                 int64    `json:"id"`                   // 用户id
+	MaterialAuthStatus bool     `json:"material_auth_status"` // 是否敏感物料授权
+	AppID              int64    `json:"app_id"`               // AccessToken对应关联开发者应用APPID
+	TokenScopeList     []int64  `json:"token_scope_list"`     // 授权的应用权限点列表
+	TokenAPIList       []string `json:"token_api_list"`       // 当前token可操作的api接口列表
 }
