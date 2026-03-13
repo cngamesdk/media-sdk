@@ -82,18 +82,12 @@ type EbpAdvertiserListReq struct {
 	EnterpriseOrganizationID int64          `json:"enterprise_organization_id,omitempty"` // 升级版巨量引擎工作台ID
 	AccountSource            string         `json:"account_source,omitempty"`             // 账户类型，允许值：AD 巨量营销客户账号，LOCAL 本地推
 	Filtering                *AccountFilter `json:"filtering,omitempty"`                  // 过滤器
-	Page                     int            `json:"page,omitempty"`                       // 页码，默认1
-	PageSize                 int            `json:"page_size,omitempty"`                  // 页面大小，[1,100]，默认10
+	PageInfoReq
 }
 
 func (receiver *EbpAdvertiserListReq) Format() {
 	receiver.accessTokenReq.Format()
-	if receiver.Page <= 0 {
-		receiver.Page = 1
-	}
-	if receiver.PageSize <= 0 || receiver.PageSize > 100 {
-		receiver.PageSize = 100
-	}
+	receiver.PageInfoReq.Format()
 }
 
 func (receiver *EbpAdvertiserListReq) Validate() (err error) {
@@ -117,7 +111,7 @@ type AccountFilter struct {
 // EbpAdvertiserListResp 账户数据
 type EbpAdvertiserListResp struct {
 	AccountList []AccountInfo `json:"account_list,omitempty"` // 账户列表
-	PageInfo    PageInfo      `json:"page_info,omitempty"`    // 分页信息
+	PageInfo    PageInfoResp  `json:"page_info,omitempty"`    // 分页信息
 }
 
 // AccountInfo 账户信息
