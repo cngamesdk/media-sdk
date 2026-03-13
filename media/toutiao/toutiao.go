@@ -145,19 +145,32 @@ func (a *ToutiaoAdapter) AuthUserInfoSelf(ctx context.Context, req *model2.AuthU
 	return
 }
 
+// AdvertiserInfoSelf 获取客户信息
+// https://open.oceanengine.com/labels/7/docs/1696710508983311?origin=left_nav
+func (a *ToutiaoAdapter) AdvertiserInfoSelf(ctx context.Context, req *model2.AccountReq) (resp *model2.AccountResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.AccountResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlAd+"/open_api/2/advertiser/info/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 // GetAccount 获取账户
 func (a *ToutiaoAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (resp *model.AccountResp, err error) {
 	myReq := &model2.AccountReq{}
 	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model2.AccountResp
-	errRequest := a.RequestGet(ctx, myReq.Headers, model2.BaseUrlAd+"/open_api/2/advertiser/info/", myReq, &result)
-	if errRequest != nil {
-		err = errRequest
+	result, resultErr := a.AdvertiserInfoSelf(ctx, myReq)
+	if resultErr != nil {
+		err = resultErr
 		return
 	}
 	resp, err = result.Convert()

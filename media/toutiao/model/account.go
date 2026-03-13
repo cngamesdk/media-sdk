@@ -8,41 +8,30 @@ import (
 
 // AccountReq 账户请求
 type AccountReq struct {
-	*model.AccountReq
-	AdvertiserIds []int64           `json:"advertiser_ids,omitempty"`
-	Headers       map[string]string `json:"-"`
+	accessTokenReq
+	AdvertiserIds []int64  `json:"advertiser_ids,omitempty"`
+	Fields        []string `json:"fields,omitempty"`
 }
 
 func (receiver *AccountReq) Convert(req *model.AccountReq) {
-	receiver.AccountReq = req
+	receiver.AccessToken = req.AccessToken
+	receiver.AdvertiserIds = append(receiver.AdvertiserIds, req.AdvertiserID)
+	receiver.Fields = req.Fields
 	return
 }
 
 func (receiver *AccountReq) Format() {
-	if receiver.AdvertiserID > 0 {
-		receiver.AdvertiserIds = append(receiver.AdvertiserIds, receiver.AdvertiserID)
-		receiver.AdvertiserID = 0
-	}
-	if receiver.Headers == nil {
-		receiver.Headers = make(map[string]string)
-	}
-	receiver.Headers["Access-Token"] = receiver.AccessToken
-	receiver.AccessToken = ""
+	receiver.accessTokenReq.Format()
 	return
 }
 
 func (receiver *AccountReq) Validate() (err error) {
+	if validateErr := receiver.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
 	if len(receiver.AdvertiserIds) <= 0 {
 		err = errors.New("客户ID集合为空")
-		return
-	}
-	accessToken, accessTokenOk := receiver.Headers["Access-Token"]
-	if !accessTokenOk {
-		err = errors.New("Access-Token不存在")
-		return
-	}
-	if len(accessToken) <= 0 {
-		err = errors.New("Access-Token为空")
 		return
 	}
 	return
