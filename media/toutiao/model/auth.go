@@ -118,3 +118,35 @@ func (receiver *RefreshTokenResp) Convert() (resp *model.RefreshTokenResp, err e
 	resp = &receiver.RefreshTokenResp
 	return
 }
+
+type AuthAdvertiserGetReq struct {
+	AccessToken string `json:"access_token"`
+}
+
+func (a *AuthAdvertiserGetReq) Format() {
+	a.AccessToken = strings.TrimSpace(a.AccessToken)
+}
+
+func (a *AuthAdvertiserGetReq) Validate() (err error) {
+	if len(a.AccessToken) <= 0 {
+		err = errors.New("access token is empty")
+		return
+	}
+	return
+}
+
+type AuthAdvertiserGetResp struct {
+	List []AuthAdvertiserGetRespListItem `json:"list"`
+}
+
+type AuthAdvertiserGetRespListItem struct {
+	AdvertiserId   int64  `json:"advertiser_id"`
+	AdvertiserName string `json:"advertiser_name"`
+	AccountRole    string `json:"account_role"`
+	IsValid        bool   `json:"is_valid"`
+	CompanyList    []struct {
+		CustomerCompanyId   int64  `json:"customer_company_id"`
+		CustomerCompanyName string `json:"customer_company_name"`
+	}
+	AccountStringId string `json:"account_string_id"`
+}

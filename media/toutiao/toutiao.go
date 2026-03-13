@@ -20,6 +20,11 @@ func init() {
 type ToutiaoFactory struct{}
 
 func (f *ToutiaoFactory) Create(config *config.Config) (adapter.MediaSDK, error) {
+	return NewToutiaoAdapter(config), nil
+}
+
+// NewToutiaoAdapter 初始化巨量引擎适配器
+func NewToutiaoAdapter(config *config.Config) *ToutiaoAdapter {
 	client := utils.NewHTTPClient(&utils.HTTPConfig{
 		Timeout:    config.Timeout,
 		Proxy:      config.Proxy,
@@ -28,7 +33,7 @@ func (f *ToutiaoFactory) Create(config *config.Config) (adapter.MediaSDK, error)
 		Debug:      config.Debug,
 	})
 
-	return &ToutiaoAdapter{media.Media{Config: config, Client: client}}, nil
+	return &ToutiaoAdapter{media.Media{Config: config, Client: client}}
 }
 
 // ToutiaoAdapter 巨量引擎适配器
@@ -154,6 +159,24 @@ func (a *ToutiaoAdapter) RefreshToken(ctx context.Context, req *model.RefreshTok
 		return
 	}
 	resp, err = result.Convert()
+	return
+}
+
+// AuthAdvertiserGetSelf 获取已授权账户
+// https://open.oceanengine.com/labels/7/docs/1696710506574848?origin=left_nav
+func (a *ToutiaoAdapter) AuthAdvertiserGetSelf(ctx context.Context, req *model2.AuthAdvertiserGetReq) (resp *model2.AuthAdvertiserGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AuthAdvertiserGetResp
+	requestErr := a.RequestGet(ctx, nil, model2.BaseUrlApi+"/open_api/oauth2/advertiser/get/", req, &result)
+	if requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
 	return
 }
 
