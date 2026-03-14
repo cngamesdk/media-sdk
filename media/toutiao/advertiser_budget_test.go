@@ -21,3 +21,19 @@ func TestAdvertiserBudgetGetSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 更新账户日预算
+func TestAdvertiserBudgetUpdateSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.AdvertiserBudgetUpdateReq{}
+	req.AccessToken = "test"
+	req.AdvertiserId = 123
+	req.BudgetMode = model.BudgetModeDay
+	req.Budget = 100
+	resp, err := factory.AdvertiserBudgetUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
