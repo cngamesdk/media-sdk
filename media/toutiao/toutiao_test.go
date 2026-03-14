@@ -76,3 +76,35 @@ func TestEbpAdvertiserListSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// EbpAppListSelf 测试-自己-获取安卓应用列表
+func TestEbpAppListSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EbpAppListReq{}
+	req.AccessToken = "test"
+	req.AccountID = 123
+	req.AccountType = model.AccountTypeEBP
+	resp, err := factory.EbpAppListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// EbpAppExtendCreateSelf 测试-自己-创建安卓分包
+func TestEbpAppExtendCreateSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EbpAppExtendCreateReq{}
+	req.AccessToken = "test"
+	req.AccountID = 123
+	req.AccountType = model.AccountTypeEBP
+	req.PackageID = "123"
+	req.Mode = model.SubpackageModeCustomize
+	resp, err := factory.EbpAppExtendCreateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

@@ -45,6 +45,26 @@ const (
 	AccountTypeNormal  = "AD_NORMAL" // 普通客户账号
 	AccountTypeDouPlus = "DOU_PLUS"  // DOU+类客户账号
 	AccountTypeLocal   = "LOCAL"     // 本地推客户账号
+	AccountTypeEBP     = "EBP"       // 升级版巨量引擎工作台
+)
+
+// 常量定义
+const (
+	// AssetManagementScope 资产范围
+	AssetScopeDirect   = "DIRECT"   // 仅查询入参组织创建或被共享的资产
+	AssetScopeTraverse = "TRAVERSE" // 查询入参组织及下属组织创建或被共享的资产
+
+	// AssetOwnership 资产来源
+	AssetOwnershipCreate = "CREATE" // 仅查询组织及下级组织创建的资产
+	AssetOwnershipShare  = "SHARE"  // 仅查询组织及下级组织被共享的资产
+
+	// Status 应用状态
+	StatusOffline       = "OFFLINE"        // 已下架
+	StatusPunished      = "PUNISHED"       // 违规惩罚
+	StatusReviewing     = "REVIEWING"      // 审核中
+	StatusReviewFail    = "REVIEW_FAIL"    // 审核失败
+	StatusReviewSuccess = "REVIEW_SUCCESS" // 待发布
+	StatusInUse         = "IN_USE"         // 已发布
 )
 
 type accessTokenReq struct {
@@ -63,11 +83,35 @@ func (a *accessTokenReq) Validate() (err error) {
 	return
 }
 
-func (a *accessTokenReq) GetHeaders() map[string]string {
-	headers := make(map[string]string)
-	headers["Access-Token"] = a.AccessToken
+func (a *accessTokenReq) GetHeaders() headersMap {
+	headers := make(headersMap)
+	headers.AccessToken(a.AccessToken)
 	a.AccessToken = ""
 	return headers
+}
+
+type headersMap map[string]string
+
+func (receiver headersMap) AccessToken(token string) {
+	receiver["Access-Token"] = token
+}
+
+func (receiver headersMap) Json() {
+	receiver["Content-Type"] = "application/json"
+}
+
+type PageInfoReq struct {
+	Page     int `json:"page,omitempty"`      // 页码，默认1
+	PageSize int `json:"page_size,omitempty"` // 页面大小，[1,100]，默认10
+}
+
+func (a *PageInfoReq) Format() {
+	if a.Page <= 0 {
+		a.Page = 1
+	}
+	if a.PageSize <= 0 {
+		a.PageSize = 100
+	}
 }
 
 type BaseResp struct {
@@ -77,8 +121,8 @@ type BaseResp struct {
 	RequestId string      `json:"request_id"`
 }
 
-// PageInfo 分页信息
-type PageInfo struct {
+// PageInfoResp 分页信息
+type PageInfoResp struct {
 	Page        int `json:"page"`         // 页码
 	PageSize    int `json:"page_size"`    // 页面大小
 	TotalPage   int `json:"total_page"`   // 总页数
