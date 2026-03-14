@@ -34,7 +34,7 @@ func (a *ToutiaoAdapter) EbpAppExtendCreateSelf(ctx context.Context, req *model2
 	}
 	headers := req.GetHeaders()
 	var result model2.EbpAppExtendCreateResp
-	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/tools/ebp/app/list/", req, &result)
+	errRequest := a.RequestPostJson(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/tools/ebp/app_extend/create/", req, &result)
 	if errRequest != nil {
 		err = errRequest
 		return
