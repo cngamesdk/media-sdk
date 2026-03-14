@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type AdvertiserBudgetGetReq struct {
 	accessTokenReq
@@ -41,3 +44,47 @@ const (
 	BudgetModeDay      = "BUDGET_MODE_DAY"      // 日预算
 	BudgetModeInfinite = "BUDGET_MODE_INFINITE" // 不限
 )
+
+type AdvertiserBudgetUpdateReq struct {
+	accessTokenReq
+	AdvertiserId int64   `json:"advertiser_id,omitempty"`
+	BudgetMode   string  `json:"budget_mode,omitempty"`
+	Budget       float32 `json:"budget,omitempty"`
+}
+
+func (a *AdvertiserBudgetUpdateReq) Format() {
+	a.accessTokenReq.Format()
+	a.BudgetMode = strings.TrimSpace(a.BudgetMode)
+	return
+}
+
+func (a *AdvertiserBudgetUpdateReq) Validate() (err error) {
+	if validateErr := a.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if a.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	if len(a.BudgetMode) <= 0 {
+		err = errors.New("budget_mode is empty")
+		return
+	}
+	if a.BudgetMode == BudgetModeDay {
+		if a.Budget <= 0 {
+			err = errors.New("budget is empty")
+			return
+		}
+	}
+	return
+}
+
+func (a *AdvertiserBudgetUpdateReq) GetHeaders() headersMap {
+	header := a.accessTokenReq.GetHeaders()
+	header.Json()
+	return header
+}
+
+type AdvertiserBudgetUpdateResp struct {
+}
