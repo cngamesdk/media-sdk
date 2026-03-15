@@ -96,6 +96,9 @@ type ProjectCreateReq struct {
 	} `json:"keywords,omitempty"` // 待添加搜索关键词列表
 	AutoExtendTraffic string `json:"auto_extend_traffic,omitempty"` // 智能拓流
 
+	//搜索蓝海流量投放
+	BlueFlowPackage *BlueFlowPackage `json:"blue_flow_package,omitempty"` // 搜索蓝海流量投放
+
 	//营销产品与投放载体
 	DownloadUrl        string `json:"download_url,omitempty"`  // 下载链接
 	AppName            string `json:"app_name,omitempty"`      // 应用名称
@@ -138,6 +141,109 @@ type ProjectCreateReq struct {
 	Audience        interface{}      `json:"audience,omitempty"`          // 定向
 	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
 	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
+}
+
+// 常量定义
+const (
+	// 蓝海流量设置
+	BlueFlowON  = "ON"  // 启用
+	BlueFlowOFF = "OFF" // 不启用
+
+	// 白名单key
+	WhiteListBlueFlow        = "blue_flow"              // 蓝海流量投放白名单
+	WhiteListSearchMergeAuto = "search_merge_auto_blue" // 极速智投蓝海关键词白名单
+)
+
+// BlueFlowPackage 搜索蓝海流量投放相关参数
+type BlueFlowPackage struct {
+	BlueFlowPackageSetting string   `json:"blue_flow_package_setting"`        // 蓝海流量设置 (条件必填)
+	BlueFlowPackageID      int64    `json:"blue_flow_package_id,omitempty"`   // 蓝海流量包ID (条件必填)
+	BlueFlowKeywordName    []string `json:"blue_flow_keyword_name,omitempty"` // 蓝海关键词
+}
+
+// ValidateBlueFlowPackage 验证搜索蓝海流量投放配置
+func (b *BlueFlowPackage) Validate(adType, deliveryType string, hasWhiteList, hasSearchMergeAutoWhiteList bool) error {
+	// 1. 仅当ad_type=SEARCH时支持传入
+	if adType != "SEARCH" {
+		if b != nil {
+			return errors.New("blue_flow_package仅当ad_type=SEARCH时支持传入")
+		}
+		return nil
+	}
+
+	// 如果没传blue_flow_package，不需要验证
+	if b == nil {
+		return nil
+	}
+
+	// 2. 验证蓝海流量设置
+	if err := b.validateSetting(hasWhiteList); err != nil {
+		return err
+	}
+
+	// 3. 根据投放类型验证
+	if deliveryType == DeliveryTypeDuration {
+		return b.validateForDuration(hasSearchMergeAutoWhiteList)
+	} else {
+		return b.validateForNormal()
+	}
+}
+
+// validateSetting 验证蓝海流量设置
+func (b *BlueFlowPackage) validateSetting(hasWhiteList bool) error {
+	// blue_flow_package_setting为条件必填
+	if b.BlueFlowPackageSetting == "" {
+		return errors.New("blue_flow_package_setting为条件必填")
+	}
+
+	// 验证设置值有效性
+	if b.BlueFlowPackageSetting != BlueFlowON && b.BlueFlowPackageSetting != BlueFlowOFF {
+		return errors.New("blue_flow_package_setting值无效，允许值：ON、OFF")
+	}
+
+	// 蓝海流量投放为白名单功能
+	if !hasWhiteList {
+		return errors.New("蓝海流量投放为白名单功能，当前账户没有权限")
+	}
+
+	return nil
+}
+
+// validateForDuration 验证极速智投场景
+func (b *BlueFlowPackage) validateForDuration(hasSearchMergeAutoWhiteList bool) error {
+	// 极速智投场景下，通过blue_flow_keyword_name设置进行蓝海投放
+	// 若不传入blue_flow_keyword_name即不进行蓝海投放
+
+	if len(b.BlueFlowKeywordName) > 0 {
+		// 极速智投蓝海关键词需要白名单
+		if !hasSearchMergeAutoWhiteList {
+			return errors.New("极速智投蓝海关键词需要search_merge_auto_blue白名单")
+		}
+	}
+
+	// 极速智投场景不支持blue_flow_package_id
+	if b.BlueFlowPackageID != 0 {
+		return errors.New("极速智投场景下不支持blue_flow_package_id")
+	}
+
+	return nil
+}
+
+// validateForNormal 验证常规场景
+func (b *BlueFlowPackage) validateForNormal() error {
+	// 仅当blue_flow_package_setting=ON时，需要验证blue_flow_package_id
+	if b.BlueFlowPackageSetting == BlueFlowON {
+		if b.BlueFlowPackageID == 0 {
+			return errors.New("启用蓝海流量投放时，blue_flow_package_id为必填")
+		}
+	}
+
+	// 常规场景不支持blue_flow_keyword_name
+	if len(b.BlueFlowKeywordName) > 0 {
+		return errors.New("blue_flow_keyword_name仅极速智投场景下有效")
+	}
+
+	return nil
 }
 
 func (p *ProjectCreateReq) Validate() error {
