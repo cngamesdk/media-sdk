@@ -87,6 +87,15 @@ type ProjectCreateReq struct {
 	SearchBidRatio float32 `json:"search_bid_ratio,omitempty"` // 出价系数
 	AudienceExtend string  `json:"audience_extend,omitempty"`  // 定向拓展
 
+	//搜索关键词
+	Keywords struct {
+		Word      string  `json:"word,omitempty"`       // 关键词
+		BidType   string  `json:"bid_type,omitempty"`   // 出价类型
+		MatchType string  `json:"match_type,omitempty"` // 匹配类型
+		Bid       float32 `json:"bid,omitempty"`        // 出价
+	} `json:"keywords,omitempty"` // 待添加搜索关键词列表
+	AutoExtendTraffic string `json:"auto_extend_traffic,omitempty"` // 智能拓流
+
 	//营销产品与投放载体
 	DownloadUrl        string `json:"download_url,omitempty"`  // 下载链接
 	AppName            string `json:"app_name,omitempty"`      // 应用名称
