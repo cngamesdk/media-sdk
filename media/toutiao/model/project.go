@@ -98,6 +98,7 @@ type ProjectCreateReq struct {
 
 	//搜索蓝海流量投放
 	BlueFlowPackage *BlueFlowPackage `json:"blue_flow_package,omitempty"` // 搜索蓝海流量投放
+	RelatedProduct  *RelatedProduct  `json:"related_product,omitempty"`   // 商品
 
 	//营销产品与投放载体
 	DownloadUrl        string `json:"download_url,omitempty"`  // 下载链接
@@ -244,6 +245,20 @@ func (b *BlueFlowPackage) validateForNormal() error {
 	}
 
 	return nil
+}
+
+// RelatedProduct 商品
+type RelatedProduct struct {
+	ProductSetting    string `json:"product_setting,omitempty"`     // 商品库设置
+	ProductPlatformId int64  `json:"product_platform_id,omitempty"` // 商品库ID
+	ProductId         string `json:"product_id,omitempty"`          // 产品ID
+	UniqueProductId   int64  `json:"unique_product_id,omitempty"`   // 升级版商品库产品ID
+	Products          struct {
+		ProductId         string `json:"product_id,omitempty"`          // 产品ID
+		ProductPlatformId int64  `json:"product_platform_id,omitempty"` // 产品库ID
+		UniqueProductId   int64  `json:"unique_product_id,omitempty"`   // 升级版商品库产品ID
+		AssetId           int64  `json:"asset_id,omitempty"`            // 投放条件ID
+	} `json:"products,omitempty"` // 产品ID列表
 }
 
 func (p *ProjectCreateReq) Validate() error {
