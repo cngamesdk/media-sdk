@@ -82,6 +82,46 @@ type ProjectCreateReq struct {
 	StarAutoMaterialAdditionSwitch string  `json:"star_auto_material_addition_switch,omitempty"` // 星广联投自动优选素材开关
 	StarAutoDeliverySwitch         string  `json:"star_auto_delivery_switch,omitempty"`          // 星广联投全自动化开关
 	RtaID                          int64   `json:"rta_id,omitempty"`
+
+	//营销产品与投放载体
+	DownloadUrl        string `json:"download_url,omitempty"`  // 下载链接
+	AppName            string `json:"app_name,omitempty"`      // 应用名称
+	DownloadType       string `json:"download_type,omitempty"` // 下载方式
+	DownloadMode       string `json:"download_mode,omitempty"`
+	QuickAppID         int64  `json:"quick_app_id,omitempty"`          // 快应用资产id，从【查询快应用信息】接口获取，仅支持已通过审核的快应用资产
+	LaunchType         string `json:"launch_type,omitempty"`           // 调起方式（仅对应用目标下的应用调起方式，快应用调起方式请使用download_type参数）
+	PromotionType      string `json:"promotion_type,omitempty"`        // 投放内容
+	OpenURLType        string `json:"open_url_type"`                   // 直达链接类型 (条件必填)
+	OpenURLParams      string `json:"open_url_params,omitempty"`       // 直达链接检测参数
+	OpenURLField       string `json:"open_url_field,omitempty"`        // 直达链接字段选择
+	OpenUrl            string `json:"open_url,omitempty"`              // Deeplink直达链接
+	UlinkUrlType       string `json:"ulink_url_type,omitempty"`        // ulink直达链接备用链接类型
+	UlinkUrl           string `json:"ulink_url,omitempty"`             // ulink直达链接备用链接
+	SubscribeUrl       string `json:"subscribe_url,omitempty"`         // 预约下载链接
+	AssetType          string `json:"asset_type,omitempty"`            // 资产类型
+	MultiAssetType     string `json:"multi_asset_type,omitempty"`      // 多投放载体
+	MicroPromotionType string `json:"micro_promotion_type,omitempty"`  // 小程序类型
+	DpaAdtype          string `json:"dpa_adtype,omitempty"`            // DPA营销类型
+	MicroAppInstanceId int64  `json:"micro_app_instance_id,omitempty"` // 微信、字节小程序/小游戏资产id
+	NativeSetting      struct {
+		AwemeId string `json:"aweme_id,omitempty"`
+	} `json:"native_setting,omitempty"` // 微信、字节小程序/小游戏资产id
+	OptimizeGoal struct {
+		AssetIds                   []int64 `json:"asset_ids,omitempty"`                       // 事件管理资产 id
+		ExternalAction             string  `json:"external_action,omitempty"`                 // 优化目标
+		GameAddictionID            string  `json:"game_addiction_id,omitempty"`               // 关键行为ID
+		PaidSwitch                 int     `json:"paid_switch,omitempty"`                     // 付费开关
+		DeepExternalAction         string  `json:"deep_external_action,omitempty"`            // 深度转化目标
+		ValueOptimizedType         string  `json:"value_optimized_type,omitempty"`            // 目标优化类型
+		LandingPageStayTime        int64   `json:"landing_page_stay_time,omitempty"`          // 店铺停留时长（毫秒）
+		Yuntu5aBrandID             string  `json:"yuntu_5a_brand_id,omitempty"`               // 云图品牌ID
+		Yuntu5aBrandMainIndustryID string  `json:"yuntu_5a_brand_main_industry_id,omitempty"` // 云图品牌行业ID
+	} `json:"optimize_goal,omitempty"` // 优化目标
+	DeliveryRange struct {
+		InventoryCatalog string   `json:"inventory_catalog,omitempty"` // 投放版位大类
+		InventoryType    []string `json:"inventory_type,omitempty"`    // 投放位置（首选媒体）
+		UnionVideoType   string   `json:"union_video_type,omitempty"`  // 投放形式（穿山甲视频创意类型）
+	} `json:"delivery_range,omitempty"` // 投放版位
 }
 
 func (p *ProjectCreateReq) Validate() error {
