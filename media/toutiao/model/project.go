@@ -122,6 +122,7 @@ type ProjectCreateReq struct {
 		InventoryType    []string `json:"inventory_type,omitempty"`    // 投放位置（首选媒体）
 		UnionVideoType   string   `json:"union_video_type,omitempty"`  // 投放形式（穿山甲视频创意类型）
 	} `json:"delivery_range,omitempty"` // 投放版位
+	Audience interface{} `json:"audience,omitempty"` // 定向
 }
 
 func (p *ProjectCreateReq) Validate() error {
@@ -333,6 +334,94 @@ func (p *ProjectCreateReq) GetHeaders() headersMap {
 	headers := p.accessTokenReq.GetHeaders()
 	headers.Json()
 	return headers
+}
+
+// DPAAudience DPA商品定向（当landing_type=DPA时投放目标参数）
+type DPAAudience struct {
+	DPACity             string  `json:"dpa_city,omitempty"`               // 地域匹配-商品所在城市
+	DPALbs              string  `json:"dpa_lbs,omitempty"`                // 地域匹配-适地性服务
+	DPARtaSwitch        string  `json:"dpa_rta_switch,omitempty"`         // RTA重定向开关
+	RtaID               int64   `json:"rta_id,omitempty"`                 // RTA策略ID（条件必填）
+	DPARtaRecommendType string  `json:"dpa_rta_recommend_type,omitempty"` // RTA推荐逻辑（条件必填）
+	DpaCategories       []int64 `json:"dpa_categories,omitempty"`         // 商品投放范围
+	DpaProductTarget    struct {
+		Title string `json:"title,omitempty"` // 筛选字段
+		Rule  string `json:"rule,omitempty"`  // 定向规则
+		Type  string `json:"type,omitempty"`  // 字段类型
+		Value string `json:"value,omitempty"` // 规则值
+	} `json:"dpa_product_target,omitempty"` // 自定义筛选条件（商品投放条件）
+}
+
+// CommonAudience 常规人群定向（其余情况均按下表传入)
+type CommonAudience struct {
+	AudiencePackageID      int64          `json:"audience_package_id,omitempty"`      // 定向包ID
+	District               string         `json:"district"`                           // 地域类型 (必填)
+	Geolocation            []*Geolocation `json:"geolocation,omitempty"`              // 地图位置 (商圈专用)
+	RegionVersion          string         `json:"region_version,omitempty"`           // 行政区版本号 (条件必填)
+	City                   []int64        `json:"city,omitempty"`                     // 地域定向省市或者区县列表 (条件必填)
+	LocationType           string         `json:"location_type,omitempty"`            // 位置类型 (条件必填)
+	Gender                 string         `json:"gender,omitempty"`                   // 性别
+	Age                    []string       `json:"age,omitempty"`                      // 年龄
+	RetargetingTagsInclude []int64        `json:"retargeting_tags_include,omitempty"` // 定向人群包列表
+	RetargetingTagsExclude []int64        `json:"retargeting_tags_exclude,omitempty"` // 排除人群包列表
+	InterestActionMode     string         `json:"interest_action_mode,omitempty"`     // 行为兴趣模式
+	ActionDays             []int          `json:"action_days,omitempty"`              // 用户发生行为天数
+	ActionCategories       []int64        `json:"action_categories,omitempty"`        // 行为类目词
+	ActionWords            []int64        `json:"action_words,omitempty"`             // 行为关键词
+	InterestCategories     []int64        `json:"interest_categories,omitempty"`      // 兴趣类目
+	InterestWords          []int64        `json:"interest_words,omitempty"`           // 兴趣关键词
+
+	// 抖音达人定向相关
+	AwesomeFanBehaviors       []string `json:"awesome_fan_behaviors,omitempty"`        // 抖音达人互动用户行为类型
+	AwesomeFanTimeScope       string   `json:"awesome_fan_time_scope,omitempty"`       // 抖音达人互动行为时间范围
+	AwesomeFanCategories      []int64  `json:"awesome_fan_categories,omitempty"`       // 抖音达人分类ID列表
+	AwesomeFanAccounts        []int64  `json:"awesome_fan_accounts,omitempty"`         // 抖音达人ID列表
+	SuperiorPopularityType    string   `json:"superior_popularity_type,omitempty"`     // 媒体定向
+	FlowPackage               []int64  `json:"flow_package,omitempty"`                 // 定向流量包
+	ExcludeFlowPackage        []int64  `json:"exclude_flow_package,omitempty"`         // 排除流量包
+	Platform                  []string `json:"platform,omitempty"`                     // 投放平台列表
+	AndroidOsv                string   `json:"android_osv,omitempty"`                  // 最低安卓版本
+	IosOsv                    string   `json:"ios_osv,omitempty"`                      // 最低IOS版本
+	HarmonyOsv                string   `json:"harmony_osv,omitempty"`                  // 鸿蒙版本
+	DeviceType                []string `json:"device_type,omitempty"`                  // 设备类型
+	Ac                        []string `json:"ac,omitempty"`                           // 网络类型
+	Carrier                   []string `json:"carrier,omitempty"`                      // 运营商
+	CarrierRegionOptimize     string   `json:"carrier_region_optimize,omitempty"`      // 运营商号段开关
+	HideIfExists              string   `json:"hide_if_exists,omitempty"`               // 过滤已安装
+	HideIfConverted           string   `json:"hide_if_converted,omitempty"`            // 过滤已转化用户
+	ConvertedTimeDuration     string   `json:"converted_time_duration,omitempty"`      // 过滤时间范围
+	FilterEvent               []string `json:"filter_event,omitempty"`                 // 自定义过滤事件
+	FilterAwemeAbnormalActive string   `json:"filter_aweme_abnormal_active,omitempty"` // 过滤高活跃用户
+	FilterAwemeFansCount      int64    `json:"filter_aweme_fans_count,omitempty"`      // 过滤高关注数用户
+	FilterOwnAwemeFans        string   `json:"filter_own_aweme_fans,omitempty"`        // 过滤自己的粉丝
+	DeviceBrand               []string `json:"device_brand,omitempty"`                 // 手机品牌
+	LaunchPrice               []int64  `json:"launch_price,omitempty"`                 // 手机价格区间
+	AutoExtendTargets         []string `json:"auto_extend_targets,omitempty"`          // 可放开定向（智能放量）
+	DPACity                   string   `json:"dpa_city,omitempty"`                     // 地域匹配-商品所在城市
+	DPALbs                    string   `json:"dpa_lbs,omitempty"`                      // 地域匹配-适地性服务
+	DPARtaSwitch              string   `json:"dpa_rta_switch,omitempty"`               // RTA重定向开关
+	RtaID                     int64    `json:"rta_id,omitempty"`                       // RTA策略ID（条件必填）
+	DPARtaRecommendType       string   `json:"dpa_rta_recommend_type,omitempty"`       // RTA推荐逻辑（条件必填）
+}
+
+// UBLAudience UBL人群定向（线索智投场景）
+type UBLAudience struct {
+	AudiencePackageID      int64          `json:"audience_package_id,omitempty"`      // 定向包ID
+	District               string         `json:"district"`                           // 地域类型 (必填)
+	Geolocation            []*Geolocation `json:"geolocation,omitempty"`              // 地图位置 (商圈专用)
+	RegionRecommend        string         `json:"region_recommend,omitempty"`         // 地域智能放量定向
+	Age                    []string       `json:"age,omitempty"`                      // 年龄
+	RetargetingTagsInclude []int64        `json:"retargeting_tags_include,omitempty"` // 定向人群包列表
+	RetargetingTagsExclude []int64        `json:"retargeting_tags_exclude,omitempty"` // 排除人群包列表
+	HideIfConverted        string         `json:"hide_if_converted,omitempty"`        // 过滤已转化用户
+}
+
+// Geolocation 地图位置信息
+type Geolocation struct {
+	Radius int     `json:"radius,omitempty"` // 半径，单位m，默认6000
+	Name   string  `json:"name,omitempty"`   // 地点名称
+	Long   float64 `json:"long,omitempty"`   // 经度
+	Lat    float64 `json:"lat,omitempty"`    // 纬度
 }
 
 // 辅助方法：检查LandingType是否支持自动投放
