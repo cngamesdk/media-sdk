@@ -122,8 +122,9 @@ type ProjectCreateReq struct {
 		InventoryType    []string `json:"inventory_type,omitempty"`    // 投放位置（首选媒体）
 		UnionVideoType   string   `json:"union_video_type,omitempty"`  // 投放形式（穿山甲视频创意类型）
 	} `json:"delivery_range,omitempty"` // 投放版位
-	Audience        interface{}      `json:"audience,omitempty"` // 定向
-	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`
+	Audience        interface{}      `json:"audience,omitempty"`          // 定向
+	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
+	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
 }
 
 func (p *ProjectCreateReq) Validate() error {
@@ -464,6 +465,18 @@ type DeliverySetting struct {
 type ShopMultiRoiGoals struct {
 	RoiGoal      float32 `json:"roi_goal,omitempty"`      // ROI系数
 	ShopPlatform string  `json:"shop_platform,omitempty"` // ROI系数所属平台
+}
+
+type TrackUrlSetting struct {
+	TrackUrlType               string   `json:"track_url_type,omitempty"`                 // 监测链接类型，区分使用监测链接组或者自定义链接
+	TrackUrlGroupId            int64    `json:"track_url_group_id,omitempty"`             // 监测链接组id
+	TrackUrl                   []string `json:"track_url,omitempty"`                      // 展示（监测链接）
+	ActionTrackUrl             []string `json:"action_track_url,omitempty"`               // 点击（监测链接），只允许传入1个
+	ActiveTrackUrl             []string `json:"active_track_url,omitempty"`               // 激活检测链接，只允许传入1个
+	VideoPlayEffectiveTrackUrl []string `json:"video_play_effective_track_url,omitempty"` // 视频有效播放（监测链接）
+	VideoPlayDoneTrackUrl      []string `json:"video_play_done_track_url,omitempty"`      // 视频播完（监测链接）
+	VideoPlayFirstTrackUrl     []string `json:"video_play_first_track_url,omitempty"`     // 视频开始播放（监测链接）
+	SendType                   string   `json:"send_type,omitempty"`                      // 数据发送方式
 }
 
 // 辅助方法：检查LandingType是否支持自动投放
