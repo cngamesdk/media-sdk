@@ -122,7 +122,8 @@ type ProjectCreateReq struct {
 		InventoryType    []string `json:"inventory_type,omitempty"`    // 投放位置（首选媒体）
 		UnionVideoType   string   `json:"union_video_type,omitempty"`  // 投放形式（穿山甲视频创意类型）
 	} `json:"delivery_range,omitempty"` // 投放版位
-	Audience interface{} `json:"audience,omitempty"` // 定向
+	Audience        interface{}      `json:"audience,omitempty"` // 定向
+	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`
 }
 
 func (p *ProjectCreateReq) Validate() error {
@@ -422,6 +423,47 @@ type Geolocation struct {
 	Name   string  `json:"name,omitempty"`   // 地点名称
 	Long   float64 `json:"long,omitempty"`   // 经度
 	Lat    float64 `json:"lat,omitempty"`    // 纬度
+}
+
+// 常量定义
+const (
+	// ScheduleType 投放时间类型
+	ScheduleTypeFromNow  = "SCHEDULE_FROM_NOW"  // 从今天起长期投放
+	ScheduleTypeStartEnd = "SCHEDULE_START_END" // 设置开始和结束日期
+	ScheduleType7Days    = "SCHEDULE_7_DAYS"    // 7日稳投 (new)
+
+	// 时间格式
+	DateFormat = "2006-01-02" // 精确到天
+)
+
+// DeliverySetting 排期、预算、出价
+type DeliverySetting struct {
+	ScheduleType           string             `json:"schedule_type"`                      // 投放时间类型 (必填)
+	StartTime              string             `json:"start_time,omitempty"`               // 投放起始时间 (条件必填)
+	EndTime                string             `json:"end_time,omitempty"`                 // 投放结束时间 (条件必填)
+	ScheduleTime           string             `json:"schedule_time,omitempty"`            // 投放时间段
+	LiveDuration           int64              `json:"live_duration,omitempty"`            // 直播时长
+	FilterNightSwitch      string             `json:"filter_night_switch,omitempty"`      // 过滤夜间时段开关
+	DeepBidType            string             `json:"deep_bid_type,omitempty"`            // 深度优化方式
+	BidType                string             `json:"bid_type,omitempty"`                 // 竞价策略
+	ProjectCustom          string             `json:"project_custom,omitempty"`           // 项目成本稳投
+	Bid                    float32            `json:"bid,omitempty"`                      // 点击出价/展示出价
+	BudgetMode             string             `json:"budget_mode,omitempty"`              // 项目预算类型
+	Budget                 float32            `json:"budget,omitempty"`                   // 项目预算，单位为元
+	Pricing                float32            `json:"pricing,omitempty"`                  // 付费方式
+	CpaBid                 float32            `json:"cpa_bid,omitempty"`                  // 目标转化出价/预期成本
+	DeepCpabid             float32            `json:"deep_cpabid,omitempty"`              // 深度优化出价
+	RoiGoal                float32            `json:"roi_goal,omitempty"`                 // ROI系数
+	FirstRoiGoal           float64            `json:"first_roi_goal,omitempty"`           // 首日roi系数
+	SevenRoiGoal           float64            `json:"seven_roi_goal,omitempty"`           // 7日ROI系数
+	ShopMultiRoiGoals      *ShopMultiRoiGoals `json:"shop_multi_roi_goals,omitempty"`     // 电商平台多ROI系数，指引流电商多平台投放ROI系数及平台信息，可按照电商平台分别确定ROI系数，分平台调控出价，白名单开放。
+	BudgetOptimizeSwitch   string             `json:"budget_optimize_switch,omitempty"`   // 支持预算择优分配
+	SearchContinueDelivery string             `json:"search_continue_delivery,omitempty"` // 续投，仅当delivery_type = DURATION搜索极速智投时必填
+}
+
+type ShopMultiRoiGoals struct {
+	RoiGoal      float32 `json:"roi_goal,omitempty"`      // ROI系数
+	ShopPlatform string  `json:"shop_platform,omitempty"` // ROI系数所属平台
 }
 
 // 辅助方法：检查LandingType是否支持自动投放
