@@ -83,6 +83,10 @@ type ProjectCreateReq struct {
 	StarAutoDeliverySwitch         string  `json:"star_auto_delivery_switch,omitempty"`          // 星广联投全自动化开关
 	RtaID                          int64   `json:"rta_id,omitempty"`
 
+	// 搜索快投
+	SearchBidRatio float32 `json:"search_bid_ratio,omitempty"` // 出价系数
+	AudienceExtend string  `json:"audience_extend,omitempty"`  // 定向拓展
+
 	//营销产品与投放载体
 	DownloadUrl        string `json:"download_url,omitempty"`  // 下载链接
 	AppName            string `json:"app_name,omitempty"`      // 应用名称
