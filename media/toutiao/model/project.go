@@ -83,18 +83,11 @@ type ProjectCreateReq struct {
 	StarAutoDeliverySwitch         string  `json:"star_auto_delivery_switch,omitempty"`          // 星广联投全自动化开关
 	RtaID                          int64   `json:"rta_id,omitempty"`
 
-	// 搜索快投
-	SearchBidRatio float32 `json:"search_bid_ratio,omitempty"` // 出价系数
-	AudienceExtend string  `json:"audience_extend,omitempty"`  // 定向拓展
+	//搜索快投
+	SearchQuick
 
 	//搜索关键词
-	Keywords struct {
-		Word      string  `json:"word,omitempty"`       // 关键词
-		BidType   string  `json:"bid_type,omitempty"`   // 出价类型
-		MatchType string  `json:"match_type,omitempty"` // 匹配类型
-		Bid       float32 `json:"bid,omitempty"`        // 出价
-	} `json:"keywords,omitempty"` // 待添加搜索关键词列表
-	AutoExtendTraffic string `json:"auto_extend_traffic,omitempty"` // 智能拓流
+	SearchKeywords
 
 	//搜索蓝海流量投放
 	BlueFlowPackage *BlueFlowPackage `json:"blue_flow_package,omitempty"` // 搜索蓝海流量投放
@@ -142,6 +135,23 @@ type ProjectCreateReq struct {
 	Audience        interface{}      `json:"audience,omitempty"`          // 定向
 	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
 	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
+}
+
+// SearchQuick 搜索快投
+type SearchQuick struct {
+	SearchBidRatio float32 `json:"search_bid_ratio,omitempty"` // 出价系数
+	AudienceExtend string  `json:"audience_extend,omitempty"`  // 定向拓展
+}
+
+// SearchKeywords 搜索关键词
+type SearchKeywords struct {
+	Keywords struct {
+		Word      string  `json:"word,omitempty"`       // 关键词
+		BidType   string  `json:"bid_type,omitempty"`   // 出价类型
+		MatchType string  `json:"match_type,omitempty"` // 匹配类型
+		Bid       float32 `json:"bid,omitempty"`        // 出价
+	} `json:"keywords,omitempty"` // 待添加搜索关键词列表
+	AutoExtendTraffic string `json:"auto_extend_traffic,omitempty"` // 智能拓流
 }
 
 // 常量定义
@@ -642,4 +652,28 @@ type ProjectCreateResp struct {
 type ErrorKeywordInfo struct {
 	ErrorKeyword string `json:"error_keyword"` // 失败的关键词
 	ErrorMessage string `json:"error_message"` // 失败原因
+}
+
+type ProjectUpdateReq struct {
+	accessTokenReq
+	AdvertiserId                   int64  `json:"advertiser_id,omitempty"`                      // 投放账户id
+	ProjectId                      int64  `json:"project_id,omitempty"`                         // 项目id
+	Name                           string `json:"name,omitempty"`                               // 项目名称
+	AigcDynamicCreativeSwitch      string `json:"aigc_dynamic_creative_switch,omitempty"`       // 是否开启AIGC动态创意
+	StarAutoDeliverySwitch         string `json:"star_auto_delivery_switch,omitempty"`          // 星广联投全自动化开关
+	StarAutoMaterialAdditionSwitch string `json:"star_auto_material_addition_switch,omitempty"` // 星广联投自动优化素材开关
+	SearchQuick
+	SearchKeywords
+
+	//搜索蓝海流量投放
+	BlueFlowPackage *BlueFlowPackage `json:"blue_flow_package,omitempty"` // 搜索蓝海流量投放
+
+	//营销产品与投放载体
+	RelatedProduct *RelatedProduct `json:"related_product,omitempty"` // 商品
+
+	//用户定向
+	Audience interface{} `json:"audience,omitempty"` // 定向
+
+	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
+	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
 }
