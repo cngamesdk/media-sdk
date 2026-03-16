@@ -654,6 +654,7 @@ type ErrorKeywordInfo struct {
 	ErrorMessage string `json:"error_message"` // 失败原因
 }
 
+// ProjectUpdateReq 更新项目请求参数
 type ProjectUpdateReq struct {
 	accessTokenReq
 	AdvertiserId                   int64  `json:"advertiser_id,omitempty"`                      // 投放账户id
@@ -676,4 +677,43 @@ type ProjectUpdateReq struct {
 
 	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
 	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
+}
+
+func (receiver *ProjectUpdateReq) Format() {
+	receiver.accessTokenReq.Format()
+}
+
+func (receiver *ProjectUpdateReq) Validate() (err error) {
+	if validateErr := receiver.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if receiver.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	if receiver.ProjectId <= 0 {
+		err = errors.New("project_id is empty")
+		return
+	}
+	return
+}
+
+func (receiver *ProjectUpdateReq) GetHeaders() map[string]string {
+	headers := receiver.accessTokenReq.GetHeaders()
+	headers.Json()
+	return headers
+}
+
+type ProjectUpdateResp struct {
+	ProjectId int64 `json:"project_id,omitempty"` // 项目ID
+	ErrorList []struct {
+		ObjectType   string `json:"object_type,omitempty"`   // 错误对象类型，返回值：BUDGET 预算、PROJECT_SETTING 项目设置
+		ErrorCode    string `json:"error_code,omitempty"`    // 错误码
+		ErrorMessage string `json:"error_message,omitempty"` // 错误信息
+	} `json:"error_list,omitempty"` // 错误list，项目为分块更新，存在部分内容更新失败，部分内容更新成功
+	ErrorKeywordsList []struct {
+		ErrorKeyword string `json:"error_keyword,omitempty"` // 失败的关键词
+		ErrorMessage string `json:"error_message,omitempty"` // 失败原因
+	}
 }

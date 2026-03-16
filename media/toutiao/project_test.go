@@ -21,3 +21,19 @@ func TestProjectCreateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 更新项目
+func TestProjectUpdateSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.ProjectUpdateReq{}
+	req.AccessToken = "test"
+	req.Name = "test"
+	req.AdvertiserId = 123
+	req.ProjectId = 123
+	resp, err := factory.ProjectUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
