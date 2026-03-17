@@ -42,3 +42,22 @@ func (a *ToutiaoAdapter) ProjectUpdateSelf(ctx context.Context, req *model2.Proj
 	resp = &result
 	return
 }
+
+// ProjectListSelf 获取项目列表
+// https://open.oceanengine.com/labels/7/docs/1740937147595776?origin=left_nav
+func (a *ToutiaoAdapter) ProjectListSelf(ctx context.Context, req *model2.ProjectListReq) (resp *model2.ProjectListResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.ProjectListResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/project/list/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}

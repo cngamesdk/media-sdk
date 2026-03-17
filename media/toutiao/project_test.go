@@ -37,3 +37,17 @@ func TestProjectUpdateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取项目列表
+func TestProjectListSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.ProjectListReq{}
+	req.AccessToken = "test"
+	req.AdvertiserId = 123
+	resp, err := factory.ProjectListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
