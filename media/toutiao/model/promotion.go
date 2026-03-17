@@ -9,10 +9,12 @@ type PromotionCreateReq struct {
 	ProjectId int64  `json:"project_id,omitempty"` // 项目ID
 	Name      string `json:"name,omitempty"`       // 单元名称，长度是1-50个字（两个英文字符占1个字）。名称不可重复，否则会报错
 	Operation string `json:"operation,omitempty"`  // 单元状态， 允许值: ENABLE开启(默认值）、DISABLE关闭
-
 	DpaMaterials
-
 	LiveAndPromotionMaterials
+	NativeSetting
+	CreativeSetting
+	PromotionDeliverySetting
+	SearchKeywords
 }
 
 // 常量定义
@@ -178,4 +180,53 @@ type InstantPlayMaterial struct {
 // PlantGrassSearchWordMaterial 种草搜索词素材
 type PlantGrassSearchWordMaterial struct {
 	SearchWord string `json:"search_word,omitempty"` // 搜索词
+}
+
+// 原生单元设置
+type NativeSetting struct {
+	NativeSetting struct {
+		AwemeSettingType  string   `json:"aweme_setting_type,omitempty"`  // 抖音号设置类型
+		AwemeID           string   `json:"aweme_id,omitempty"`            // 抖音号ID
+		AwemeIDs          []string `json:"aweme_ids,omitempty"`           // 抖音号ID列表
+		AnchorRelatedType string   `json:"anchor_related_type,omitempty"` // 原生锚点启用开关
+	} `json:"native_setting,omitempty"` // 原生单元设置
+}
+
+// 创意设置
+type CreativeSetting struct {
+	Source           string     `json:"source"`                       // 来源（条件必填）
+	IsCommentDisable string     `json:"is_comment_disable,omitempty"` // 是否关闭评论
+	AdDownloadStatus string     `json:"ad_download_status,omitempty"` // 广告下载状态
+	BrandInfo        *BrandInfo `json:"brand_info,omitempty"`         // 品牌信息
+}
+
+// BrandInfo 品牌信息
+type BrandInfo struct {
+	YuntuCategoryID int64    `json:"yuntu_category_id,omitempty"`  // 云图类目ID
+	CdpBrandID      int64    `json:"cdp_brand_id,omitempty"`       // CDP品牌ID
+	EcomBrandID     int64    `json:"ecom_brand_id,omitempty"`      // 电商品牌ID
+	BrandNameID     int64    `json:"brand_name_id,omitempty"`      // 品牌名称ID
+	CdpBrandName    string   `json:"cdp_brand_name,omitempty"`     // CDP品牌名称
+	SubBrandNames   []string `json:"sub_brand_names,omitempty"`    // 子品牌名称列表
+	SubBrandNameIDs []string `json:"sub_brand_name_ids,omitempty"` // 子品牌名称ID列表
+}
+
+// 单元预算与出价
+type PromotionDeliverySetting struct {
+	BudgetMode        string              `json:"budget_mode,omitempty"`          // 预算类型，详见【附录-预算类型】
+	Budget            float64             `json:"budget,omitempty"`               // 预算金额，单位：元
+	Bid               float64             `json:"bid,omitempty"`                  // 出价金额，单位：元
+	CpaBid            float64             `json:"cpa_bid,omitempty"`              // 目标转化出价，单位：元
+	DeepCpabid        float64             `json:"deep_cpabid"`                    // 深度目标出价（条件必填）
+	RoiGoal           float64             `json:"roi_goal"`                       // ROI目标（条件必填）
+	FirstRoiGoal      float64             `json:"first_roi_goal"`                 // 首次ROI目标（条件必填）
+	UnionBidRatio     float64             `json:"union_bid_ratio,omitempty"`      // 穿山甲出价系数
+	ShopMultiRoiGoals []*ShopMultiRoiGoal `json:"shop_multi_roi_goals,omitempty"` // 电商多ROI目标列表
+	Retention7d       float64             `json:"7d_retention"`                   // 7日留存（条件必填）
+}
+
+// ShopMultiRoiGoal 电商多ROI目标
+type ShopMultiRoiGoal struct {
+	RoiGoal      float64 `json:"roi_goal"`                // ROI目标
+	ShopPlatform string  `json:"shop_platform,omitempty"` // 电商平台
 }
