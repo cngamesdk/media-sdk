@@ -1,11 +1,17 @@
 package model
 
+import (
+	"errors"
+	"strings"
+)
+
 type commonPromotionStruct struct {
 	AdvertiserId int64 `json:"advertiser_id,omitempty"`
 }
 
 type PromotionCreateReq struct {
 	accessTokenReq
+	commonPromotionStruct
 	ProjectId int64  `json:"project_id,omitempty"` // 项目ID
 	Name      string `json:"name,omitempty"`       // 单元名称，长度是1-50个字（两个英文字符占1个字）。名称不可重复，否则会报错
 	Operation string `json:"operation,omitempty"`  // 单元状态， 允许值: ENABLE开启(默认值）、DISABLE关闭
@@ -15,6 +21,37 @@ type PromotionCreateReq struct {
 	CreativeSetting
 	PromotionDeliverySetting
 	SearchKeywords
+}
+
+func (a *PromotionCreateReq) Format() {
+	a.accessTokenReq.Format()
+	a.Name = strings.TrimSpace(a.Name)
+}
+
+func (a *PromotionCreateReq) Validate() (err error) {
+	if validateErr := a.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if a.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	if a.ProjectId <= 0 {
+		err = errors.New("project_id is empty")
+		return
+	}
+	if len(a.Name) <= 0 {
+		err = errors.New("name is empty")
+		return
+	}
+	return
+}
+
+func (a *PromotionCreateReq) GetHeaders() headersMap {
+	headers := a.accessTokenReq.GetHeaders()
+	headers.Json()
+	return headers
 }
 
 // 常量定义
@@ -229,4 +266,9 @@ type PromotionDeliverySetting struct {
 type ShopMultiRoiGoal struct {
 	RoiGoal      float64 `json:"roi_goal"`                // ROI目标
 	ShopPlatform string  `json:"shop_platform,omitempty"` // 电商平台
+}
+
+type PromotionCreateResp struct {
+	PromotionID       int64               `json:"promotion_id"`                  // 推广ID
+	ErrorKeywordsList []*ErrorKeywordInfo `json:"error_keywords_list,omitempty"` // 错误关键词列表
 }
