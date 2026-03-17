@@ -23,3 +23,19 @@ func TestPromotionCreateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 修改单元
+func TestPromotionUpdateSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.PromotionUpdateReq{}
+	req.AccessToken = "test"
+	req.AdvertiserId = 123
+	req.PromotionId = 123
+	req.Name = "test"
+	resp, err := factory.PromotionUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
