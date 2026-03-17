@@ -272,3 +272,60 @@ type PromotionCreateResp struct {
 	PromotionID       int64               `json:"promotion_id"`                  // 推广ID
 	ErrorKeywordsList []*ErrorKeywordInfo `json:"error_keywords_list,omitempty"` // 错误关键词列表
 }
+
+type PromotionUpdateReq struct {
+	accessTokenReq
+	commonPromotionStruct
+	PromotionId int64  `json:"promotion_id,omitempty"` // 单元ID
+	Name        string `json:"name,omitempty"`         // 单元名称，长度是1-50个字（两个英文字符占1个字）。名称不可重复，否则会报错
+	DpaMaterials
+	LiveAndPromotionMaterials
+	NativeSetting
+	CreativeSetting
+	PromotionDeliverySetting
+	SearchKeywords
+}
+
+func (a *PromotionUpdateReq) Format() {
+	a.accessTokenReq.Format()
+	a.Name = strings.TrimSpace(a.Name)
+}
+
+func (a *PromotionUpdateReq) Validate() (err error) {
+	if validateErr := a.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if a.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	if a.PromotionId <= 0 {
+		err = errors.New("promotion_id is empty")
+		return
+	}
+	if len(a.Name) <= 0 {
+		err = errors.New("name is empty")
+		return
+	}
+	return
+}
+
+func (a *PromotionUpdateReq) GetHeaders() headersMap {
+	headers := a.accessTokenReq.GetHeaders()
+	headers.Json()
+	return headers
+}
+
+type PromotionUpdateResp struct {
+	PromotionID int64          `json:"promotion_id"`         // 推广ID
+	ErrorList   []*ErrorDetail `json:"error_list,omitempty"` // 错误详情列表
+}
+
+// ErrorDetail 错误详情
+type ErrorDetail struct {
+	ObjectType   string `json:"object_type,omitempty"`   // 对象类型
+	ErrorCode    int    `json:"error_code,omitempty"`    // 错误码
+	ErrorKeyword string `json:"error_keyword,omitempty"` // 失败的关键词
+	ErrorMessage string `json:"error_message,omitempty"` // 失败原因
+}

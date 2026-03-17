@@ -23,3 +23,22 @@ func (a *ToutiaoAdapter) PromotionCreateSelf(ctx context.Context, req *model2.Pr
 	resp = &result
 	return
 }
+
+// PromotionUpdateSelf 修改单元
+// https://open.oceanengine.com/labels/7/docs/1740952287987719?origin=left_nav
+func (a *ToutiaoAdapter) PromotionUpdateSelf(ctx context.Context, req *model2.PromotionUpdateReq) (resp *model2.PromotionUpdateResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.PromotionUpdateResp
+	errRequest := a.RequestPostJson(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/promotion/update/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
