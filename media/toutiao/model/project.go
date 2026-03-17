@@ -60,10 +60,9 @@ const (
 	AIGCDynamicCreativeOFF = "OFF" // 关闭
 )
 
-type ProjectCreateReq struct {
+type commonProjectStruct struct {
 	accessTokenReq
 	AdvertiserID                   int64   `json:"advertiser_id"`                                // 投放账户id (必填)
-	Operation                      string  `json:"operation,omitempty"`                          // 项目状态，允许值：ENABLE 开启（默认值），DISABLE 关闭
 	DeliveryMode                   string  `json:"delivery_mode,omitempty"`                      // 投放模式
 	LandingType                    string  `json:"landing_type"`                                 // 推广目的/落地页类型 (必填)
 	AppPromotionType               string  `json:"app_promotion_type,omitempty"`                 // 应用推广子目标
@@ -135,6 +134,12 @@ type ProjectCreateReq struct {
 	Audience        interface{}      `json:"audience,omitempty"`          // 定向
 	DeliverySetting *DeliverySetting `json:"delivery_setting,omitempty"`  // 排期、预算、出价
 	TrackUrlSetting *TrackUrlSetting `json:"track_url_setting,omitempty"` // 监测链接
+}
+
+type ProjectCreateReq struct {
+	commonProjectStruct
+
+	Operation string `json:"operation,omitempty"` // 项目状态，允许值：ENABLE 开启（默认值），DISABLE 关闭
 }
 
 // SearchQuick 搜索快投
@@ -490,7 +495,7 @@ type DPAAudience struct {
 	RtaID               int64   `json:"rta_id,omitempty"`                 // RTA策略ID（条件必填）
 	DPARtaRecommendType string  `json:"dpa_rta_recommend_type,omitempty"` // RTA推荐逻辑（条件必填）
 	DpaCategories       []int64 `json:"dpa_categories,omitempty"`         // 商品投放范围
-	DpaProductTarget    struct {
+	DpaProductTarget    []struct {
 		Title string `json:"title,omitempty"` // 筛选字段
 		Rule  string `json:"rule,omitempty"`  // 定向规则
 		Type  string `json:"type,omitempty"`  // 字段类型
@@ -713,7 +718,79 @@ type ProjectUpdateResp struct {
 		ErrorMessage string `json:"error_message,omitempty"` // 错误信息
 	} `json:"error_list,omitempty"` // 错误list，项目为分块更新，存在部分内容更新失败，部分内容更新成功
 	ErrorKeywordsList []struct {
-		ErrorKeyword string `json:"error_keyword,omitempty"` // 失败的关键词
-		ErrorMessage string `json:"error_message,omitempty"` // 失败原因
+		ErrorKeyword string `json:"error_keyword,advertiser_id"` // 失败的关键词
+		ErrorMessage string `json:"error_message,omitempty"`     // 失败原因
 	}
+}
+
+type ProjectListReq struct {
+	accessTokenReq
+	AdvertiserId int64             `json:"advertiser_id,omitempty"` // 帐户ID
+	Fields       string            `json:"fields,omitempty"`        // 查询字段集合
+	Filtering    *ProjectFiltering `json:"filtering,omitempty"`     // 过滤条件
+	PageInfoReq
+}
+
+type ProjectFiltering struct {
+	Ids                    []int64 `json:"ids,omitempty"`                       // 按项目ID过滤，范围为1-100
+	DeliveryMode           string  `json:"delivery_mode,omitempty"`             // 投放模式
+	DeliveryType           string  `json:"delivery_type,omitempty"`             // 按投放类型过滤
+	LandingType            string  `json:"landing_type,omitempty"`              // 营销目的
+	AppPromotionType       string  `json:"app_promotion_type,omitempty"`        // 子目标
+	MarketingGoal          string  `json:"marketing_goal,omitempty"`            // 营销场景
+	AdType                 string  `json:"ad_type,omitempty"`                   // 营销类型
+	Name                   string  `json:"name,omitempty"`                      // 项目名称，模糊查询
+	Status                 string  `json:"status,omitempty"`                    // 项目状态过滤（已废弃）
+	StatusFirst            string  `json:"status_first,omitempty"`              // 项目一级状态过滤
+	StatusSecond           string  `json:"status_second,omitempty"`             // 项目二级状态过滤
+	ProjectCreateTime      string  `json:"project_create_time,omitempty"`       // 项目创建时间，格式yyyy-mm-dd
+	ProjectModifyTime      string  `json:"project_modify_time,omitempty"`       // 项目更新时间，格式yyyy-mm-dd
+	ProjectModifyStartTime string  `json:"project_modify_start_time,omitempty"` // 项目更新开始时间，格式yyyy-mm-dd hh:mm:ss
+	ProjectModifyEndTime   string  `json:"project_modify_end_time,omitempty"`   // 项目更新结束时间，格式yyyy-mm-dd hh:mm:ss
+	Pricing                string  `json:"pricing,omitempty"`                   // 按计费方式过滤
+	InventoryType          string  `json:"inventory_type,omitempty"`            // 按首选位置过滤
+	Platform               string  `json:"platform,omitempty"`                  // 按平台过滤
+	BudgetGroupID          int64   `json:"budget_group_id,omitempty"`           // 按预算组ID过滤
+	BlueFlowPackageSetting string  `json:"blue_flow_package_setting,omitempty"` // 是否开启蓝海流量投放过滤
+	StarDeliveryType       string  `json:"star_delivery_type,omitempty"`        // 是否为星产联投项目
+	StarAutoDeliverySwitch string  `json:"star_auto_delivery_switch,omitempty"` // 星产联投全自动化开关
+}
+
+func (receiver *ProjectListReq) Format() {
+	receiver.accessTokenReq.Format()
+	receiver.PageInfoReq.Format()
+}
+
+func (receiver *ProjectListReq) Validate() (err error) {
+	if validateErr := receiver.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if receiver.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	return
+}
+
+type ProjectListResp struct {
+	List     []ProjectListItemResp `json:"list,omitempty"`
+	PageInfo PageInfoResp          `json:"page_info,omitempty"`
+}
+
+type ProjectListItemResp struct {
+	commonProjectStruct
+
+	ProjectID int64 `json:"project_id"` // 项目ID
+
+	ProjectCreateTime   string `json:"project_create_time"`             // 项目创建时间
+	ProjectModifyTime   string `json:"project_modify_time"`             // 项目更新时间
+	Status              string `json:"status,omitempty"`                // 项目状态（已废弃）
+	StatusFirst         string `json:"status_first"`                    // 项目一级状态
+	StatusSecond        string `json:"status_second,omitempty"`         // 项目二级状态
+	PackageName         string `json:"package_name,omitempty"`          // 应用包名
+	FeedDeliverySearch  string `json:"feed_delivery_search,omitempty"`  // 搜索快投关键词功能
+	DeliveryProduct     string `json:"delivery_product,omitempty"`      // 营销产品
+	DeliveryMedium      string `json:"delivery_medium,omitempty"`       // 单投放载体
+	MultiDeliveryMedium string `json:"multi_delivery_medium,omitempty"` // 多投放载体
 }
