@@ -42,3 +42,22 @@ func (a *ToutiaoAdapter) PromotionUpdateSelf(ctx context.Context, req *model2.Pr
 	resp = &result
 	return
 }
+
+// PromotionListSelf 修改单元
+// https://open.oceanengine.com/labels/7/docs/1741028841006095?origin=left_nav
+func (a *ToutiaoAdapter) PromotionListSelf(ctx context.Context, req *model2.PromotionListReq) (resp *model2.PromotionListResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.PromotionListResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/promotion/list/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}

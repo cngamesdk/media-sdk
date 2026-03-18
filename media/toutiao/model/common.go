@@ -128,3 +128,18 @@ type PageInfoResp struct {
 	TotalPage   int `json:"total_page"`   // 总页数
 	TotalNumber int `json:"total_number"` // 总数
 }
+
+// PageInfoContainerResp 分页信息
+type PageInfoContainerResp struct {
+	PageInfo PageInfoResp `json:"page_info,omitempty"`
+}
+
+type CursorInfoContainer struct {
+	CursorInfo CursorInfo `json:"cursor_info,omitempty"` // 游标分页信息
+}
+
+type CursorInfo struct {
+	HasMore bool  `json:"has_more,omitempty"` // 是否有下一页
+	Count   int64 `json:"count,omitempty"`    // 页面数据量
+	Cursor  int64 `json:"cursor,omitempty"`   // 下一次分页拉取的游标值
+}
