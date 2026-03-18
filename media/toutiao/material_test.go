@@ -24,3 +24,19 @@ func TestEbpVideoUploadSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 上传广告图片
+func TestFileImageAdSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.FileImageAdReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.UploadType = model.UploadTypeURL
+	req.ImageURL = "https://www.xxx.com"
+	resp, err := factory.FileImageAdSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
