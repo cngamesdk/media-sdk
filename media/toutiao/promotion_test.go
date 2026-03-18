@@ -39,3 +39,17 @@ func TestPromotionUpdateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取单元列表
+func TestPromotionListSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.PromotionListReq{}
+	req.AccessToken = "test"
+	req.AdvertiserId = 123
+	resp, err := factory.PromotionListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

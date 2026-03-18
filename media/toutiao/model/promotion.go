@@ -9,6 +9,14 @@ type commonPromotionStruct struct {
 	AdvertiserId int64 `json:"advertiser_id,omitempty"`
 }
 
+func (a *commonPromotionStruct) Validate() (err error) {
+	if a.AdvertiserId <= 0 {
+		err = errors.New("advertiser_id is empty")
+		return
+	}
+	return
+}
+
 type PromotionCreateReq struct {
 	accessTokenReq
 	commonPromotionStruct
@@ -91,9 +99,8 @@ type DpaMaterials struct {
 	} `json:"promotion_materials,omitempty"` // 素材组合
 }
 
-// 直播素材与营销素材组合
-type LiveAndPromotionMaterials struct {
-	MaterialsType           string `json:"materials_type,omitempty"` // 素材类型，直播场景必填
+// PromotionRelatedProduct UBP多品素材组合
+type PromotionRelatedProduct struct {
 	PromotionRelatedProduct []struct {
 		UniqueProductId   int64 `json:"unique_product_id,omitempty"` // 商品ID
 		VideoMaterialList []struct {
@@ -126,81 +133,92 @@ type LiveAndPromotionMaterials struct {
 		UlinkURL              string `json:"ulink_url,omitempty"`              // 直达备用链接
 		AnchorRelatedType     string `json:"anchor_related_type,omitempty"`    // 原生锚点启用开关
 		IntelligentGeneration string `json:"intelligent_generation,omitempty"` // 智能生成行动号召按钮
-		PromotionMaterials    struct {
-			VideoMaterialList []struct {
-				ImageMode         string `json:"image_mode"`                    // 素材类型 (必填)
-				VideoID           string `json:"video_id,omitempty"`            // 视频ID
-				VideoCoverID      string `json:"video_cover_id,omitempty"`      // 视频封面图片ID
-				ItemID            int64  `json:"item_id,omitempty"`             // 抖音短视频ID
-				VideoHpVisibility string `json:"video_hp_visibility,omitempty"` // 原生单元视频素材主页可见性设置
-				GuideVideoID      string `json:"guide_video_id,omitempty"`      // 引导视频ID（游戏行业奖励关卡专用）
-			} `json:"video_material_list,omitempty"` // 视频素材信息
-			ImageMaterialList []struct {
-				ImageMode string `json:"image_mode,omitempty"` // 素材类型
-				Images    []struct {
-					ImageId string `json:"image_id,omitempty"` // 图片ID
-				} `json:"images"` // 图片ID数组
-			} `json:"image_material_list,omitempty"` // 创意图片素材
-			TextAbstractList []struct {
-				AbstractText string `json:"abstract_text,omitempty"` // 文本摘要内容
-				BidwordList  []struct {
-					DefaultWord string `json:"default_word,omitempty"` // 关键词
-				} `json:"bidword_list,omitempty"` // 搜索关键词列表
-				WordList []int64 `json:"word_list,omitempty"` // 动态词包ID
-			} `json:"text_abstract_list"` // 文本摘要信息
-			OriginalVideoTitle string `json:"original_video_title,omitempty"` // 投放原视频标题
-			TitleMaterialList  []struct {
-				Title       string `json:"title,omitempty"` // 创意标题
-				BidwordList []struct {
-					DefaultWord string `json:"default_word,omitempty"` // 关键词
-				} `json:"bidword_list,omitempty"` // 搜索关键词列表
-				WordList []int64 `json:"word_list,omitempty"` // 动态词包ID
-			} `json:"title_material_list"`
-			PlayletSeriesUrlList []string `json:"playlet_series_url_list,omitempty"` // 短剧合集链接url
-			ProductInfo          struct {
-				Titles        []string `json:"titles,omitempty"`         // 产品名称（条件必填）
-				ImageIDs      []string `json:"image_ids,omitempty"`      // 产品主图（条件必填）
-				SellingPoints []string `json:"selling_points,omitempty"` // 产品卖点（条件必填）
-			} `json:"product_info,omitempty"` // 产品信息
-			DecorationMaterial struct {
-				ImageMode  string `json:"image_mode,omitempty"`  // 素材类型（条件必填）
-				ActivityID string `json:"activity_id,omitempty"` // 活动ID（条件必填）
-			} `json:"decoration_material,omitempty"` // 家装卡券素材
-			AnchorMaterialList struct {
-				AnchorType string `json:"anchor_type,omitempty"` // 锚点类型（条件必填）
-				AnchorID   string `json:"anchor_id,omitempty"`   // 原生锚点id（条件必填）
-			} `json:"anchor_material_list,omitempty"` // 原生锚点素材
-			ComponentMaterialList []struct {
-				ComponentID int64 `json:"component_id,omitempty"` // 组件id
-			} `json:"component_material_list,omitempty"` // 创意组件信息
-			ExternalUrlMaterialList []string `json:"external_url_material_list,omitempty"` // 普通落地页链接素材
-			MiniProgramInfo         struct {
-				URL       string   `json:"url,omitempty"`              // 小程序链接
-				AppID     string   `json:"app_id,omitempty"`           // 小程序APPID（条件必填）
-				StartPath string   `json:"start_path,omitempty"`       // 小程序启动路径（条件必填）
-				Params    string   `json:"params,omitempty,omitempty"` // 小程序参数
-				URLs      []string `json:"urls,omitempty"`             // 小程序链接列表
-				Auto      []struct {
-					AppID     string `json:"app_id,omitempty"`           // 小程序APPID
-					StartPath string `json:"start_path,omitempty"`       // 小程序启动路径
-					Params    string `json:"params,omitempty,omitempty"` // 小程序参数
-				} `json:"auto,omitempty"` // 自动配置列表
-			} `json:"mini_program_info,omitempty"` // 字节小程序信息
-			CarouselID              string                 `json:"carousel_id,omitempty"`             // 轮播图ID
-			ItemID                  int64                  `json:"item_id,omitempty"`                 // 抖音短视频ID
-			VideoHpVisibility       string                 `json:"video_hp_visibility,omitempty"`     // 视频主页可见性
-			TrialPlayMaterialList   []*TrialPlayMaterial   `json:"trial_play_material_list"`          // 试玩素材列表（条件必填）
-			InstantPlayMaterialList []*InstantPlayMaterial `json:"instant_play_material_list"`        // 快玩素材列表（条件必填）
-			DynamicCreativeSwitch   string                 `json:"dynamic_creative_switch,omitempty"` // 动态创意开关
-			AdvancedDcSettings      []string               `json:"advanced_dc_settings,omitempty"`    // 高级创意设置
-
-			CallToActionButtons          []string                        `json:"call_to_action_buttons"`           // 行动号召按钮列表（必填）
-			IntelligentGeneration        string                          `json:"intelligent_generation,omitempty"` // 智能生成开关
-			PlantGrassSearchWordMaterial []*PlantGrassSearchWordMaterial `json:"plant_grass_search_word_material"` // 种草搜索词素材列表
-
-		} `json:"promotion_materials,omitempty"` // 单元素材组合
-
+		PromotionMaterials
 	} `json:"promotion_related_product,omitempty"` // UBP多品单元素材组合
+}
+
+type PromotionMaterials struct {
+	PromotionMaterials struct {
+		VideoMaterialList []struct {
+			ImageMode         string `json:"image_mode"`                    // 素材类型 (必填)
+			VideoID           string `json:"video_id,omitempty"`            // 视频ID
+			VideoCoverID      string `json:"video_cover_id,omitempty"`      // 视频封面图片ID
+			ItemID            int64  `json:"item_id,omitempty"`             // 抖音短视频ID
+			VideoHpVisibility string `json:"video_hp_visibility,omitempty"` // 原生单元视频素材主页可见性设置
+			GuideVideoID      string `json:"guide_video_id,omitempty"`      // 引导视频ID（游戏行业奖励关卡专用）
+		} `json:"video_material_list,omitempty"` // 视频素材信息
+		ImageMaterialList []struct {
+			ImageMode string `json:"image_mode,omitempty"` // 素材类型
+			Images    []struct {
+				ImageId string `json:"image_id,omitempty"` // 图片ID
+			} `json:"images"` // 图片ID数组
+		} `json:"image_material_list,omitempty"` // 创意图片素材
+		TextAbstractList []struct {
+			AbstractText string `json:"abstract_text,omitempty"` // 文本摘要内容
+			BidwordList  []struct {
+				DefaultWord string `json:"default_word,omitempty"` // 关键词
+			} `json:"bidword_list,omitempty"` // 搜索关键词列表
+			WordList []int64 `json:"word_list,omitempty"` // 动态词包ID
+		} `json:"text_abstract_list"` // 文本摘要信息
+		OriginalVideoTitle string `json:"original_video_title,omitempty"` // 投放原视频标题
+		TitleMaterialList  []struct {
+			Title       string `json:"title,omitempty"` // 创意标题
+			BidwordList []struct {
+				DefaultWord string `json:"default_word,omitempty"` // 关键词
+			} `json:"bidword_list,omitempty"` // 搜索关键词列表
+			WordList []int64 `json:"word_list,omitempty"` // 动态词包ID
+		} `json:"title_material_list"`
+		PlayletSeriesUrlList []string `json:"playlet_series_url_list,omitempty"` // 短剧合集链接url
+		ProductInfo          struct {
+			Titles        []string `json:"titles,omitempty"`         // 产品名称（条件必填）
+			ImageIDs      []string `json:"image_ids,omitempty"`      // 产品主图（条件必填）
+			SellingPoints []string `json:"selling_points,omitempty"` // 产品卖点（条件必填）
+		} `json:"product_info,omitempty"` // 产品信息
+		DecorationMaterial struct {
+			ImageMode  string `json:"image_mode,omitempty"`  // 素材类型（条件必填）
+			ActivityID string `json:"activity_id,omitempty"` // 活动ID（条件必填）
+		} `json:"decoration_material,omitempty"` // 家装卡券素材
+		AnchorMaterialList struct {
+			AnchorType string `json:"anchor_type,omitempty"` // 锚点类型（条件必填）
+			AnchorID   string `json:"anchor_id,omitempty"`   // 原生锚点id（条件必填）
+		} `json:"anchor_material_list,omitempty"` // 原生锚点素材
+		ComponentMaterialList []struct {
+			ComponentID int64 `json:"component_id,omitempty"` // 组件id
+		} `json:"component_material_list,omitempty"` // 创意组件信息
+		ExternalUrlMaterialList []string `json:"external_url_material_list,omitempty"` // 普通落地页链接素材
+		MiniProgramInfo         struct {
+			URL       string   `json:"url,omitempty"`              // 小程序链接
+			AppID     string   `json:"app_id,omitempty"`           // 小程序APPID（条件必填）
+			StartPath string   `json:"start_path,omitempty"`       // 小程序启动路径（条件必填）
+			Params    string   `json:"params,omitempty,omitempty"` // 小程序参数
+			URLs      []string `json:"urls,omitempty"`             // 小程序链接列表
+			Auto      []struct {
+				AppID     string `json:"app_id,omitempty"`           // 小程序APPID
+				StartPath string `json:"start_path,omitempty"`       // 小程序启动路径
+				Params    string `json:"params,omitempty,omitempty"` // 小程序参数
+			} `json:"auto,omitempty"` // 自动配置列表
+		} `json:"mini_program_info,omitempty"` // 字节小程序信息
+		CarouselID              string                 `json:"carousel_id,omitempty"`             // 轮播图ID
+		ItemID                  int64                  `json:"item_id,omitempty"`                 // 抖音短视频ID
+		VideoHpVisibility       string                 `json:"video_hp_visibility,omitempty"`     // 视频主页可见性
+		TrialPlayMaterialList   []*TrialPlayMaterial   `json:"trial_play_material_list"`          // 试玩素材列表（条件必填）
+		InstantPlayMaterialList []*InstantPlayMaterial `json:"instant_play_material_list"`        // 快玩素材列表（条件必填）
+		DynamicCreativeSwitch   string                 `json:"dynamic_creative_switch,omitempty"` // 动态创意开关
+		AdvancedDcSettings      []string               `json:"advanced_dc_settings,omitempty"`    // 高级创意设置
+		CallToActionButtons     []string               `json:"call_to_action_buttons"`            // 行动号召按钮列表（必填）
+		IntelligentGeneration   string                 `json:"intelligent_generation,omitempty"`  // 智能生成开关
+		PlantGrassSearchWordMaterial
+	} `json:"promotion_materials,omitempty"` // 单元素材组合
+}
+
+type PlantGrassSearchWordMaterial struct {
+	PlantGrassSearchWordMaterial []*PlantGrassSearchWordMaterialItem `json:"plant_grass_search_word_material"` // 种草搜索词素材列表
+}
+
+// 直播素材与营销素材组合
+type LiveAndPromotionMaterials struct {
+	MaterialsType string `json:"materials_type,omitempty"` // 素材类型，直播场景必填
+	PromotionRelatedProduct
 }
 
 // TrialPlayMaterial 试玩素材
@@ -214,8 +232,8 @@ type InstantPlayMaterial struct {
 	AppPlayURI string `json:"app_play_uri,omitempty"` // 应用快玩URI
 }
 
-// PlantGrassSearchWordMaterial 种草搜索词素材
-type PlantGrassSearchWordMaterial struct {
+// PlantGrassSearchWordMaterialItem 种草搜索词素材
+type PlantGrassSearchWordMaterialItem struct {
 	SearchWord string `json:"search_word,omitempty"` // 搜索词
 }
 
@@ -328,4 +346,102 @@ type ErrorDetail struct {
 	ErrorCode    int    `json:"error_code,omitempty"`    // 错误码
 	ErrorKeyword string `json:"error_keyword,omitempty"` // 失败的关键词
 	ErrorMessage string `json:"error_message,omitempty"` // 失败原因
+}
+
+type PromotionListReq struct {
+	accessTokenReq
+	commonPromotionStruct
+	Filtering *PromotionListFilter `json:"filtering,omitempty"` // 过滤条件
+}
+
+func (receiver *PromotionListReq) Format() {
+	receiver.accessTokenReq.Format()
+}
+
+func (receiver *PromotionListReq) Validate() (err error) {
+	if validateErr := receiver.accessTokenReq.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	if validateErr := receiver.commonPromotionStruct.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	return
+}
+
+// PromotionListFilter 项目过滤条件
+type PromotionListFilter struct {
+	IDs                         []int64  `json:"ids,omitempty"`                           // 项目ID列表
+	Name                        string   `json:"name,omitempty"`                          // 项目名称（模糊查询）
+	ProjectID                   int64    `json:"project_id,omitempty"`                    // 项目ID
+	DeliveryMode                string   `json:"delivery_mode,omitempty"`                 // 投放模式
+	Status                      string   `json:"status,omitempty"`                        // 项目状态（已废弃）
+	StatusFirst                 string   `json:"status_first,omitempty"`                  // 项目一级状态
+	StatusSecond                string   `json:"status_second,omitempty"`                 // 项目二级状态
+	PromotionCreateTime         string   `json:"promotion_create_time,omitempty"`         // 广告创建时间，格式yyyy-mm-dd
+	PromotionModifyTime         string   `json:"promotion_modify_time,omitempty"`         // 广告更新时间，格式yyyy-mm-dd
+	PromotionModifyStartTime    string   `json:"promotion_modify_start_time,omitempty"`   // 广告更新开始时间，格式yyyy-mm-dd hh:mm:ss
+	PromotionModifyEndTime      string   `json:"promotion_modify_end_time,omitempty"`     // 广告更新结束时间，格式yyyy-mm-dd hh:mm:ss
+	RejectReasonType            string   `json:"reject_reason_type,omitempty"`            // 拒绝原因类型
+	LearningPhase               []string `json:"learning_phase,omitempty"`                // 学习阶段状态
+	HasCarryMaterial            string   `json:"has_carry_material,omitempty"`            // 是否携带素材
+	BlueFlowPackageSetting      string   `json:"blue_flow_package_setting,omitempty"`     // 蓝海流量投放设置
+	StarDeliveryType            string   `json:"star_delivery_type,omitempty"`            // 星产联投项目类型
+	StarAutoDeliverySwitch      string   `json:"star_auto_delivery_switch,omitempty"`     // 星广联投全自动化开关
+	Fields                      []string `json:"fields,omitempty"`                        // 返回字段列表
+	IncludingMaterialAttributes string   `json:"including_material_attributes,omitempty"` // 是否包含素材属性
+	PageInfoReq
+	Cursor int `json:"cursor,omitempty"` // 游标位置
+	Count  int `json:"count,omitempty"`  // 返回数量
+}
+
+type PromotionListResp struct {
+	List []PromotionListItemResp `json:"list,omitempty"` // 单元列表
+	CursorInfoContainer
+	PageInfoContainerResp
+}
+
+type PromotionListItemResp struct {
+	PromotionID                    int64    `json:"promotion_id"`                                 // 广告ID
+	PromotionName                  string   `json:"promotion_name"`                               // 广告名称
+	IfNewCustomerDelivery          bool     `json:"if_newcustomerdelivery"`                       // 是否新客交付
+	ProjectID                      int64    `json:"project_id"`                                   // 项目ID
+	AdvertiserID                   int64    `json:"advertiser_id"`                                // 广告主ID
+	PromotionCreateTime            string   `json:"promotion_create_time"`                        // 广告创建时间
+	PromotionModifyTime            string   `json:"promotion_modify_time"`                        // 广告修改时间
+	AIGCDynamicCreativeSwitch      string   `json:"aigc_dynamic_creative_switch,omitempty"`       // AIGC动态创意开关
+	LearningPhase                  string   `json:"learning_phase,omitempty"`                     // 学习阶段
+	Status                         string   `json:"status,omitempty"`                             // 广告状态（旧版，已废弃）
+	StatusFirst                    string   `json:"status_first,omitempty"`                       // 广告一级状态
+	StatusSecond                   []string `json:"status_second,omitempty"`                      // 广告二级状态列表
+	OptStatus                      string   `json:"opt_status,omitempty"`                         // 操作状态（ENABLE/DISABLE）
+	StarTaskID                     int64    `json:"star_task_id,omitempty"`                       // 星广联投任务ID
+	StarTaskVersion                string   `json:"star_task_version,omitempty"`                  // 星广联投任务版本
+	StarAutoMaterialAdditionSwitch string   `json:"star_auto_material_addition_switch,omitempty"` // 星广联投自动优选素材开关
+	StarAutoDeliverySwitch         string   `json:"star_auto_delivery_switch,omitempty"`          // 星广联投全自动化开关
+	HasCarryMaterial               string   `json:"has_carry_material,omitempty"`                 // 是否携带素材
+
+	DpaMaterials
+	LiveAndPromotionMaterials
+	NativeSetting
+	CreativeSetting
+	PromotionDeliverySetting
+	SearchKeywords
+
+	ScheduleTime               string `json:"schedule_time,omitempty"`                 // 投放时段
+	CreativeAutoGenerateSwitch string `json:"creative_auto_generate_switch,omitempty"` // 是否开启自动生成素材
+	ConfigId                   int64  `json:"config_id,omitempty"`                     // 配置ID
+
+	CursorInfo
+	PageInfoContainerResp
+}
+
+// PromotionBlueFlowPackage 项目蓝海流量配置
+type PromotionBlueFlowPackage struct {
+	BlueFlowPackage struct {
+		BlueFlowPackageSetting string `json:"blue_flow_package_setting"`      // 蓝海流量设置（ON/OFF）
+		BlueFlowPackageID      int64  `json:"blue_flow_package_id,omitempty"` // 蓝海流量包ID
+		BlueFlowSuggestion     string `json:"blue_flow_suggestion,omitempty"` // 蓝海流量建议
+	} `json:"blue_flow_package,omitempty"` // 蓝海流量包配置
 }
