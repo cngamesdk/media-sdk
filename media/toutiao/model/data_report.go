@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type ReportCustomConfigGetReq struct {
 	accessTokenReq
@@ -118,4 +121,214 @@ type FilterConfig struct {
 type RangeValue struct {
 	Label string `json:"label"` // 筛选字段名称
 	Value string `json:"value"` // 筛选字段具体值
+}
+
+type ReportCustomGetReq struct {
+	accessTokenReq
+	AdvertiserID int64              `json:"advertiser_id"`     // 客户ID (必填)
+	DataTopic    string             `json:"data_topic"`        // 数据主题，默认BASIC_DATA
+	Dimensions   []string           `json:"dimensions"`        // 维度列表 (必填)
+	Metrics      []string           `json:"metrics"`           // 指标列表 (必填)
+	Filters      []*FilterCondition `json:"filters,omitempty"` // 过滤条件列表
+	StartTime    string             `json:"start_time"`        // 开始时间 (必填)
+	EndTime      string             `json:"end_time"`          // 结束时间 (必填)
+	OrderBy      []OrderBy          `json:"order_by"`          // 排序
+	PageInfoReq
+}
+
+const (
+	OrderByAsc  = "ASC"  // 升序
+	OrderByDesc = "DESC" // 降序
+)
+
+type OrderBy struct {
+	Field string `json:"field,omitempty"` // 排序字段
+	Type  string `json:"type,omitempty"`  // 排序类型
+}
+
+// FilterCondition 过滤条件
+type FilterCondition struct {
+	Field    string   `json:"field"`    // 过滤的消耗指标字段 (条件必填)
+	Type     int      `json:"type"`     // 字段类型 (条件必填)
+	Operator int      `json:"operator"` // 处理方式 (条件必填)
+	Values   []string `json:"values"`   // 过滤字段具体值 (条件必填)
+}
+
+// 常量定义 - 字段类型
+const (
+	FieldTypeEnum   = 1 // 固定枚举值
+	FieldTypeInput  = 2 // 固定输入值
+	FieldTypeNumber = 3 // 数值类型
+)
+
+// 常量定义 - 处理方式
+const (
+	OperatorEqual              = 1  // 等于
+	OperatorLessThan           = 2  // 小于
+	OperatorLessThanOrEqual    = 3  // 小于等于
+	OperatorGreaterThan        = 4  // 大于
+	OperatorGreaterThanOrEqual = 5  // 大于等于
+	OperatorNotEqual           = 6  // 不等于
+	OperatorContains           = 7  // 包含
+	OperatorNotContains        = 8  // 不包含
+	OperatorRange              = 9  // 范围查询
+	OperatorMultiValueInclude  = 10 // 多个值匹配包含
+	OperatorMultiValueAll      = 11 // 多个值匹配都要包含
+)
+
+func (p *ReportCustomGetReq) Format() {
+	p.accessTokenReq.Format()
+	p.PageInfoReq.Format()
+}
+
+// 时间格式
+const TimeFormat = "2006-01-02 15:04:05"
+
+// Validate 验证查询参数
+func (p *ReportCustomGetReq) Validate() error {
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 设置默认值
+	p.setDefaults()
+
+	// 3. 验证数据主题
+	if err := p.validateDataTopic(); err != nil {
+		return err
+	}
+
+	// 4. 验证维度列表
+	if len(p.Dimensions) == 0 {
+		return errors.New("dimensions为必填")
+	}
+
+	// 5. 验证指标列表
+	if len(p.Metrics) == 0 {
+		return errors.New("metrics为必填")
+	}
+
+	// 6. 验证过滤条件
+	if err := p.validateFilters(); err != nil {
+		return err
+	}
+
+	// 7. 验证时间
+	if err := p.validateTimeRange(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// setDefaults 设置默认值
+func (p *ReportCustomGetReq) setDefaults() {
+	if p.DataTopic == "" {
+		p.DataTopic = DataTopicBasic
+	}
+}
+
+// validateDataTopic 验证数据主题
+func (p *ReportCustomGetReq) validateDataTopic() error {
+	validTopics := make(map[string]bool)
+	for _, topic := range AllDataTopics {
+		validTopics[topic] = true
+	}
+
+	if !validTopics[p.DataTopic] {
+		return errors.New("data_topic值无效，请参考文档中的枚举值")
+	}
+
+	return nil
+}
+
+// validateFilters 验证过滤条件
+func (p *ReportCustomGetReq) validateFilters() error {
+	for i, filter := range p.Filters {
+		if err := filter.validate(); err != nil {
+			return errors.New("filters[" + string(rune(i)) + "]验证失败: " + err.Error())
+		}
+	}
+	return nil
+}
+
+// validate 验证单个过滤条件
+func (f *FilterCondition) validate() error {
+	// 验证字段
+	if f.Field == "" {
+		return errors.New("field为条件必填")
+	}
+
+	// 验证字段类型
+	if f.Type < FieldTypeEnum || f.Type > FieldTypeNumber {
+		return errors.New("type值无效，允许值：1(固定枚举值)、2(固定输入值)、3(数值类型)")
+	}
+
+	// 验证处理方式
+	if f.Operator < OperatorEqual || f.Operator > OperatorMultiValueAll {
+		return errors.New("operator值无效，允许值：1-11")
+	}
+
+	// 验证过滤值
+	if len(f.Values) == 0 {
+		return errors.New("values为条件必填")
+	}
+
+	// 根据字段类型和处理方式进一步验证
+	switch f.Type {
+	case FieldTypeNumber:
+		// 数值类型验证
+		if f.Operator == OperatorContains || f.Operator == OperatorNotContains {
+			return errors.New("数值类型不支持包含/不包含操作")
+		}
+	}
+
+	return nil
+}
+
+// validateTimeRange 验证时间范围
+func (p *ReportCustomGetReq) validateTimeRange() error {
+	// 验证开始时间
+	if p.StartTime == "" {
+		return errors.New("start_time为必填")
+	}
+
+	start, err := time.Parse(TimeFormat, p.StartTime)
+	if err != nil {
+		return errors.New("start_time格式错误，应为yyyy-MM-dd hh:mm:ss")
+	}
+
+	// 验证结束时间
+	if p.EndTime == "" {
+		return errors.New("end_time为必填")
+	}
+
+	end, err := time.Parse(TimeFormat, p.EndTime)
+	if err != nil {
+		return errors.New("end_time格式错误，应为yyyy-MM-dd hh:mm:ss")
+	}
+
+	// 验证开始时间不能晚于结束时间
+	if start.After(end) {
+		return errors.New("开始时间不能晚于结束时间")
+	}
+
+	return nil
+}
+
+// ReportDataRow 报表数据行
+type ReportDataRow struct {
+	Dimensions map[string]string `json:"dimensions"` // 维度数据
+	Metrics    map[string]string `json:"metrics"`    // 指标数据
+}
+
+// ReportCustomGetResp 报表数据响应
+type ReportCustomGetResp struct {
+	Rows         []*ReportDataRow  `json:"rows"`          // 指标数据列表
+	TotalMetrics map[string]string `json:"total_metrics"` // 指标汇总数据
+	PageInfoContainerResp
 }
