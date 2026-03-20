@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -115,7 +116,7 @@ var ShowMacrosExclude = []string{
 }
 
 // 点击宏参数中排除
-var ClickMacrosExclude = []string{}
+var ClickMacrosExclude []string
 
 type CustomMacros map[string]string
 
@@ -180,4 +181,116 @@ func (m CustomMacros) BuildUrl(url string) string {
 		connectStr = "&"
 	}
 	return url + connectStr + m.BuildQueryString()
+}
+
+// EventType 事件类型
+type EventType int
+
+// MatchType 归因方式
+type MatchType int
+
+const (
+	OSAndroid                             = 0   // 安卓
+	OSiOS                                 = 1   // IOS
+	OSHarmony                             = 2   // 鸿蒙
+	OSOther                               = 3   // 其他
+	EventTypeActivate           EventType = 0   // 激活
+	EventTypeRegister           EventType = 1   // 注册
+	EventTypePay                EventType = 2   // 付费
+	EventTypeForm               EventType = 3   // 表单
+	EventTypeOnlineConsult      EventType = 4   // 在线咨询
+	EventTypeEffectiveConsult   EventType = 5   // 有效咨询
+	EventTypeRetention          EventType = 6   // 次留
+	EventTypeAppOrder           EventType = 20  // app内下单
+	EventTypeAppVisit           EventType = 21  // app内访问
+	EventTypeAppAddCart         EventType = 22  // app内添加购物车
+	EventTypeAppPay             EventType = 23  // app内付费
+	EventTypeKeyBehavior        EventType = 25  // 关键行为
+	EventTypeAuthorize          EventType = 28  // 授权
+	EventTypeAppDetailPageUV    EventType = 29  // app内详情页到站uv
+	EventTypeClickProduct       EventType = 179 // 点击商品
+	EventTypeAddToWishlist      EventType = 128 // 加入收藏/心愿单
+	EventTypeReceiveCoupon      EventType = 213 // 领取优惠券
+	EventTypeBuyNow             EventType = 175 // 立即购买
+	EventTypeAddDeliveryInfo    EventType = 212 // 添加/选定收货信息、电话
+	EventTypeAddPaymentInfo     EventType = 127 // 添加/选定支付信息
+	EventTypeSubmitOrder        EventType = 176 // 提交订单
+	EventTypeOrderConfirm       EventType = 214 // 订单提交/确认收货
+	EventTypeEnterLiveRoom      EventType = 202 // 进入直播间
+	EventTypeLiveFollow         EventType = 204 // 直播间内点击关注按钮
+	EventTypeLiveComment        EventType = 205 // 直播间内评论
+	EventTypeLiveReward         EventType = 206 // 直播间内打赏
+	EventTypeLiveClickCart      EventType = 207 // 直播间内点击购物车按钮
+	EventTypeLiveClickProduct   EventType = 208 // 直播间内商品点击
+	EventTypeLiveEnterPlantPage EventType = 209 // 直播间进入种草页跳转到第三方
+	EventTypeLiveAddToCart      EventType = 210 // 直播-加购
+	EventTypeLivePlaceOrder     EventType = 211 // 直播-下单
+
+	MatchTypeClick MatchType = 0 // 点击
+	MatchTypeShow  MatchType = 1 // 展示
+	MatchTypePlay  MatchType = 2 // 有效播放归因
+
+	CallbackUrl = "https://ad.oceanengine.com/track/activate/"
+)
+
+// ConversionEventReq 转化事件
+type ConversionEventReq struct {
+	CallbackUrl  string `json:"callback_url,omitempty"`   // 回调地址
+	Callback     string `json:"callback"`                 // 点击检测下发的 callback (点击事件必填)
+	IDFA         string `json:"idfa"`                     // ios 手机的 idfa 原值 (必填)
+	OAID         string `json:"oaid"`                     // Android Q 版本的 oaid 原值 (必填)
+	OAIDMD5      string `json:"oaid_md5,omitempty"`       // Android Q 版本的 oaid 原值的md5摘要 (可选)
+	CAID1        string `json:"caid1"`                    // 最新版本的中国营销协会互联网营销标识 (必填)
+	CAID2        string `json:"caid2"`                    // 老版本的中国营销协会互联网营销标识 (必填)
+	OS           int    `json:"os"`                       // 客户端的操作系统类型 (必填)
+	Source       string `json:"source,omitempty"`         // 数据来源，客户可自行定义 (可选)
+	ConvTime     int64  `json:"conv_time,omitempty"`      // 转化发生的时间，UTC 时间戳 (可选)
+	EventType    int    `json:"event_type"`               // 事件类型 (必填)
+	MatchType    int    `json:"match_type,omitempty"`     // 归因方式 (可选)
+	OuterEventID string `json:"outer_event_id,omitempty"` // 外部事件ID，用于去重 (可选)
+}
+
+func (p *ConversionEventReq) Format() {
+	if len(p.CallbackUrl) == 0 {
+		p.CallbackUrl = CallbackUrl
+	}
+	return
+}
+
+// Validate 验证回调参数
+func (p *ConversionEventReq) Validate() error {
+	// 验证必填字段
+	if p.Callback == "" && strings.Index(p.CallbackUrl, "callback=") < 0 {
+		return errors.New("callback为必填")
+	}
+	if p.OS == OSiOS {
+		if p.IDFA == "" {
+			return errors.New("idfa为必填")
+		}
+		if p.CAID1 == "" {
+			return errors.New("caid1为必填")
+		}
+		if p.CAID2 == "" {
+			return errors.New("caid2为必填")
+		}
+	}
+	if p.OS == OSAndroid {
+		if p.OAID == "" {
+			return errors.New("oaid为必填")
+		}
+	}
+	if p.EventType < 0 {
+		return errors.New("event_type为必填")
+	}
+
+	if p.MatchType < 0 {
+		return errors.New("match_type为必填")
+	}
+	return nil
+}
+
+type ConversionEventResp struct {
+	Code int    `json:"code"`
+	Ret  int    `json:"ret"`
+	Msg  string `json:"msg"`
 }
