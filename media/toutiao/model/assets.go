@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 // 常量定义 - 资产类型
 const (
@@ -317,3 +320,158 @@ func (a *EventManagerAssetsCreateReq) GetHeaders() headersMap {
 type EventManagerAssetsCreateResp struct {
 	AssetId int64 `json:"asset_id"` // 资产ID
 }
+
+type EventAssetsListReq struct {
+	accessTokenReq
+	AdvertiserID int64        `json:"advertiser_id"`       // 投放账户id (必填)
+	Filtering    *AssetFilter `json:"filtering,omitempty"` // 过滤条件
+	PageInfoReq
+}
+
+func (p *EventAssetsListReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// AssetFilter 资产过滤条件
+type AssetFilter struct {
+	AssetIDs        []int64 `json:"asset_ids,omitempty"`         // 资产id列表，最大100
+	AssetType       string  `json:"asset_type,omitempty"`        // 资产类型
+	ModifyStartTime string  `json:"modify_start_time,omitempty"` // 资产修改开始时间 YYYY-MM-DD
+	ModifyEndTime   string  `json:"modify_end_time,omitempty"`   // 资产修改结束时间 YYYY-MM-DD
+}
+
+// 分页限制常量
+const (
+	MaxAssetIDsCount = 100    // 资产ID列表最大数量
+	DefaultPage      = 1      // 默认页数
+	DefaultPageSize  = 10     // 默认页面大小
+	MaxPageSize      = 100    // 最大页面大小
+	MaxPage          = 999999 // 最大页数
+)
+
+// Validate 验证资产查询参数
+func (p *EventAssetsListReq) Validate() error {
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 设置分页默认值
+	p.setPageDefaults()
+
+	// 3. 验证过滤条件
+	if err := p.validateFiltering(); err != nil {
+		return err
+	}
+
+	// 5. 验证分页参数
+	if err := p.validatePageParams(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// setPageDefaults 设置分页默认值
+func (p *EventAssetsListReq) setPageDefaults() {
+	if p.Page <= 0 {
+		p.Page = DefaultPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = DefaultPageSize
+	}
+}
+
+// validateFiltering 验证过滤条件
+func (p *EventAssetsListReq) validateFiltering() error {
+	if p.Filtering == nil {
+		return nil
+	}
+
+	// 验证资产ID列表长度
+	if len(p.Filtering.AssetIDs) > MaxAssetIDsCount {
+		return errors.New("asset_ids列表长度不能超过100")
+	}
+
+	// 验证资产类型
+	if p.Filtering.AssetType != "" && !isValidAssetQueryType(p.Filtering.AssetType) {
+		return errors.New("asset_type值无效，允许值：THIRD_EXTERNAL、TETRIS_EXTERNAL、APP、QUICK_APP、MINI_PROGRAMME")
+	}
+	// 检查是否只传了其中一个时间
+	if (p.Filtering.ModifyStartTime != "" && p.Filtering.ModifyEndTime == "") ||
+		(p.Filtering.ModifyStartTime == "" && p.Filtering.ModifyEndTime != "") {
+		return errors.New("开始时间和结束时间必须同时传入")
+	}
+
+	// 如果两个时间都为空，跳过验证
+	if p.Filtering.ModifyStartTime == "" && p.Filtering.ModifyEndTime == "" {
+		return nil
+	}
+
+	// 验证时间格式
+	start, err := time.Parse(DateFormat, p.Filtering.ModifyStartTime)
+	if err != nil {
+		return errors.New("modify_start_time格式错误，应为YYYY-MM-DD")
+	}
+
+	end, err := time.Parse(DateFormat, p.Filtering.ModifyEndTime)
+	if err != nil {
+		return errors.New("modify_end_time格式错误，应为YYYY-MM-DD")
+	}
+
+	// 验证开始时间 <= 结束时间
+	if start.After(end) {
+		return errors.New("开始时间不能大于结束时间")
+	}
+
+	return nil
+}
+
+// validatePageParams 验证分页参数
+func (p *EventAssetsListReq) validatePageParams() error {
+	if p.Page > MaxPage {
+		return errors.New("page不能超过999999")
+	}
+
+	if p.PageSize > MaxPageSize {
+		return errors.New("page_size不能超过100")
+	}
+
+	return nil
+}
+
+// isValidAssetQueryType 验证资产类型是否有效
+func isValidAssetQueryType(assetType string) bool {
+	validTypes := map[string]bool{
+		AssetTypeThird:       true,
+		AssetTypeTetris:      true,
+		AssetTypeApp:         true,
+		AssetTypeQuickApp:    true,
+		AssetTypeMiniProgram: true,
+	}
+	return validTypes[assetType]
+}
+
+// AssetInfo 资产信息
+type AssetInfo struct {
+	AssetType    string `json:"asset_type"`               // 资产类型
+	AssetID      int64  `json:"asset_id"`                 // 资产id
+	AssetName    string `json:"asset_name"`               // 资产名称
+	ShareType    string `json:"share_type,omitempty"`     // 资产来源
+	CreateTime   string `json:"create_time"`              // 资产创建时间，格式 YYYY-MM-DD HH:MM:SS
+	ModifyTime   string `json:"modify_time"`              // 资产修改时间，格式 YYYY-MM-DD HH:MM:SS
+	AppForceInfo string `json:"app_force_info,omitempty"` // 异常资产限制倒计时
+}
+
+// EventAssetsListResp 资产列表响应
+type EventAssetsListResp struct {
+	AssetList []*AssetInfo `json:"asset_list"` // 账户下的资产列表，不支持查询已删除的资产
+	PageInfoContainerResp
+}
+
+// 常量定义 - 资产来源
+const (
+	ShareTypeMyCreations = "MY_CREATIONS"  // 我创建的
+	ShareTypeSharing     = "SHARING"       // 共享中
+	ShareTypeExpired     = "SHATE_EXPIRED" // 共享失效
+)
