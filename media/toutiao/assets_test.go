@@ -30,3 +30,17 @@ func TestEventManagerAssetsCreateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取账户下资产列表（新）
+func TestEventAssetsListSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventAssetsListReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	resp, err := factory.EventAssetsListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
