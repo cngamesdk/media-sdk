@@ -22,11 +22,11 @@ go get -u github.com/cngamesdk/media-sdk
 
 ```Go
 import (
-    "github.com/cngamesdk/media-sdk"
+    mediaSdk "github.com/cngamesdk/media-sdk"
     "time"
 )
 
-config := adsdk.DefaultConfig(adsdk.MediaToutiao)
+config := mediaSdk.DefaultConfig(mediaSdk.MediaToutiao)
 config.AppID = "your_app_id"
 config.AppSecret = "your_app_secret"
 ```
@@ -34,7 +34,7 @@ config.AppSecret = "your_app_secret"
 ### 2. 创建客户端
 
 ```Go
-client, err := media-sdk.NewClient(config)
+client, err := mediaSdk.NewClient(config)
 if err != nil {
     panic(err)
 }
@@ -63,7 +63,7 @@ campaign, err := client.CreateCampaign(ctx, &model.CampaignReq{
 
 ```go
 // 创建多客户端管理器
-multiClient := media-sdk.NewMultiClient()
+multiClient := mediaSdk.NewMultiClient()
 
 // 注册多个媒体客户端
 multiClient.RegisterClient(config.MediaToutiao, toutiaoClient)
@@ -73,7 +73,7 @@ multiClient.RegisterClient(config.MediaTencent, tencentClient)
 client, _ := multiClient.GetClient(adsdk.MediaToutiao)
 
 // 批量执行
-multiClient.BatchExecute(ctx, func(client *media-sdk.Client) error {
+multiClient.BatchExecute(ctx, func(client *mediaSdk.Client) error {
     _, err := client.GetAccount(ctx, req)
     return err
 })
@@ -83,9 +83,6 @@ multiClient.BatchExecute(ctx, func(client *media-sdk.Client) error {
 
 | 参数        | 说明         | 默认值  |
 |------------|--------------|--------|
-| MediaType  | 媒体类型       | -      |
-| AppID      | 应用ID        | -      |
-| AppSecret  | 应用密钥       | -      |
 | Timeout    | 超时时间       | 30s    |
 | RateLimit  | QPS限制       | 10     |
 | MaxRetries | 最大重试次数   | 3      |
@@ -116,21 +113,21 @@ multiClient.BatchExecute(ctx, func(client *media-sdk.Client) error {
 package adapter
 
 import (
-    "media-sdk"
+	mediaSdk "github.com/cngamesdk/media-sdk"
 )
 
 func init() {
-    Register(media-sdk.MediaNew, &NewMediaFactory{})
+    Register(mediaSdk.MediaNew, &NewMediaFactory{})
 }
 
 type NewMediaFactory struct{}
 
-func (f *NewMediaFactory) Create(config *media-sdk.Config) (media-sdk.MediaSdk, error) {
+func (f *NewMediaFactory) Create(config *mediaSdk.Config) (mediaSdk.MediaSdk, error) {
     return &NewMediaAdapter{config: config}, nil
 }
 
 type NewMediaAdapter struct {
-    config *media-sdk.Config
+    config *mediaSdk.Config
 }
 
 // 实现所有接口方法...
@@ -148,10 +145,10 @@ type NewMediaAdapter struct {
 
 ```go
 if err != nil {
-    if errors.Is(err, media-sdk.ErrTokenExpired) {
+    if errors.Is(err, mediaSdk.ErrTokenExpired) {
         // 刷新token
         client.RefreshToken(ctx)
-    } else if errors.Is(err, media-sdk.ErrRateLimit) {
+    } else if errors.Is(err, mediaSdk.ErrRateLimit) {
         // 等待后重试
         time.Sleep(time.Second)
     }
@@ -177,8 +174,8 @@ if err != nil {
 package main
 
 import (
-    "media-sdk"
-    "media-sdk/model"
+	mediaSdk "github.com/cngamesdk/media-sdk"
+    "github.com/cngamesdk/media-sdk/model"
     "context"
     "fmt"
     "log"
@@ -187,34 +184,34 @@ import (
 
 func main() {
     // 创建巨量引擎客户端
-    toutiaoConfig := media-sdk.DefaultConfig(model.MediaToutiao)
+    toutiaoConfig := mediaSdk.DefaultConfig(model.MediaToutiao)
     toutiaoConfig.AppID = "your_app_id"
     toutiaoConfig.AppSecret = "your_app_secret"
     
-    toutiaoClient, err := media-sdk.NewClient(toutiaoConfig)
+    toutiaoClient, err := mediaSdk.NewClient(toutiaoConfig)
     if err != nil {
         log.Fatal(err)
     }
     
     // 创建腾讯广告客户端
-    tencentConfig := media-sdk.DefaultConfig(model.MediaTencent)
+    tencentConfig := mediaSdk.DefaultConfig(model.MediaTencent)
     tencentConfig.AppID = "your_app_id"
     tencentConfig.AppSecret = "your_app_secret"
     
-    tencentClient, err := media-sdk.NewClient(tencentConfig)
+    tencentClient, err := mediaSdk.NewClient(tencentConfig)
     if err != nil {
         log.Fatal(err)
     }
     
     // 创建多媒体管理器
-    multiClient := media-sdk.NewMultiClient()
-    multiClient.RegisterClient(media-sdk.MediaToutiao, toutiaoClient)
-    multiClient.RegisterClient(media-sdk.MediaTencent, tencentClient)
+    multiClient := mediaSdk.NewMultiClient()
+    multiClient.RegisterClient(mediaSdk.MediaToutiao, toutiaoClient)
+    multiClient.RegisterClient(mediaSdk.MediaTencent, tencentClient)
     
     ctx := context.Background()
     
     // 获取所有媒体账户信息
-    multiClient.BatchExecute(ctx, func(client *media-sdk.Client) error {
+    multiClient.BatchExecute(ctx, func(client *mediaSdk.Client) error {
         account, err := client.GetAccount(ctx, &model.AccountRequest{
             AdvertiserID: client.config.AdvertiserID,
         })
