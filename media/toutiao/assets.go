@@ -42,3 +42,22 @@ func (a *ToutiaoAdapter) EventAssetsListSelf(ctx context.Context, req *model2.Ev
 	resp = &result
 	return
 }
+
+// EventAssetsDetailSelf 获取已创建资产详情（新）
+// https://open.oceanengine.com/labels/7/docs/1800988620664954?origin=left_nav
+func (a *ToutiaoAdapter) EventAssetsDetailSelf(ctx context.Context, req *model2.EventAssetsDetailReq) (resp *model2.EventAssetsDetailResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EventAssetsDetailResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/2/tools/event/all_assets/detail/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
