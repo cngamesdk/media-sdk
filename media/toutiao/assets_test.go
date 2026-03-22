@@ -74,3 +74,20 @@ func TestEventManagerAvailableEventsGetSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 资产下创建事件
+func TestEventManagerEventsCreateSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventManagerEventsCreateReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.AssetID = 123
+	req.EventID = 123
+	req.TrackTypes = []string{model.TrackTypeApplicationAPI}
+	resp, err := factory.EventManagerEventsCreateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
