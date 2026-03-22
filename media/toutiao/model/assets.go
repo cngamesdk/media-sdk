@@ -606,3 +606,74 @@ const (
 	TrackTypeMiniProgramSDK = "MINI_PROGRAMME_SDK" // 小程序SDK
 	TrackTypeMiniProgramAPI = "MINI_PROGRAMME_API" // 小程序API
 )
+
+type EventManagerEventsCreateReq struct {
+	accessTokenReq
+	AdvertiserID int64    `json:"advertiser_id"` // 客户ID (必填)
+	AssetID      int64    `json:"asset_id"`      // 资产ID (必填)
+	EventID      int64    `json:"event_id"`      // 事件ID (必填)
+	TrackTypes   []string `json:"track_types"`   // 事件回传方式列表 (必填)
+}
+
+func (p *EventManagerEventsCreateReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+func (p *EventManagerEventsCreateReq) GetHeaders() headersMap {
+	headers := p.accessTokenReq.GetHeaders()
+	headers.Json()
+	return headers
+}
+
+// 所有有效回传方式列表
+var ValidTrackTypes = []string{
+	TrackTypeJSSDK,
+	TrackTypeExternalAPI,
+	TrackTypeXPath,
+	TrackTypeApplicationAPI,
+	TrackTypeApplicationSDK,
+	TrackTypeQuickAppAPI,
+}
+
+// Validate 验证事件启用参数
+func (p *EventManagerEventsCreateReq) Validate() error {
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 验证资产ID
+	if p.AssetID == 0 {
+		return errors.New("asset_id为必填")
+	}
+
+	// 3. 验证事件ID
+	if p.EventID == 0 {
+		return errors.New("event_id为必填")
+	}
+
+	// 4. 验证回传方式列表
+	if len(p.TrackTypes) == 0 {
+		return errors.New("track_types为必填")
+	}
+
+	// 5. 验证每个回传方式是否有效
+	validTrackTypeMap := make(map[string]bool)
+	for _, tt := range ValidTrackTypes {
+		validTrackTypeMap[tt] = true
+	}
+
+	for _, tt := range p.TrackTypes {
+		if !validTrackTypeMap[tt] {
+			return errors.New("track_types包含无效值，允许值：JSSDK、EXTERNAL_API、XPATH、APPLICATION_API、APPLICATION_SDK、QUICK_APP_API")
+		}
+	}
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+	return nil
+}
+
+// 资产下创建事件 返回
+type EventManagerEventsCreateResp struct {
+}

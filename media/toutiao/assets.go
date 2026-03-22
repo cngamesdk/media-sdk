@@ -80,3 +80,22 @@ func (a *ToutiaoAdapter) EventManagerAvailableEventsGetSelf(ctx context.Context,
 	resp = &result
 	return
 }
+
+// EventManagerEventsCreateSelf 资产下创建事件
+// https://open.oceanengine.com/labels/7/docs/1709792900524035?origin=left_nav
+func (a *ToutiaoAdapter) EventManagerEventsCreateSelf(ctx context.Context, req *model2.EventManagerEventsCreateReq) (resp *model2.EventManagerEventsCreateResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EventManagerEventsCreateResp
+	errRequest := a.RequestPostJson(ctx, headers, model2.BaseUrlAd+"/open_api/2/event_manager/events/create/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
