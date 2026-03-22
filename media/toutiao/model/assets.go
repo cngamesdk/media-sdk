@@ -475,3 +475,65 @@ const (
 	ShareTypeSharing     = "SHARING"       // 共享中
 	ShareTypeExpired     = "SHATE_EXPIRED" // 共享失效
 )
+
+// EventAssetsDetailReq 获取已创建资产详情（新）
+type EventAssetsDetailReq struct {
+	accessTokenReq
+	AdvertiserID int64   `json:"advertiser_id"` // 客户id (必填)
+	AssetIDs     []int64 `json:"asset_ids"`     // 资产id列表 (必填)
+}
+
+// 常量定义
+const (
+	MaxAssetIDsLength = 50 // 资产id列表最大长度
+)
+
+func (p *EventAssetsDetailReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// Validate 验证资产详情查询参数
+func (p *EventAssetsDetailReq) Validate() error {
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 验证资产id列表
+	if len(p.AssetIDs) == 0 {
+		return errors.New("asset_ids为必填")
+	}
+
+	if len(p.AssetIDs) > MaxAssetIDsLength {
+		return errors.New("asset_ids列表长度不能超过50")
+	}
+
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	return nil
+}
+
+// EventAssetsDetailResp 响应
+type EventAssetsDetailResp struct {
+	AssetList []*AssetDetailInfo `json:"asset_list"` // 资产列表
+}
+
+// AssetDetailInfo 资产信息
+type AssetDetailInfo struct {
+	AssetID             int64  `json:"asset_id"`                         // 资产id，不会返回已删除资产
+	AssetName           string `json:"asset_name"`                       // 资产名称，不会返回已删除资产
+	AssetType           string `json:"asset_type"`                       // 资产类型
+	SiteID              int64  `json:"site_id,omitempty"`                // 橙子落地页站点id
+	AppType             string `json:"app_type,omitempty"`               // 应用类型
+	AppID               int64  `json:"app_id,omitempty"`                 // 应用ID
+	AppName             string `json:"app_name,omitempty"`               // 应用名称
+	PackageID           string `json:"package_id,omitempty"`             // 应用包id
+	PackageName         string `json:"package_name,omitempty"`           // 应用包名
+	DownloadURL         string `json:"download_url,omitempty"`           // 应用下载链接
+	QuickAppID          int64  `json:"quick_app_id,omitempty"`           // 快应用id
+	QuickAppPackageName string `json:"quick_app_package_name,omitempty"` // 快应用包名
+	MicroAppID          string `json:"micro_app_id,omitempty"`           // 小程序appid
+	MicroAppInstanceID  int64  `json:"micro_app_instance_id,omitempty"`  // 小程序资产id
+}

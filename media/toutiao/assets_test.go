@@ -44,3 +44,18 @@ func TestEventAssetsListSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取已创建资产详情（新）
+func TestEventAssetsDetailSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventAssetsDetailReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.AssetIDs = []int64{123}
+	resp, err := factory.EventAssetsDetailSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
