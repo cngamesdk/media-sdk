@@ -91,3 +91,18 @@ func TestEventManagerEventsCreateSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取资产下已创建事件列表
+func TestEventManagerEventConfigsGetSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventManagerEventConfigsGetReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.AssetID = 123
+	resp, err := factory.EventManagerEventConfigsGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

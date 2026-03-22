@@ -677,3 +677,78 @@ func (p *EventManagerEventsCreateReq) Validate() error {
 // 资产下创建事件 返回
 type EventManagerEventsCreateResp struct {
 }
+
+// 获取资产下已创建事件列表
+// https://open.oceanengine.com/labels/7/docs/1709793086075972?origin=left_nav
+type EventManagerEventConfigsGetReq struct {
+	accessTokenReq
+	AdvertiserID int64  `json:"advertiser_id"`       // 客户ID (必填)
+	AssetID      int64  `json:"asset_id"`            // 资产ID (必填)
+	SortType     string `json:"sort_type,omitempty"` // 创建时间排序方式，默认ASC
+}
+
+func (p *EventManagerEventConfigsGetReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// 常量定义 - 排序方式
+const (
+	SortTypeAsc  = "ASC"  // 升序（默认）
+	SortTypeDesc = "DESC" // 降序
+)
+
+// Validate 验证事件列表查询参数
+func (p *EventManagerEventConfigsGetReq) Validate() error {
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 验证资产ID
+	if p.AssetID == 0 {
+		return errors.New("asset_id为必填")
+	}
+
+	// 3. 设置默认排序方式
+	if p.SortType == "" {
+		p.SortType = SortTypeAsc
+	}
+
+	// 4. 验证排序方式
+	if p.SortType != SortTypeAsc && p.SortType != SortTypeDesc {
+		return errors.New("sort_type值无效，允许值：ASC、DESC")
+	}
+
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+	return nil
+}
+
+// EventManagerEventConfigsGetResp 事件配置列表响应
+type EventManagerEventConfigsGetResp struct {
+	EventConfigs []*EventManagerEventConfig `json:"event_configs"` // 已创建事件列表
+}
+
+// EventManagerEventConfig 事件配置
+type EventManagerEventConfig struct {
+	EventID                  int64              `json:"event_id"`                            // 事件ID
+	EventType                string             `json:"event_type"`                          // 事件类型
+	EventCnName              string             `json:"event_cn_name"`                       // 事件中文名称
+	AttributionConfiguration *AttributionConfig `json:"attribution_configuration,omitempty"` // 属性配置
+	DebuggingStatus          string             `json:"debugging_status,omitempty"`          // 激活免联调状态
+	TrackTypes               []string           `json:"track_types"`                         // 事件回传方式列表
+	CreateTime               string             `json:"create_time"`                         // 事件创建时间
+	Properties               []*EventProperty   `json:"properties,omitempty"`                // 事件的附加属性
+}
+
+// AttributionConfig 属性配置
+type AttributionConfig struct {
+	AttributionWindow int64 `json:"attribution_window"` // 归因窗口
+}
+
+// 常量定义 - 调试状态
+const (
+	DebuggingStatusActive   = "Active"   // 已激活
+	DebuggingStatusInactive = "Inactive" // 未激活
+)
