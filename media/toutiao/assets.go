@@ -61,3 +61,22 @@ func (a *ToutiaoAdapter) EventAssetsDetailSelf(ctx context.Context, req *model2.
 	resp = &result
 	return
 }
+
+// EventManagerAvailableEventsGetSelf 获取可创建事件列表
+// https://open.oceanengine.com/labels/7/docs/1709793059412996?origin=left_nav
+func (a *ToutiaoAdapter) EventManagerAvailableEventsGetSelf(ctx context.Context, req *model2.EventManagerAvailableEventsGetReq) (resp *model2.EventManagerAvailableEventsGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EventManagerAvailableEventsGetResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/2/event_manager/available_events/get/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}

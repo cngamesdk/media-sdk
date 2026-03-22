@@ -537,3 +537,72 @@ type AssetDetailInfo struct {
 	MicroAppID          string `json:"micro_app_id,omitempty"`           // 小程序appid
 	MicroAppInstanceID  int64  `json:"micro_app_instance_id,omitempty"`  // 小程序资产id
 }
+
+// EventManagerAvailableEventsGetReq 获取可创建事件列表
+type EventManagerAvailableEventsGetReq struct {
+	accessTokenReq
+	AdvertiserID int64 `json:"advertiser_id"` // 客户ID (必填)
+	AssetID      int64 `json:"asset_id"`      // 资产ID (必填)
+}
+
+func (p *EventManagerAvailableEventsGetReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// Validate 验证资产删除参数
+func (p *EventManagerAvailableEventsGetReq) Validate() error {
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+	if p.AssetID == 0 {
+		return errors.New("asset_id为必填")
+	}
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+	return nil
+}
+
+// EventManagerAvailableEventsGetResp 返回
+type EventManagerAvailableEventsGetResp struct {
+	EventConfigs []*EventConfig `json:"event_configs"` // 可创建事件列表
+}
+
+// EventConfig
+type EventConfig struct {
+	EventID     int64            `json:"event_id"`             // 事件ID
+	EventType   string           `json:"event_type"`           // 事件类型
+	EventCnName string           `json:"event_cn_name"`        // 事件中文名称
+	Description string           `json:"description"`          // 事件描述信息
+	TrackTypes  []string         `json:"track_types"`          // 事件回传方式列表
+	Properties  []*EventProperty `json:"properties,omitempty"` // 事件的附加属性
+}
+
+// EventProperty 事件附加属性
+type EventProperty struct {
+	Field        string            `json:"field"`                 // 附加属性英文名称
+	FieldName    string            `json:"field_name"`            // 附加属性中文名称
+	VariableType string            `json:"variable_type"`         // 附加属性值类型
+	EnumValue    map[string]string `json:"enum_value,omitempty"`  // 附加属性枚举值
+	Unit         string            `json:"unit,omitempty"`        // 附加属性单位
+	Description  string            `json:"description,omitempty"` // 附加属性描述
+}
+
+// 常量定义 - 事件回传方式
+const (
+	// 落地页支持的回传方式
+	TrackTypeJSSDK       = "JSSDK"        // JS埋码
+	TrackTypeExternalAPI = "EXTERNAL_API" // API回传
+	TrackTypeXPath       = "XPATH"        // XPath圈选
+
+	// 应用支持的回传方式
+	TrackTypeApplicationAPI = "APPLICATION_API" // 应用API
+	TrackTypeApplicationSDK = "APPLICATION_SDK" // 应用SDK
+
+	// 快应用支持的回传方式
+	TrackTypeQuickAppAPI = "QUICK_APP_API" // 快应用API
+
+	// 小程序支持的回传方式
+	TrackTypeMiniProgramSDK = "MINI_PROGRAMME_SDK" // 小程序SDK
+	TrackTypeMiniProgramAPI = "MINI_PROGRAMME_API" // 小程序API
+)
