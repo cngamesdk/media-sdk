@@ -59,3 +59,18 @@ func TestEventAssetsDetailSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取可创建事件列表
+func TestEventManagerAvailableEventsGetSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventManagerAvailableEventsGetReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.AssetID = 123
+	resp, err := factory.EventManagerAvailableEventsGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
