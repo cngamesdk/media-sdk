@@ -118,3 +118,22 @@ func (a *ToutiaoAdapter) EventManagerEventConfigsGetSelf(ctx context.Context, re
 	resp = &result
 	return
 }
+
+// EventManagerOptimizedGoalGetSelf 获取可用优化目标（巨量营销升级版）
+// https://open.oceanengine.com/labels/7/docs/1740944984250381?origin=left_nav
+func (a *ToutiaoAdapter) EventManagerOptimizedGoalGetSelf(ctx context.Context, req *model2.EventManagerOptimizedGoalGetReq) (resp *model2.EventManagerOptimizedGoalGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EventManagerOptimizedGoalGetResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/event_manager/optimized_goal/get_v2/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
