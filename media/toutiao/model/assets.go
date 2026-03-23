@@ -15,6 +15,13 @@ const (
 	AssetTypeOther       = "OTHER"           // 其他
 	AssetTypeQuickApp    = "QUICK_APP"       // 快应用
 	AssetTypeSite        = "SITE"            // 橙子落地页
+
+	AssetTypeAweme      = "AWEME"      // 抖音主页
+	AssetTypeEnterprise = "ENTERPRISE" // 企业号落地页
+	AssetTypeMicroApp   = "MICRO_APP"  // 字节小程序
+	AssetTypeOrange     = "ORANGE"     // 橙子落地页
+	AssetTypeThirdparty = "THIRDPARTY" // 自研落地页
+	AssetTypeWechatApp  = "WECHAT_APP" // 微信小程序
 )
 
 // 常量定义 - 小程序类型
@@ -27,6 +34,8 @@ const (
 const (
 	AppTypeAndroid = "Android" // Android应用
 	AppTypeIOS     = "IOS"     // iOS应用
+	AppTypeDefault = "DEFAULT" // 默认
+	AppTypeHarmony = "HARMONY" // 鸿蒙
 )
 
 // 常量定义 - 应用创建类型
@@ -752,3 +761,224 @@ const (
 	DebuggingStatusActive   = "Active"   // 已激活
 	DebuggingStatusInactive = "Inactive" // 未激活
 )
+
+type EventManagerOptimizedGoalGetReq struct {
+	accessTokenReq
+	AdvertiserID       int64  `json:"advertiser_id"`                   // 客户id (必填)
+	LandingType        string `json:"landing_type"`                    // 营销目的 (必填)
+	AdType             string `json:"ad_type"`                         // 营销类型 (必填)
+	AssetType          string `json:"asset_type"`                      // 资产类型 (必填)
+	MultiAssetType     string `json:"multi_asset_type,omitempty"`      // 多投放载体
+	AssetID            int64  `json:"asset_id,omitempty"`              // 事件管理资产id
+	PackageName        string `json:"package_name,omitempty"`          // 应用包名称
+	AppType            string `json:"app_type,omitempty"`              // 应用类型
+	AppPromotionType   string `json:"app_promotion_type,omitempty"`    // 子目标
+	MarketingGoal      string `json:"marketing_goal,omitempty"`        // 营销场景
+	QuickAppID         int64  `json:"quick_app_id,omitempty"`          // 快应用资产id
+	DeliveryMode       string `json:"delivery_mode,omitempty"`         // 投放模式
+	MiniProgramID      string `json:"mini_program_id,omitempty"`       // 字节小程序资产id
+	DpaAdtype          string `json:"dpa_adtype,omitempty"`            // dpa营销类型
+	MicroPromotionType string `json:"micro_promotion_type,omitempty"`  // 小程序类型
+	MicroAppInstanceID int64  `json:"micro_app_instance_id,omitempty"` // 小程序资产id
+	DeliveryType       string `json:"delivery_type,omitempty"`         // 投放类型
+}
+
+func (p *EventManagerOptimizedGoalGetReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// 常量定义 - 多投放载体
+const (
+	MultiAssetTypeOrangeAndAweme = "ORANGE_AND_AWEME" // 建站落地页和抖音主页
+)
+
+// 常量定义 - DPA营销类型
+const (
+	DpaAdtypeApp  = "DPA_APP"  // 应用下载
+	DpaAdtypeLink = "DPA_LINK" // 落地页
+)
+
+// 常量定义 - 小程序类型
+const (
+	MicroPromotionTypeByteApp    = "BYTE_APP"    // 字节小程序
+	MicroPromotionTypeByteGame   = "BYTE_GAME"   // 字节小游戏
+	MicroPromotionTypeWechatApp  = "WECHAT_APP"  // 微信小程序
+	MicroPromotionTypeWechatGame = "WECHAT_GAME" // 微信小游戏
+	MicroPromotionTypeAweme      = "AWEME"       // 抖音号
+)
+
+// Validate 验证事件资产查询参数
+func (p *EventManagerOptimizedGoalGetReq) Validate() error {
+	// 1. 验证必填字段
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+	if p.LandingType == "" {
+		return errors.New("landing_type为必填")
+	}
+	if p.AdType == "" {
+		return errors.New("ad_type为必填")
+	}
+	if p.AssetType == "" {
+		return errors.New("asset_type为必填")
+	}
+
+	// 2. 验证营销目的
+	if !isValidLandingType(p.LandingType) {
+		return errors.New("landing_type值无效，允许值：APP、DPA、LINK、MICRO_GAME、NATIVE_ACTION、QUICK_APP、SHOP")
+	}
+
+	// 3. 验证营销类型
+	if !isValidAdType(p.AdType) {
+		return errors.New("ad_type值无效，允许值：ALL、SEARCH")
+	}
+
+	// 4. 验证资产类型
+	if !isValidAssetTypeOptimizedGoal(p.AssetType) {
+		return errors.New("asset_type值无效，允许值：APP、AWEME、ENTERPRISE、MICRO_APP、ORANGE、QUICK_APP、THIRDPARTY、WECHAT_APP")
+	}
+
+	// 5. 验证多投放载体
+	if p.MultiAssetType != "" && p.MultiAssetType != MultiAssetTypeOrangeAndAweme {
+		return errors.New("multi_asset_type值无效，允许值：ORANGE_AND_AWEME")
+	}
+
+	// 6. 应用类型验证
+	if p.AssetType == AssetTypeApp && p.AppType == "" {
+		return errors.New("asset_type为APP时，app_type为必填")
+	}
+	if p.AppType != "" && !isValidAppType(p.AppType) {
+		return errors.New("app_type值无效，允许值：ANDROID、DEFAULT、IOS、HARMONY")
+	}
+
+	// 7. 子目标验证
+	if p.AppPromotionType != "" && !isValidAppPromotionType(p.AppPromotionType) {
+		return errors.New("app_promotion_type值无效，允许值：DOWNLOAD、LAUNCH、RESERVE")
+	}
+
+	// 8. 营销场景验证
+	if p.MarketingGoal != "" && !isValidMarketingGoal(p.MarketingGoal) {
+		return errors.New("marketing_goal值无效，允许值：LIVE、VIDEO_AND_IMAGE")
+	}
+
+	// 9. 投放模式验证
+	if p.DeliveryMode != "" && !isValidDeliveryMode(p.DeliveryMode) {
+		return errors.New("delivery_mode值无效，允许值：MANUAL、PROCEDURAL")
+	}
+
+	// 10. DPA营销类型验证
+	if p.DpaAdtype != "" && !isValidDpaAdtype(p.DpaAdtype) {
+		return errors.New("dpa_adtype值无效，允许值：DPA_APP、DPA_LINK")
+	}
+
+	// 11. 小程序类型验证（landing_type = MICRO_GAME时有效且必填）
+	if p.LandingType == LandingTypeMicroGame && p.MicroPromotionType == "" {
+		return errors.New("landing_type为MICRO_GAME时，micro_promotion_type为必填")
+	}
+	if p.MicroPromotionType != "" && !isValidMicroPromotionType(p.MicroPromotionType) {
+		return errors.New("micro_promotion_type值无效，允许值：BYTE_APP、BYTE_GAME、WECHAT_APP、WECHAT_GAME、AWEME")
+	}
+
+	// 12. 验证字节小程序资产id
+	if p.AssetType == AssetTypeMicroApp && p.MiniProgramID == "" {
+		return errors.New("asset_type为MICRO_APP时，mini_program_id为必填")
+	}
+
+	// 13. 验证投放类型
+	if p.DeliveryType != "" && !isValidDeliveryType(p.DeliveryType) {
+		return errors.New("delivery_type值无效，允许值：DURATION、NORMAL")
+	}
+
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	return nil
+}
+
+// 辅助验证函数
+func isValidLandingType(landingType string) bool {
+	validTypes := map[string]bool{
+		LandingTypeApp: true, LandingTypeDPA: true, LandingTypeLink: true,
+		LandingTypeMicroGame: true, LandingTypeNativeAction: true,
+		LandingTypeQuickApp: true, LandingTypeShop: true,
+	}
+	return validTypes[landingType]
+}
+
+func isValidAdType(adType string) bool {
+	return adType == AdTypeAll || adType == AdTypeSearch
+}
+
+func isValidAssetTypeOptimizedGoal(assetType string) bool {
+	validTypes := map[string]bool{
+		AssetTypeApp: true, AssetTypeAweme: true, AssetTypeEnterprise: true,
+		AssetTypeMicroApp: true, AssetTypeOrange: true, AssetTypeQuickApp: true,
+		AssetTypeThirdparty: true, AssetTypeWechatApp: true,
+	}
+	return validTypes[assetType]
+}
+
+func isValidAppType(appType string) bool {
+	validTypes := map[string]bool{
+		AppTypeAndroid: true, AppTypeIOS: true, AppTypeDefault: true, AppTypeHarmony: true,
+	}
+	return validTypes[appType]
+}
+
+func isValidAppPromotionType(promotionType string) bool {
+	return promotionType == AppPromotionTypeDownload ||
+		promotionType == AppPromotionTypeLaunch ||
+		promotionType == AppPromotionTypeReserve
+}
+
+func isValidMarketingGoal(goal string) bool {
+	return goal == MarketingGoalLive || goal == MarketingGoalVideoImage
+}
+
+func isValidDeliveryMode(mode string) bool {
+	return mode == DeliveryModeManual || mode == DeliveryModeProcedural
+}
+
+func isValidDpaAdtype(dpaAdtype string) bool {
+	return dpaAdtype == DpaAdtypeApp || dpaAdtype == DpaAdtypeLink
+}
+
+func isValidMicroPromotionType(microType string) bool {
+	validTypes := map[string]bool{
+		MicroPromotionTypeByteApp: true, MicroPromotionTypeByteGame: true,
+		MicroPromotionTypeWechatApp: true, MicroPromotionTypeWechatGame: true,
+		MicroPromotionTypeAweme: true,
+	}
+	return validTypes[microType]
+}
+
+func isValidDeliveryType(deliveryType string) bool {
+	return deliveryType == DeliveryTypeDuration || deliveryType == DeliveryTypeNormal
+}
+
+type EventManagerOptimizedGoalGetResp struct {
+	Goals    []*OptimizationGoal `json:"goals"`               // 优化目标数据
+	AssetIDs []int64             `json:"asset_ids,omitempty"` // 事件管理的资产id
+}
+
+// OptimizationGoal 优化目标
+type OptimizationGoal struct {
+	OptimizationName   string                  `json:"optimization_name"`         // 事件名称 (必填)
+	AssetTypes         []string                `json:"asset_types"`               // 资产类型
+	HistoryBack        bool                    `json:"history_back"`              // 历史有无回传 (必填)
+	TwentyFourHourBack bool                    `json:"twenty_four_hour_back"`     // 24小时历史有无回传
+	ExternalAction     string                  `json:"external_action,omitempty"` // 优化目标
+	ValueType          string                  `json:"value_type,omitempty"`      // 是否设置差异价值
+	DeepGoals          []*DeepOptimizationGoal `json:"deep_goals,omitempty"`      // 深度优化目标列表
+	NeedAppForce       bool                    `json:"need_app_force,omitempty"`  // 仅针对 landing_type = APP 的筛选下进行返回
+}
+
+// DeepOptimizationGoal 深度优化目标
+type DeepOptimizationGoal struct {
+	OptimizationName   string   `json:"optimization_name"`              // 事件名称 (必填)
+	HistoryBack        bool     `json:"history_back"`                   // 历史有无回传
+	TwentyFourHourBack bool     `json:"twenty_four_hour_back"`          // 24小时历史有无回传
+	DeepExternalAction string   `json:"deep_external_action,omitempty"` // 深度优化目标
+	AssetTypes         []string `json:"asset_types"`                    // 资产类型
+}

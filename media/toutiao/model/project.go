@@ -37,7 +37,8 @@ const (
 	MarketingTypeSearch = "SEARCH" // 搜索
 
 	// AdType 广告类型
-	AdTypeAll = "ALL" // 通投
+	AdTypeAll    = "ALL"    // 通投
+	AdTypeSearch = "SEARCH" // 搜索
 
 	// InventoryType 广告位类型
 	InventoryTypeHomedAggregate = "INVENTORY_HOMED_AGGREGATE" // 住小帮

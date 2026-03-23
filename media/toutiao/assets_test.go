@@ -106,3 +106,22 @@ func TestEventManagerEventConfigsGetSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取可用优化目标（巨量营销升级版）
+func TestEventManagerOptimizedGoalGetSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventManagerOptimizedGoalGetReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.AssetID = 123
+	req.LandingType = model.LandingTypeApp
+	req.AdType = model.AdTypeAll
+	req.AssetType = model.AssetTypeApp
+	req.AppType = model.AppTypeAndroid
+	resp, err := factory.EventManagerOptimizedGoalGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
