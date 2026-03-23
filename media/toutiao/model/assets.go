@@ -982,3 +982,111 @@ type DeepOptimizationGoal struct {
 	DeepExternalAction string   `json:"deep_external_action,omitempty"` // 深度优化目标
 	AssetTypes         []string `json:"asset_types"`                    // 资产类型
 }
+
+type EventManagerDeepBidTypeGetReq struct {
+	accessTokenReq
+	AdvertiserID       int64  `json:"advertiser_id"`                  // 客户id (必填)
+	AssetID            int64  `json:"asset_id,omitempty"`             // 资产id
+	ExternalAction     string `json:"external_action"`                // 优化目标 (必填)
+	DeepExternalAction string `json:"deep_external_action,omitempty"` // 深度优化目标
+	ConvertID          int64  `json:"convert_id,omitempty"`           // 转化跟踪id
+	DeliveryMode       string `json:"delivery_mode,omitempty"`        // 投放模式
+	LandingType        string `json:"landing_type,omitempty"`         // 营销目的
+	AdType             string `json:"ad_type,omitempty"`              // 营销类型
+	MarketingGoal      string `json:"marketing_goal,omitempty"`       // 营销场景
+	MicroPromotionType string `json:"micro_promotion_type,omitempty"` // 小程序类型
+	ProductSetting     string `json:"product_setting,omitempty"`      // 产品设置
+	ValueOptimizedType string `json:"value_optimized_type,omitempty"` // 价值优化类型
+}
+
+func (p *EventManagerDeepBidTypeGetReq) Format() {
+	p.accessTokenReq.Format()
+}
+
+// 常量定义 - 产品设置
+const (
+	ProductSettingMultiProducts = "MULTI_PRODUCTS" // ubp多品，非dpa
+	ProductSettingNoMap         = "NO_MAP"         // 不启用
+	ProductSettingSingle        = "SINGLE"         // 启用sdpa
+)
+
+// 常量定义 - 价值优化类型
+const (
+	ValueOptimizedTypeAction = "ACTION" // 行为优化
+	ValueOptimizedTypeOff    = "OFF"    // 不启用
+)
+
+// Validate 验证转化查询参数
+func (p *EventManagerDeepBidTypeGetReq) Validate() error {
+	// 1. 验证客户ID
+	if p.AdvertiserID == 0 {
+		return errors.New("advertiser_id为必填")
+	}
+
+	// 2. 验证优化目标
+	if p.ExternalAction == "" {
+		return errors.New("external_action为必填")
+	}
+
+	// 3. 验证投放模式
+	if p.DeliveryMode != "" && !isValidDeliveryMode(p.DeliveryMode) {
+		return errors.New("delivery_mode值无效，允许值：MANUAL、PROCEDURAL")
+	}
+
+	// 4. 验证营销目的
+	if p.LandingType != "" && !isValidLandingType(p.LandingType) {
+		return errors.New("landing_type值无效，允许值：APP、LINK、MICRO_GAME、SHOP、QUICK_APP、NATIVE_ACTION、DPA")
+	}
+
+	// 5. 验证营销类型
+	if p.AdType != "" && !isValidAdType(p.AdType) {
+		return errors.New("ad_type值无效，允许值：ALL、SEARCH")
+	}
+
+	// 6. 验证营销场景
+	if p.MarketingGoal != "" && !isValidMarketingGoal(p.MarketingGoal) {
+		return errors.New("marketing_goal值无效，允许值：LIVE、VIDEO_AND_IMAGE")
+	}
+
+	// 7. 验证小程序类型
+	if p.MicroPromotionType != "" && !isValidMicroPromotionType(p.MicroPromotionType) {
+		return errors.New("micro_promotion_type值无效，允许值：AWEME、BYTE_APP、BYTE_GAME、WECHAT_APP、WECHAT_GAME")
+	}
+
+	// 8. 验证产品设置
+	if p.ProductSetting != "" && !isValidProductSetting(p.ProductSetting) {
+		return errors.New("product_setting值无效，允许值：MULTI_PRODUCTS、NO_MAP、SINGLE")
+	}
+
+	// 9. 验证价值优化类型
+	if p.ValueOptimizedType != "" && !isValidValueOptimizedType(p.ValueOptimizedType) {
+		return errors.New("value_optimized_type值无效，允许值：ACTION、OFF")
+	}
+
+	if validateErr := p.accessTokenReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	return nil
+}
+
+func isValidProductSetting(setting string) bool {
+	return setting == ProductSettingMultiProducts ||
+		setting == ProductSettingNoMap ||
+		setting == ProductSettingSingle
+}
+
+func isValidValueOptimizedType(valueType string) bool {
+	return valueType == ValueOptimizedTypeAction || valueType == ValueOptimizedTypeOff
+}
+
+type EventManagerDeepBidTypeGetResp struct {
+	DeepBidType       []string           `json:"deep_bid_type,omitempty"`        // 可用的深度优化方式列表
+	DeepBidTypeDetail []*DeepBidTypeInfo `json:"deep_bid_type_detail,omitempty"` // 可用的深度优化方式详情信息
+}
+
+// DeepBidTypeInfo 深度优化方式信息
+type DeepBidTypeInfo struct {
+	DeepBidType     string `json:"deep_bid_type"`      // 可用的深度优化方式枚举值
+	DeepBidTypeName string `json:"deep_bid_type_name"` // 可用的深度优化方式中文名称
+}

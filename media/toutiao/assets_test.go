@@ -125,3 +125,18 @@ func TestEventManagerOptimizedGoalGetSelf(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// 获取可用深度优化方式（营销投放升级版）
+func TestEventManagerDeepBidTypeGetSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewToutiaoAdapter(config.DefaultConfig())
+	req := &model.EventManagerDeepBidTypeGetReq{}
+	req.AccessToken = "test"
+	req.AdvertiserID = 123
+	req.ExternalAction = "AD_CONVERT_TYPE_ACTIVE"
+	resp, err := factory.EventManagerDeepBidTypeGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
