@@ -137,3 +137,22 @@ func (a *ToutiaoAdapter) EventManagerOptimizedGoalGetSelf(ctx context.Context, r
 	resp = &result
 	return
 }
+
+// EventManagerDeepBidTypeGetSelf 获取可用深度优化方式（营销投放升级版）
+// https://open.oceanengine.com/labels/7/docs/1754875889727563?origin=left_nav
+func (a *ToutiaoAdapter) EventManagerDeepBidTypeGetSelf(ctx context.Context, req *model2.EventManagerDeepBidTypeGetReq) (resp *model2.EventManagerDeepBidTypeGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result model2.EventManagerDeepBidTypeGetResp
+	errRequest := a.RequestGet(ctx, headers, model2.BaseUrlApi+"/open_api/v3.0/event_manager/deep_bid_type/get/", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
