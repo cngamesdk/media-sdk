@@ -6,6 +6,8 @@ import (
 	"github.com/cngamesdk/media-sdk/adapter"
 	"github.com/cngamesdk/media-sdk/config"
 	"github.com/cngamesdk/media-sdk/errors"
+	_ "github.com/cngamesdk/media-sdk/media/kuaishou"
+	_ "github.com/cngamesdk/media-sdk/media/tencent"
 	_ "github.com/cngamesdk/media-sdk/media/toutiao"
 	"github.com/cngamesdk/media-sdk/model"
 	"sync"
