@@ -391,11 +391,6 @@ func (a *ToutiaoAdapter) UpdateCreative(ctx context.Context, req *model.Creative
 	return nil, nil
 }
 
-// GetCreative 获取广告创意
-func (a *ToutiaoAdapter) GetCreative(ctx context.Context, req *model.GetCreativeReq) (*model.CreativeResp, error) {
-	return nil, nil
-}
-
 // GetCreative 获取广告创意列表
 func (a *ToutiaoAdapter) ListCreatives(ctx context.Context, req *model.ListCreativesReq) (*model.ListCreativesResp, error) {
 	return nil, nil
