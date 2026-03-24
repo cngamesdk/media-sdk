@@ -87,21 +87,6 @@ func (a *TencentAdapter) AccessToken(ctx context.Context, req *model.AccessToken
 
 // RefreshToken 刷新Token
 func (a *TencentAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
-	myReq := &model3.RefreshTokenReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model3.RefreshTokenResp
-
-	requestErr := a.RequestPostJson(ctx, nil, model3.ApiUrl+"/oauth/refresh_token", myReq, &result)
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	resp, err = result.Convert()
 	return
 }
 

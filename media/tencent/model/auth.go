@@ -5,7 +5,6 @@ import (
 	"github.com/cngamesdk/media-sdk/model"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type OAuth2AuthorizeReq struct {
@@ -191,47 +190,6 @@ func (receiver *AccessTokenResp) Convert() (*model.AccessTokenResp, error) {
 	return &receiver.AccessTokenResp, nil
 }
 
-type RefreshTokenReq struct {
-	model.RefreshTokenReq
-}
-
-func (receiver *RefreshTokenReq) Format() {
-	receiver.Secret = strings.TrimSpace(receiver.Secret)
-	receiver.RefreshToken = strings.TrimSpace(receiver.RefreshToken)
-}
-
-func (receiver *RefreshTokenReq) Validate() (err error) {
-	if receiver.AppId <= 0 {
-		err = errors.New("app_id is empty")
-		return
-	}
-	if len(receiver.Secret) <= 0 {
-		err = errors.New("secret is empty")
-		return
-	}
-	if len(receiver.RefreshToken) <= 0 {
-		err = errors.New("refresh token is empty")
-		return
-	}
-	return
-}
-
-func (receiver *RefreshTokenReq) Convert(req *model.RefreshTokenReq) {
-	receiver.RefreshTokenReq = *req
-	return
-}
-
-type RefreshTokenResp struct {
-	model.RefreshTokenResp
-}
-
-func (receiver *RefreshTokenResp) Convert() (resp *model.RefreshTokenResp, err error) {
-	receiver.ExpireTime = time.Now().Add(time.Duration(receiver.ExpiresIn) * time.Second)
-	receiver.RefreshTokenExpireTime = time.Now().Add(time.Duration(receiver.RefreshTokenExpireIn) * time.Second)
-	resp = &receiver.RefreshTokenResp
-	return
-}
-
 // OAuth2TokenReq OAuth2获取Token参数
 type OAuth2TokenReq struct {
 	ClientID          int64  `json:"client_id"`                    // 应用id (必填)
@@ -357,4 +315,42 @@ type AuthorizerInfo struct {
 	AccountRoleType string   `json:"account_role_type"`           // 授权账号身份类型
 	AccountType     string   `json:"account_type"`                // 账号类型
 	RoleType        string   `json:"role_type"`                   // 角色
+}
+
+// RefreshTokenReq 刷新Token参数
+type RefreshTokenReq struct {
+	ClientID     int64  `json:"client_id"`     // 应用id (必填)
+	ClientSecret string `json:"client_secret"` // 应用密码 (必填)
+	RefreshToken string `json:"refresh_token"` // 刷新令牌 (必填)
+}
+
+// Validate 验证刷新Token参数
+func (p *RefreshTokenReq) Validate() error {
+	// 1. 验证client_id
+	if p.ClientID == 0 {
+		return errors.New("client_id为必填")
+	}
+
+	// 2. 验证client_secret
+	if p.ClientSecret == "" {
+		return errors.New("client_secret为必填")
+	}
+	if len(p.ClientSecret) < MinClientSecretLength || len(p.ClientSecret) > MaxClientSecretLength {
+		return errors.New("client_secret长度必须在1-128字节之间")
+	}
+
+	// 3. 验证refresh_token
+	if p.RefreshToken == "" {
+		return errors.New("refresh_token为必填")
+	}
+
+	return nil
+}
+
+// RefreshTokenResp 刷新Token响应
+type RefreshTokenResp struct {
+	AccessToken           string `json:"access_token"`             // 应用accesstoken
+	RefreshToken          string `json:"refresh_token,omitempty"`  // 应用refreshtoken，当grant_type=refresh_token时不返回
+	AccessTokenExpiresIn  int64  `json:"access_token_expires_in"`  // access_token过期时间，单位（秒）
+	RefreshTokenExpiresIn int64  `json:"refresh_token_expires_in"` // refresh_token过期时间，单位（秒）
 }
