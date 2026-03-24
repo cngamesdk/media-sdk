@@ -52,20 +52,17 @@ func (a *TencentAdapter) Name() string {
 // Auth 授权
 func (a *TencentAdapter) Auth(ctx context.Context, req *model.AuthReq) (resp interface{}, err error) {
 	_ = ctx
-	myReq := &model3.AuthReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	convertResult, convertErr := utils.ConvertStructToQueryString(myReq)
-	if convertErr != nil {
+	myReq := &model3.OAuth2AuthorizeReq{}
+	if convertErr := myReq.Convert(req); convertErr != nil {
 		err = convertErr
 		return
 	}
-	authResp := model3.AuthResp(model3.DevelopersUrl + "/oauth/authorize?" + convertResult)
-	resp = authResp
+	result, resultErr := a.OAuth2AuthorizeSelf(ctx, myReq)
+	if resultErr != nil {
+		err = resultErr
+		return
+	}
+	resp = result
 	return
 }
 
