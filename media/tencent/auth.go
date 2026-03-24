@@ -43,3 +43,23 @@ func (a *TencentAdapter) OAuth2TokenSelf(ctx context.Context, req *model.OAuth2T
 	resp = &result
 	return
 }
+
+// RefreshTokenSelf 刷新Refresh Token
+func (a *TencentAdapter) RefreshTokenSelf(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	convertResult, convertErr := utils.ConvertStructToQueryString(req)
+	if convertErr != nil {
+		err = convertErr
+		return
+	}
+	var result model.RefreshTokenResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl+"/oauth/refresh_token", convertResult, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
