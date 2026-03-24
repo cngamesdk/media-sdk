@@ -7,7 +7,7 @@ import (
 )
 
 // OAuth2AuthorizeSelf 授权
-func (a *TencentAdapter) OAuth2AuthorizeSelf(ctx context.Context, req *model.OAuth2AuthorizeReq) (resp string, err error) {
+func (a *TencentAdapter) OAuth2AuthorizeSelf(ctx context.Context, req *model.OAuth2AuthorizeReq) (resp *model.OAuth2AuthorizeResp, err error) {
 	_ = ctx
 	req.Format()
 	if validateErr := req.Validate(); validateErr != nil {
@@ -19,6 +19,27 @@ func (a *TencentAdapter) OAuth2AuthorizeSelf(ctx context.Context, req *model.OAu
 		err = convertErr
 		return
 	}
-	resp = model.DevelopersUrl + "/oauth/authorize?" + convertResult
+	resp = &model.OAuth2AuthorizeResp{}
+	resp.RedirectURL = model.DevelopersUrl + "/oauth/authorize?" + convertResult
+	return
+}
+
+// OAuth2TokenSelf 授权码获取token
+func (a *TencentAdapter) OAuth2TokenSelf(ctx context.Context, req *model.OAuth2TokenReq) (resp *model.OAuth2TokenResp, err error) {
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	convertResult, convertErr := utils.ConvertStructToQueryString(req)
+	if convertErr != nil {
+		err = convertErr
+		return
+	}
+	var result model.OAuth2TokenResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl+"/oauth/token", convertResult, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
 	return
 }
