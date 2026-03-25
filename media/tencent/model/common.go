@@ -10,6 +10,7 @@ import (
 const (
 	DevelopersUrl = "https://developers.e.qq.com"
 	ApiUrl        = "https://api.e.qq.com"
+	ApiUrl3       = ApiUrl + "/v3.0"
 )
 
 // GlobalReq 全局参数
