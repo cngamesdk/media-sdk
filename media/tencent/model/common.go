@@ -85,10 +85,131 @@ func GetCurrentTimestamp() int64 {
 	return time.Now().Unix()
 }
 
+// 常量定义 - 分页方式
+const (
+	PaginationModeNormal = "PAGINATION_MODE_NORMAL" // 普通分页模式
+	PaginationModeCursor = "PAGINATION_MODE_CURSOR" // 游标分页模式
+)
+
+// 分页限制常量
+const (
+	MinPage              = 1
+	MaxPage              = 100
+	MinPageSize          = 1
+	MaxPageSize          = 100
+	MaxNormalPageProduct = 1000 // page_size * page 的最大值
+	MinCursor            = 1
+)
+
+type CursorPageReq struct {
+	PaginationMode string `json:"pagination_mode"`     // 分页方式 (必填)
+	Cursor         int64  `json:"cursor,omitempty"`    // 游标翻页模式下的游标值
+	Page           int    `json:"page,omitempty"`      // 搜索页码
+	PageSize       int    `json:"page_size,omitempty"` // 一页显示的数据条数
+}
+
+func (p *CursorPageReq) Format() {
+	p.setPageDefaults()
+}
+
+func (p *CursorPageReq) Validate() error {
+	// 验证分页方式
+	if p.PaginationMode == "" {
+		return errors.New("pagination_mode为必填")
+	}
+	if p.PaginationMode != PaginationModeNormal && p.PaginationMode != PaginationModeCursor {
+		return errors.New("pagination_mode值无效，允许值：PAGINATION_MODE_NORMAL、PAGINATION_MODE_CURSOR")
+	}
+
+	// 根据分页方式验证
+	switch p.PaginationMode {
+	case PaginationModeNormal:
+		return p.validateNormalPagination()
+	case PaginationModeCursor:
+		return p.validateCursorPagination()
+	}
+
+	return nil
+}
+
+// setPageDefaults 设置分页默认值
+func (p *CursorPageReq) setPageDefaults() {
+	if p.Page <= 0 {
+		p.Page = MinPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = MinPageSize
+	}
+}
+
+// validateNormalPagination 验证普通分页模式
+func (p *CursorPageReq) validateNormalPagination() error {
+	// 验证page范围
+	if p.Page < MinPage || p.Page > MaxPage {
+		return errors.New("page必须在1-100之间")
+	}
+
+	// 验证page_size范围
+	if p.PageSize < MinPageSize || p.PageSize > MaxPageSize {
+		return errors.New("page_size必须在1-100之间")
+	}
+
+	// 验证page_size * page <= 1000
+	if p.PageSize*p.Page > MaxNormalPageProduct {
+		return errors.New("page_size * page 必须小于等于1000")
+	}
+
+	return nil
+}
+
+// validateCursorPagination 验证游标分页模式
+func (p *CursorPageReq) validateCursorPagination() error {
+	// cursor可选，如果传了则验证
+	if p.Cursor != 0 && p.Cursor < MinCursor {
+		return errors.New("cursor必须大于等于1")
+	}
+
+	// 游标模式下，page无效（忽略）
+	// page_size可选，如果传了则验证范围
+	if p.PageSize != 0 {
+		if p.PageSize < MinPageSize || p.PageSize > MaxPageSize {
+			return errors.New("page_size必须在1-100之间")
+		}
+	} else {
+		p.PageSize = MinPageSize // 设置默认值
+	}
+
+	return nil
+}
+
 type BaseResp struct {
 	Code      int         `json:"code"`
 	Message   string      `json:"message"`
 	MessageCn string      `json:"message_cn"`
 	Data      interface{} `json:"data"`
 	RequestId string      `json:"request_id"`
+}
+
+type PageInfoContainer struct {
+	PageInfo *PageInfo `json:"page_info,omitempty"` // 分页配置信息（普通翻页模式）
+}
+
+// PageInfo 分页配置信息（普通翻页模式）
+type PageInfo struct {
+	Page        int `json:"page"`         // 搜索页码，默认值：1
+	PageSize    int `json:"page_size"`    // 一页显示的数据条数
+	TotalNumber int `json:"total_number"` // 总条数
+	TotalPage   int `json:"total_page"`   // 总页数
+}
+
+type CursorPageInfoContainer struct {
+	CursorPageInfo *CursorPageInfo `json:"cursor_page_info,omitempty"` // 分页配置信息（游标翻页模式）
+}
+
+// CursorPageInfo 分页配置信息（游标翻页模式）
+type CursorPageInfo struct {
+	PageSize    int   `json:"page_size"`    // 一页显示的数据条数
+	TotalNumber int   `json:"total_number"` // 总条数
+	HasMore     bool  `json:"has_more"`     // 是否有下一页，返回false表示已无下一页，此时务必停止拉取
+	Cursor      int64 `json:"cursor"`       // 下一次拉取的游标值
 }
