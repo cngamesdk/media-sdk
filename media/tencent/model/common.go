@@ -31,6 +31,9 @@ func (p *GlobalReq) Format() {
 		uuid, _ := random.UUIdV4()
 		p.Nonce = cryptor.Md5String(uuid)
 	}
+	if p.Timestamp <= 0 {
+		p.Timestamp = GetCurrentTimestamp()
+	}
 }
 
 // Validate 验证API请求公共参数
