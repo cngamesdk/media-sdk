@@ -115,16 +115,16 @@ func (a *TencentAdapter) RequestPostJson(ctx context.Context, headers map[string
 
 func (a *TencentAdapter) dealResponse(req model3.BaseResp, result interface{}) (err error) {
 	if req.Code != 0 {
-		err = fmt.Errorf("toutiao api error: code=%d, message:%s, message_cn:%s, request_id:%s", req.Code, req.Message, req.MessageCn, req.RequestId)
+		err = fmt.Errorf("api error: code=%d, message:%s, message_cn:%s, request_id:%s", req.Code, req.Message, req.MessageCn, req.RequestId)
 		return
 	}
 	dataJson, dataJsonErr := json.Marshal(req.Data)
 	if dataJsonErr != nil {
-		err = fmt.Errorf("toutiao response to json error: %s", dataJsonErr.Error())
+		err = fmt.Errorf("response to json error: %s", dataJsonErr.Error())
 		return
 	}
 	if unJsonErr := json.Unmarshal(dataJson, result); unJsonErr != nil {
-		err = fmt.Errorf("toutiao json to target error: %s", unJsonErr.Error())
+		err = fmt.Errorf("json to target error: %s", unJsonErr.Error())
 		return
 	}
 	return
