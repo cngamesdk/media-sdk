@@ -22,3 +22,21 @@ func (a *TencentAdapter) OrganizationAccountRelationGetSelf(ctx context.Context,
 	resp = &result
 	return
 }
+
+// AdvertiserDailyBudgetSelf 获取竞价广告账户日预算
+// https://developers.e.qq.com/v3.0/docs/api/advertiser_daily_budget/get
+func (a *TencentAdapter) AdvertiserDailyBudgetSelf(ctx context.Context, req *model.AdvertiserDailyBudgetReq) (
+	resp *model.AdvertiserDailyBudgetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.AdvertiserDailyBudgetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/advertiser_daily_budget/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}

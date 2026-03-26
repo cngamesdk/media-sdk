@@ -20,3 +20,17 @@ func TestOrganizationAccountRelationGetSelf(t *testing.T) {
 	}
 	fmt.Printf("result: %+v", result)
 }
+
+func TestAdvertiserDailyBudgetSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdvertiserDailyBudgetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Fields = []string{"account_id", "daily_budget"}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdvertiserDailyBudgetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
