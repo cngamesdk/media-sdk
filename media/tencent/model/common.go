@@ -282,3 +282,15 @@ type CursorPageInfo struct {
 	HasMore     bool  `json:"has_more"`     // 是否有下一页，返回false表示已无下一页，此时务必停止拉取
 	Cursor      int64 `json:"cursor"`       // 下一次拉取的游标值
 }
+
+type CursorPageInfoV2Container struct {
+	CursorPageInfo *CursorPageInfoV2 `json:"cursor_page_info,omitempty"` // 分页配置信息（游标翻页模式）
+}
+
+// CursorPageInfo 第二版游标分页信息
+type CursorPageInfoV2 struct {
+	PageSize       int    `json:"page_size"`       // 一页显示的数据条数，默认值：10
+	TotalNumber    int    `json:"total_number"`    // 总条数
+	NextCursor     string `json:"next_cursor"`     // 下一页游标值，若为空则无下一页
+	PreviousCursor string `json:"previous_cursor"` // 上一页游标值，若为空则无上一页
+}
