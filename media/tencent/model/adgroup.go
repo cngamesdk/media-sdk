@@ -1153,3 +1153,7 @@ func isValidMarketingSubGoal(subGoal string) bool {
 	}
 	return validSubGoals[subGoal]
 }
+
+type AdgroupsAddResp struct {
+	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
+}
