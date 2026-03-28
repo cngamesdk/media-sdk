@@ -15,9 +15,10 @@ const (
 
 // GlobalReq 全局参数
 type GlobalReq struct {
-	AccessToken string `json:"access_token"` // 授权令牌 (必填)
-	Timestamp   int64  `json:"timestamp"`    // 当前时间戳，单位为秒 (必填)
-	Nonce       string `json:"nonce"`        // 随机字符串标识，不超过32个字符 (必填)
+	AccessToken string `json:"access_token,omitempty"` // 授权令牌 (必填)
+	Timestamp   int64  `json:"timestamp,omitempty"`    // 当前时间戳，单位为秒 (必填)
+	Nonce       string `json:"nonce,omitempty"`        // 随机字符串标识，不超过32个字符 (必填)
+	UserToken   string `json:"user_token,omitempty"`   // 实名认证完成获取的令牌
 }
 
 // 常量定义
