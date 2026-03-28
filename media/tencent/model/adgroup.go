@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type AdgroupsGetReq struct {
 	GlobalReq
@@ -352,92 +355,91 @@ type AdgroupsGetResp struct {
 	CursorPageInfoV2Container
 }
 
+// AdgroupCommonStruct 广告组通用结构体
+type AdgroupCommonStruct struct {
+	Targeting                         *Targeting                     `json:"targeting,omitempty"`                             // 定向详细设置
+	ConfiguredStatus                  string                         `json:"configured_status"`                               // 客户设置的状态
+	AdgroupName                       string                         `json:"adgroup_name"`                                    // 广告名称
+	MarketingGoal                     string                         `json:"marketing_goal"`                                  // 营销目的类型
+	MarketingSubGoal                  string                         `json:"marketing_sub_goal,omitempty"`                    // 二级营销目的类型
+	MarketingCarrierType              string                         `json:"marketing_carrier_type"`                          // 营销载体类型
+	MarketingCarrierDetail            *MarketingCarrierDetail        `json:"marketing_carrier_detail,omitempty"`              // 营销载体详情
+	MarketingTargetType               string                         `json:"marketing_target_type"`                           // 推广产品类型
+	BeginDate                         string                         `json:"begin_date"`                                      // 开始投放日期 (必填)
+	EndDate                           string                         `json:"end_date"`                                        // 结束投放日期 (必填)
+	FirstDayBeginTime                 string                         `json:"first_day_begin_time,omitempty"`                  // 首日开始投放时间
+	BidAmount                         int64                          `json:"bid_amount"`                                      // 广告出价，单位分 (必填)
+	OptimizationGoal                  string                         `json:"optimization_goal"`                               // 广告优化目标类型 (必填)
+	TimeSeries                        string                         `json:"time_series"`                                     // 投放时间段 (必填)
+	AutomaticSiteEnabled              bool                           `json:"automatic_site_enabled"`                          // 是否开启智能版位功能
+	SiteSet                           []string                       `json:"site_set,omitempty"`                              // 投放站点集合
+	DailyBudget                       int64                          `json:"daily_budget"`                                    // 日预算，单位分
+	SceneSpec                         *SceneSpec                     `json:"scene_spec,omitempty"`                            // 场景定向
+	UserActionSets                    []*UserActionSet               `json:"user_action_sets,omitempty"`                      // 用户行为数据源
+	DeepConversionSpec                *DeepConversionSpec            `json:"deep_conversion_spec,omitempty"`                  // oCPA 深度优化内容
+	ConversionID                      int64                          `json:"conversion_id,omitempty"`                         // 转化id
+	DeepConversionBehaviorBid         int64                          `json:"deep_conversion_behavior_bid,omitempty"`          // 深度优化行为出价，单位分
+	DeepConversionWorthRate           float64                        `json:"deep_conversion_worth_rate,omitempty"`            // 深度优化价值出价
+	DeepConversionWorthAdvancedRate   float64                        `json:"deep_conversion_worth_advanced_rate,omitempty"`   // 强化优化价值的期望ROI
+	DeepConversionBehaviorAdvancedBid int64                          `json:"deep_conversion_behavior_advanced_bid,omitempty"` // 深度辅助优化OG出价，单位分
+	BidMode                           string                         `json:"bid_mode"`                                        // 出价方式 (必填)
+	AutoAcquisitionEnabled            bool                           `json:"auto_acquisition_enabled,omitempty"`              // 一键起量开关
+	AutoAcquisitionBudget             int64                          `json:"auto_acquisition_budget,omitempty"`               // 一键起量预算，单位分
+	SmartBidType                      string                         `json:"smart_bid_type,omitempty"`                        // 出价类型
+	SmartCostCap                      int64                          `json:"smart_cost_cap,omitempty"`                        // 自动出价下预计成本上限，单位分
+	AutoDerivedCreativeEnabled        bool                           `json:"auto_derived_creative_enabled,omitempty"`         // 创意增强MAX开关
+	AutoDerivedCreativePreference     *AutoDerivedCreativePreference `json:"auto_derived_creative_preference,omitempty"`      // 创意增强MAX偏好设置
+	SearchExpandTargetingSwitch       string                         `json:"search_expand_targeting_switch,omitempty"`        // 搜索定向拓展开关
+	AutoDerivedLandingPageSwitch      bool                           `json:"auto_derived_landing_page_switch,omitempty"`      // 是否开启自动衍生落地页开关
+	BidScene                          string                         `json:"bid_scene,omitempty"`                             // 出价场景
+	FlowOptimizationEnabled           bool                           `json:"flow_optimization_enabled,omitempty"`             // 是否使用自动流量优选（已废弃）
+	SearchExpansionSwitch             string                         `json:"search_expansion_switch,omitempty"`               // 搜索引擎开关
+	MarketingAssetID                  int64                          `json:"marketing_asset_id,omitempty"`                    // 产品id
+	MaterialPackageID                 int64                          `json:"material_package_id,omitempty"`                   // 素材标签id
+	MarketingAssetOuterSpec           *MarketingAssetOuterSpec       `json:"marketing_asset_outer_spec,omitempty"`            // 产品外部id数据
+	PoiList                           []string                       `json:"poi_list,omitempty"`                              // 门店id列表
+	ExplorationStrategy               string                         `json:"exploration_strategy,omitempty"`                  // 探索策略
+	PrioritySiteSet                   []string                       `json:"priority_site_set,omitempty"`                     // 投放站点集合
+	EcomPkamSwitch                    string                         `json:"ecom_pkam_switch,omitempty"`                      // 一方人群跑量加强开关状态
+	ForwardLinkAssist                 string                         `json:"forward_link_assist,omitempty"`                   // 助攻行为目标
+	AutoAcquisitionStatus             string                         `json:"auto_acquisition_status,omitempty"`               // 一键起量状态
+	CustomCostCap                     int64                          `json:"custom_cost_cap,omitempty"`                       // 用户输入的成本上限，单位分
+	MpaSpec                           *MpaSpec                       `json:"mpa_spec,omitempty"`                              // 动态商品广告属性
+	ShortPlayPayType                  string                         `json:"short_play_pay_type,omitempty"`                   // 售卖方式类型
+	SellStrategyID                    int64                          `json:"sell_strategy_id,omitempty"`                      // 售卖策略id
+	DcaSpec                           *DcaSpec                       `json:"dca_spec,omitempty"`                              // 动态内容广告属性
+	AoiOptimizationStrategy           *AoiOptimizationStrategy       `json:"aoi_optimization_strategy,omitempty"`             // 高价值范围探索
+	AdditionalProductSpec             *AdditionalProductSpec         `json:"additional_product_spec,omitempty"`               // 附加商品属性
+	LiveRecommendStrategyEnabled      bool                           `json:"live_recommend_strategy_enabled,omitempty"`       // 直播种草人群探索
+	EnableSteadyExploration           bool                           `json:"enable_steady_exploration,omitempty"`             // 是否稳步探索更多版位
+	AdxRealtimeType                   string                         `json:"adx_realtime_type,omitempty"`                     // ADX程序化广告素材实时回复类型
+}
+
 type AdgroupsGetListItem struct {
-	Targeting *Targeting `json:"targeting,omitempty"` // 定向详细设置
-
-	AdgroupID                         int64                   `json:"adgroup_id"`                                      // 广告id
-	TargetingTranslation              string                  `json:"targeting_translation,omitempty"`                 // 已选择定向条件的描述
-	ConfiguredStatus                  string                  `json:"configured_status"`                               // 客户设置的状态
-	CreatedTime                       int64                   `json:"created_time"`                                    // 创建时间，时间戳
-	LastModifiedTime                  int64                   `json:"last_modified_time"`                              // 最后修改时间，时间戳
-	IsDeleted                         bool                    `json:"is_deleted"`                                      // 是否已删除
-	SystemStatus                      string                  `json:"system_status"`                                   // 广告在系统中的状态
-	AdgroupName                       string                  `json:"adgroup_name"`                                    // 广告名称
-	MarketingGoal                     string                  `json:"marketing_goal"`                                  // 营销目的类型
-	MarketingSubGoal                  string                  `json:"marketing_sub_goal,omitempty"`                    // 二级营销目的类型
-	MarketingCarrierType              string                  `json:"marketing_carrier_type"`                          // 营销载体类型
-	MarketingCarrierDetail            *MarketingCarrierDetail `json:"marketing_carrier_detail,omitempty"`              // 营销载体详情
-	MarketingTargetType               string                  `json:"marketing_target_type"`                           // 推广产品类型
-	MarketingTargetDetail             *MarketingTargetDetail  `json:"marketing_target_detail,omitempty"`               // 营销对象详情
-	MarketingTargetID                 int64                   `json:"marketing_target_id,omitempty"`                   // 营销对象id
-	BeginDate                         string                  `json:"begin_date"`                                      // 开始投放日期 (必填)
-	EndDate                           string                  `json:"end_date"`                                        // 结束投放日期 (必填)
-	FirstDayBeginTime                 string                  `json:"first_day_begin_time,omitempty"`                  // 首日开始投放时间
-	BidAmount                         int64                   `json:"bid_amount"`                                      // 广告出价，单位分 (必填)
-	OptimizationGoal                  string                  `json:"optimization_goal"`                               // 广告优化目标类型 (必填)
-	TimeSeries                        string                  `json:"time_series"`                                     // 投放时间段 (必填)
-	AutomaticSiteEnabled              bool                    `json:"automatic_site_enabled"`                          // 是否开启智能版位功能
-	SiteSet                           []string                `json:"site_set,omitempty"`                              // 投放站点集合
-	DailyBudget                       int64                   `json:"daily_budget"`                                    // 日预算，单位分
-	SceneSpec                         *SceneSpec              `json:"scene_spec,omitempty"`                            // 场景定向
-	UserActionSets                    []*UserActionSet        `json:"user_action_sets,omitempty"`                      // 用户行为数据源
-	DeepConversionSpec                *DeepConversionSpec     `json:"deep_conversion_spec,omitempty"`                  // oCPA 深度优化内容
-	ConversionID                      int64                   `json:"conversion_id,omitempty"`                         // 转化id
-	DeepConversionBehaviorBid         int64                   `json:"deep_conversion_behavior_bid,omitempty"`          // 深度优化行为出价，单位分
-	DeepConversionWorthRate           float64                 `json:"deep_conversion_worth_rate,omitempty"`            // 深度优化价值出价
-	DeepConversionWorthAdvancedRate   float64                 `json:"deep_conversion_worth_advanced_rate,omitempty"`   // 强化优化价值的期望ROI
-	DeepConversionBehaviorAdvancedBid int64                   `json:"deep_conversion_behavior_advanced_bid,omitempty"` // 深度辅助优化OG出价，单位分
-	BidMode                           string                  `json:"bid_mode"`                                        // 出价方式 (必填)
-	AutoAcquisitionEnabled            bool                    `json:"auto_acquisition_enabled,omitempty"`              // 一键起量开关
-	AutoAcquisitionBudget             int64                   `json:"auto_acquisition_budget,omitempty"`               // 一键起量预算，单位分
-	SmartBidType                      string                  `json:"smart_bid_type,omitempty"`                        // 出价类型
-	SmartCostCap                      int64                   `json:"smart_cost_cap,omitempty"`                        // 自动出价下预计成本上限，单位分
-	AutoDerivedCreativeEnabled        bool                    `json:"auto_derived_creative_enabled,omitempty"`         // 创意增强MAX开关
-
-	AutoDerivedCreativePreference *AutoDerivedCreativePreference `json:"auto_derived_creative_preference,omitempty"` // 创意增强MAX偏好设置
-	SearchExpandTargetingSwitch   string                         `json:"search_expand_targeting_switch,omitempty"`   // 搜索定向拓展开关
-	AutoDerivedLandingPageSwitch  bool                           `json:"auto_derived_landing_page_switch,omitempty"` // 是否开启自动衍生落地页开关
-	DataModelVersion              int64                          `json:"data_model_version,omitempty"`               // 数据版本号
-	BidScene                      string                         `json:"bid_scene,omitempty"`                        // 出价场景
-	MarketingTargetExt            *MarketingTargetExt            `json:"marketing_target_ext,omitempty"`             // 营销对象扩展数据
-	DeepOptimizationType          string                         `json:"deep_optimization_type,omitempty"`           // 深度优化策略类型
-	FlowOptimizationEnabled       bool                           `json:"flow_optimization_enabled,omitempty"`        // 是否使用自动流量优选（已废弃）
-
+	AdgroupCommonStruct
+	AdgroupID                 int64                      `json:"adgroup_id"`                            // 广告id
+	TargetingTranslation      string                     `json:"targeting_translation,omitempty"`       // 已选择定向条件的描述
+	CreatedTime               int64                      `json:"created_time"`                          // 创建时间，时间戳
+	LastModifiedTime          int64                      `json:"last_modified_time"`                    // 最后修改时间，时间戳
+	IsDeleted                 bool                       `json:"is_deleted"`                            // 是否已删除
+	SystemStatus              string                     `json:"system_status"`                         // 广告在系统中的状态
+	MarketingTargetDetail     *MarketingTargetDetail     `json:"marketing_target_detail,omitempty"`     // 营销对象详情
+	MarketingTargetID         int64                      `json:"marketing_target_id,omitempty"`         // 营销对象id
+	DataModelVersion          int64                      `json:"data_model_version,omitempty"`          // 数据版本号
+	MarketingTargetExt        *MarketingTargetExt        `json:"marketing_target_ext,omitempty"`        // 营销对象扩展数据
+	DeepOptimizationType      string                     `json:"deep_optimization_type,omitempty"`      // 深度优化策略类型
 	MarketingTargetAttachment *MarketingTargetAttachment `json:"marketing_target_attachment,omitempty"` // 营销对象附加信息
 	NegativeWordCnt           *NegativeWordCnt           `json:"negative_word_cnt,omitempty"`           // 否定词个数
-	SearchExpansionSwitch     string                     `json:"search_expansion_switch,omitempty"`     // 搜索引擎开关
-	MarketingAssetID          int64                      `json:"marketing_asset_id,omitempty"`          // 产品id
 	PromotedAssetType         string                     `json:"promoted_asset_type,omitempty"`         // 推广内容类型
-	MaterialPackageID         int64                      `json:"material_package_id,omitempty"`         // 素材标签id
-
-	MarketingAssetOuterSpec *MarketingAssetOuterSpec `json:"marketing_asset_outer_spec,omitempty"` // 产品外部id数据
-	PoiList                 []string                 `json:"poi_list,omitempty"`                   // 门店id列表
-	MarketingScene          string                   `json:"marketing_scene,omitempty"`            // 营销目标
-	ExplorationStrategy     string                   `json:"exploration_strategy,omitempty"`       // 探索策略
-	PrioritySiteSet         []string                 `json:"priority_site_set,omitempty"`          // 投放站点集合
-	EcomPkamSwitch          string                   `json:"ecom_pkam_switch,omitempty"`           // 一方人群跑量加强开关状态
-	ForwardLinkAssist       string                   `json:"forward_link_assist,omitempty"`        // 助攻行为目标
-	ConversionName          string                   `json:"conversion_name,omitempty"`            // 转化名称
-
-	AutoAcquisitionStatus string   `json:"auto_acquisition_status,omitempty"` // 一键起量状态
-	CostConstraintScene   string   `json:"cost_constraint_scene,omitempty"`   // 成本控制场景
-	CustomCostCap         int64    `json:"custom_cost_cap,omitempty"`         // 用户输入的成本上限，单位分
-	MpaSpec               *MpaSpec `json:"mpa_spec,omitempty"`                // 动态商品广告属性
-	ShortPlayPayType      string   `json:"short_play_pay_type,omitempty"`     // 售卖方式类型
-	SellStrategyID        int64    `json:"sell_strategy_id,omitempty"`        // 售卖策略id
-	OgCompletionType      string   `json:"og_completion_type,omitempty"`      // 达成类型
-	DcaSpec               *DcaSpec `json:"dca_spec,omitempty"`                // 动态内容广告属性
-
-	AoiOptimizationStrategy      *AoiOptimizationStrategy `json:"aoi_optimization_strategy,omitempty"`       // 高价值范围探索
-	CostGuaranteeStatus          string                   `json:"cost_guarantee_status,omitempty"`           // 成本保障状态
-	CostGuaranteeMoney           int64                    `json:"cost_guarantee_money,omitempty"`            // 成本保障赔付金额，单位分
-	AdditionalProductSpec        *AdditionalProductSpec   `json:"additional_product_spec,omitempty"`         // 附加商品属性
-	EnableBreakthroughSiteset    bool                     `json:"enable_breakthrough_siteset,omitempty"`     // 是否支持版位突破
-	LiveRecommendStrategyEnabled bool                     `json:"live_recommend_strategy_enabled,omitempty"` // 直播种草人群探索
-	CustomCostRolCap             float64                  `json:"custom_cost_rol_cap,omitempty"`             // 控制成本的期望ROI
-	EnableSteadyExploration      bool                     `json:"enable_steady_exploration,omitempty"`       // 是否稳步探索更多版位
-	AdxRealtimeType              string                   `json:"adx_realtime_type,omitempty"`               // ADX程序化广告素材实时回复类型
-	SmartTargetingStatus         string                   `json:"smart_targeting_status,omitempty"`          // 广告智能定向状态
+	MarketingScene            string                     `json:"marketing_scene,omitempty"`             // 营销目标
+	ConversionName            string                     `json:"conversion_name,omitempty"`             // 转化名称
+	AutoAcquisitionStatus     string                     `json:"auto_acquisition_status,omitempty"`     // 一键起量状态
+	OgCompletionType          string                     `json:"og_completion_type,omitempty"`          // 达成类型
+	CostGuaranteeStatus       string                     `json:"cost_guarantee_status,omitempty"`       // 成本保障状态
+	CostGuaranteeMoney        int64                      `json:"cost_guarantee_money,omitempty"`        // 成本保障赔付金额，单位分
+	EnableBreakthroughSiteset bool                       `json:"enable_breakthrough_siteset,omitempty"` // 是否支持版位突破
+	CustomCostRolCap          float64                    `json:"custom_cost_rol_cap,omitempty"`         // 控制成本的期望ROI
+	SmartTargetingStatus      string                     `json:"smart_targeting_status,omitempty"`      // 广告智能定向状态
 }
 
 // AoiOptimizationStrategy 高价值范围探索
@@ -631,4 +633,523 @@ type CustomLocation struct {
 	Longitude float64 `json:"longitude"` // 经度，单位度
 	Latitude  float64 `json:"latitude"`  // 纬度，单位度
 	Radius    int     `json:"radius"`    // 半径，单位米
+}
+
+// 常量定义 - 营销目的类型
+const (
+	MarketingGoalUnknown                 = "MARKETING_GOAL_UNKNOWN"                   // 未知
+	MarketingGoalUserGrowth              = "MARKETING_GOAL_USER_GROWTH"               // 用户增长
+	MarketingGoalProductSales            = "MARKETING_GOAL_PRODUCT_SALES"             // 商品销售
+	MarketingGoalLeadRetention           = "MARKETING_GOAL_LEAD_RETENTION"            // 销售线索收集
+	MarketingGoalBrandPromotion          = "MARKETING_GOAL_BRAND_PROMOTION"           // 品牌推广
+	MarketingGoalIncreaseFansInteraction = "MARKETING_GOAL_INCREASE_FANS_INTERACTION" // 提升粉丝互动
+)
+
+// 常量定义 - 二级营销目的类型
+const (
+	MarketingSubGoalUnknown                          = "MARKETING_SUB_GOAL_UNKNOWN"                              // 未知
+	MarketingSubGoalNewGameReserve                   = "MARKETING_SUB_GOAL_NEW_GAME_RESERVE"                     // 新游戏预约
+	MarketingSubGoalNewGameTest                      = "MARKETING_SUB_GOAL_NEW_GAME_TEST"                        // 新游戏测试
+	MarketingSubGoalNewGameLaunch                    = "MARKETING_SUB_GOAL_NEW_GAME_LAUNCH"                      // 新游戏首发
+	MarketingSubGoalPlateauPhaseLaunch               = "MARKETING_SUB_GOAL_PLATEAU_PHASE_LAUNCH"                 // 平推期投放
+	MarketingSubGoalMinigameNewCustomerGrowth        = "MARKETING_SUB_GOAL_MINIGAME_NEW_CUSTOMER_GROWTH"         // 小游戏新客增长
+	MarketingSubGoalMiniGameReturnCustomerEngagement = "MARKETING_SUB_GOAL_MINI_GAME_RETURN_CUSTOMER_ENGAGEMENT" // 小游戏老客召回
+	MarketingSubGoalAppAcquisition                   = "MARKETING_SUB_GOAL_APP_ACQUISITION"                      // 应用获取
+	MarketingSubGoalAppActivation                    = "MARKETING_SUB_GOAL_APP_ACTIVATION"                       // 应用激活
+	MarketingSubGoalNotInstallUser                   = "MARKETING_SUB_GOAL_NOT_INSTALL_USER"                     // 未安装用户
+	MarketingSubGoalPreInstallUser                   = "MARKETING_SUB_GOAL_PRE_INSTALL_USER"                     // 预安装用户
+	MarketingSubGoalUnloadedUser                     = "MARKETING_SUB_GOAL_UNLOADED_USER"                        // 已卸载用户
+	MarketingSubGoalShortInactiveUser                = "MARKETING_SUB_GOAL_SHORT_INACTIVE_USER"                  // 短期不活跃用户
+	MarketingSubGoalLongInactiveUser                 = "MARKETING_SUB_GOAL_LONG_INACTIVE_USER"                   // 长期不活跃用户
+	MarketingSubGoalGameVersionUpgrade               = "MARKETING_SUB_GOAL_GAME_VERSION_UPGRADE"                 // 游戏版本升级
+	MarketingSubGoalNewStoreOpening                  = "MARKETING_SUB_GOAL_NEW_STORE_OPENING"                    // 新店开业
+	MarketingSubGoalEveningPromotion                 = "MARKETING_SUB_GOAL_EVENING_PROMOTION"                    // 晚间促销
+	MarketingSubGoalSpecialRelease                   = "MARKETING_SUB_GOAL_SPECIAL_RELEASE"                      // 特殊发布
+)
+
+// 创建广告
+type AdgroupsAddReq struct {
+	GlobalReq
+	AdgroupCommonStruct
+	AccountID              int64                   `json:"account_id"`                         // 广告主帐号id (必填)
+	AdgroupName            string                  `json:"adgroup_name"`                       // 广告名称 (必填)
+	MarketingGoal          string                  `json:"marketing_goal"`                     // 营销目的类型 (必填)
+	MarketingSubGoal       string                  `json:"marketing_sub_goal"`                 // 二级营销目的类型
+	MarketingCarrierType   string                  `json:"marketing_carrier_type"`             // 营销载体类型 (必填)
+	MarketingCarrierDetail *MarketingCarrierDetail `json:"marketing_carrier_detail,omitempty"` // 营销载体详情
+	BeginDate              string                  `json:"begin_date"`                         // 开始投放日期 (必填)
+	EndDate                string                  `json:"end_date"`                           // 结束投放日期 (必填)
+	FirstDayBeginTime      string                  `json:"first_day_begin_time,omitempty"`     // 首日开始投放时间
+	BidAmount              int64                   `json:"bid_amount"`                         // 广告出价，单位分 (必填)
+	OptimizationGoal       string                  `json:"optimization_goal,omitempty"`        // 广告优化目标类型
+	TimeSeries             string                  `json:"time_series"`                        // 投放时间段 (必填)
+	AutomaticSiteEnabled   bool                    `json:"automatic_site_enabled"`             // 是否开启智能版位功能
+	SiteSet                []string                `json:"site_set,omitempty"`                 // 投放版位集合
+	ExplorationStrategy    string                  `json:"exploration_strategy,omitempty"`     // 自动版位探索策略
+	PrioritySiteSet        []string                `json:"priority_site_set,omitempty"`        // 优先级位集合
+	DailyBudget            int64                   `json:"daily_budget"`                       // 日预算，单位分
+	SmartTargetingMode     string                  `json:"smart_targeting_mode,omitempty"`     // 广告智能定向功能
+	SmartCouponMode        string                  `json:"smart_coupon_mode,omitempty"`        // 小店智券开关
+}
+
+func (p *AdgroupsAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// 常量定义 - 广告智能定向功能
+const (
+	SmartTargetingManual = "SMART_TARGETING_MANUAL" // 手动定向
+	// 其他值根据文档补充
+)
+
+// 常量定义 - 小店智券开关
+const (
+	SwitchStatusOff = "SWITCH_STATUS_OFF" // 关闭（默认）
+	SwitchStatusOn  = "SWITCH_STATUS_ON"  // 开启
+)
+
+// 常量定义 - 投放时间段
+const (
+	TimeSeriesLength = 336 // 48*7，以半小时为粒度
+)
+
+// 常量定义 - 站点集合长度限制
+const (
+	MinSiteSetCount = 1
+	MaxSiteSetCount = 32
+)
+
+// 常量定义 - 日预算限制
+const (
+	DailyBudgetMin = 5000      // 最小日预算 50元
+	DailyBudgetMax = 400000000 // 最大日预算 4,000,000元
+)
+
+// 常量定义 - 自动版位探索策略
+const (
+	ExplorationStrategySteady = "STEADY_EXPLORATION" // 稳步探索
+	ExplorationStrategyFast   = "FAST_EXPLORATION"   // 快速探索
+)
+
+// 常量定义 - 投放版位
+const (
+	SiteSetMobileUnion       = "SITE_SET_MOBILE_UNION"        // 移动联盟
+	SiteSetWechat            = "SITE_SET_WECHAT"              // 微信
+	SiteSetTencentNews       = "SITE_SET_TENCENT_NEWS"        // 腾讯新闻
+	SiteSetTencentVideo      = "SITE_SET_TENCENT_VIDEO"       // 腾讯视频
+	SiteSetMobileYyb         = "SITE_SET_MOBILE_YYB"          // 应用宝
+	SiteSetPcqq              = "SITE_SET_PCQQ"                // PCQQ
+	SiteSetKandian           = "SITE_SET_KANDIAN"             // 看点
+	SiteSetQqMusicGame       = "SITE_SET_QQ_MUSIC_GAME"       // QQ音乐游戏
+	SiteSetMoments           = "SITE_SET_MOMENTS"             // 朋友圈
+	SiteSetChannels          = "SITE_SET_CHANNELS"            // 视频号
+	SiteSetWechatSearch      = "SITE_SET_WECHAT_SEARCH"       // 微信搜一搜
+	SiteSetWechatPlugin      = "SITE_SET_WECHAT_PLUGIN"       // 微信插件
+	SiteSetQbsearch          = "SITE_SET_QBSEARCH"            // QQ浏览器搜索
+	SiteSetSearchScene       = "SITE_SET_SEARCH_SCENE"        // 搜索场景
+	SiteSetSearchMobileUnion = "SITE_SET_SEARCH_MOBILE_UNION" // 搜索移动联盟
+	SiteSetSmart             = "SITE_SET_SMART"               // 智能版位
+)
+
+// 常量定义 - 营销载体类型
+const (
+	MarketingCarrierTypeUnknown                       = "MARKETING_CARRIER_TYPE_UNKNOWN"                          // 未知
+	MarketingCarrierTypeAppAndroid                    = "MARKETING_CARRIER_TYPE_APP_ANDROID"                      // 安卓应用
+	MarketingCarrierTypeAppIOS                        = "MARKETING_CARRIER_TYPE_APP_IOS"                          // iOS应用
+	MarketingCarrierTypeWechatOfficialAccount         = "MARKETING_CARRIER_TYPE_WECHAT_OFFICIAL_ACCOUNT"          // 微信公众号
+	MarketingCarrierTypeJumpPage                      = "MARKETING_CARRIER_TYPE_JUMP_PAGE"                        // 跳转页面
+	MarketingCarrierTypeWechatMiniGame                = "MARKETING_CARRIER_TYPE_WECHAT_MINIGAME"                  // 微信小游戏
+	MarketingCarrierTypeWechatChannelsLive            = "MARKETING_CARRIER_TYPE_WECHAT_CHANNELS_LIVE"             // 微信视频号直播
+	MarketingCarrierTypeWechatChannels                = "MARKETING_CARRIER_TYPE_WECHAT_CHANNELS"                  // 微信视频号
+	MarketingCarrierTypeWechatChannelsLiveReservation = "MARKETING_CARRIER_TYPE_WECHAT_CHANNELS_LIVE_RESERVATION" // 微信视频号直播预约
+	MarketingCarrierTypeMiniProgramWechat             = "MARKETING_CARRIER_TYPE_MINI_PROGRAM_WECHAT"              // 微信小程序
+	MarketingCarrierTypeAppQuickApp                   = "MARKETING_CARRIER_TYPE_APP_QUICK_APP"                    // 快应用
+	MarketingCarrierTypePCGame                        = "MARKETING_CARRIER_TYPE_PC_GAME"                          // PC游戏
+	MarketingCarrierTypeQQMiniGame                    = "MARKETING_CARRIER_TYPE_QQ_MINIGAME"                      // QQ小游戏
+	MarketingCarrierTypeAppHarmony                    = "MARKETING_CARRIER_TYPE_APP_HARMONY"                      // 鸿蒙应用
+)
+
+// 常量定义 - 首日开始投放时间格式
+const TimeFormat = "15:04:05"
+
+// 常量定义 - 首日开始投放时间长度限制
+const (
+	MinFirstDayBeginTimeLength = 0
+	MaxFirstDayBeginTimeLength = 8
+)
+
+// 长度限制常量
+const (
+	MinAdgroupNameLength = 1
+	MaxAdgroupNameLength = 60 // 等宽字符，即60个中文字或120个英文字
+)
+
+// 日期格式常量
+const DateFormat = "2006-01-02"
+
+// Validate 验证广告组创建请求
+func (p *AdgroupsAddReq) Validate() error {
+	// 1. 验证account_id
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+
+	// 2. 验证广告名称
+	if p.AdgroupName == "" {
+		return errors.New("adgroup_name为必填")
+	}
+	if len(p.AdgroupName) > MaxAdgroupNameLength*3 {
+		return errors.New("adgroup_name长度不能超过60个等宽字符")
+	}
+
+	// 3. 验证营销目的类型
+	if p.MarketingGoal == "" {
+		return errors.New("marketing_goal为必填")
+	}
+	if !isValidMarketingGoal(p.MarketingGoal) {
+		return errors.New("marketing_goal值无效，请参考文档中的枚举值")
+	}
+
+	// 4. 验证二级营销目的类型
+	if p.MarketingSubGoal != "" && !isValidMarketingSubGoal(p.MarketingSubGoal) {
+		return errors.New("marketing_sub_goal值无效，请参考文档中的枚举值")
+	}
+
+	// 5. 验证营销载体类型
+	if p.MarketingCarrierType == "" {
+		return errors.New("marketing_carrier_type为必填")
+	}
+	if !isValidMarketingCarrierType(p.MarketingCarrierType) {
+		return errors.New("marketing_carrier_type值无效，请参考文档中的枚举值")
+	}
+
+	// 6. 验证营销载体详情
+	if p.MarketingCarrierDetail != nil {
+		if err := p.MarketingCarrierDetail.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// 7. 验证开始和结束日期
+	if err := p.validateDates(); err != nil {
+		return err
+	}
+
+	// 8. 验证首日开始投放时间
+	if err := p.validateFirstDayBeginTime(); err != nil {
+		return err
+	}
+
+	// 9. 验证广告出价
+	if err := p.validateBidAmount(); err != nil {
+		return err
+	}
+
+	// 10. 验证投放时间段
+	if err := p.validateTimeSeries(); err != nil {
+		return err
+	}
+
+	// 11. 验证站点集合
+	if err := p.validateSiteSet(); err != nil {
+		return err
+	}
+
+	// 12. 验证探索策略
+	if err := p.validateExplorationStrategy(); err != nil {
+		return err
+	}
+
+	// 13. 验证日预算
+	if err := p.validateDailyBudget(); err != nil {
+		return err
+	}
+
+	// 14. 验证智能定向模式
+	if err := p.validateSmartTargetingMode(); err != nil {
+		return err
+	}
+
+	// 15. 验证小店智券开关
+	if err := p.validateSmartCouponMode(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateSmartTargetingMode 验证广告智能定向功能
+func (p *AdgroupsAddReq) validateSmartTargetingMode() error {
+	if p.SmartTargetingMode == "" {
+		return nil
+	}
+
+	validModes := map[string]bool{
+		SmartTargetingManual: true,
+		// 可根据文档补充其他模式
+	}
+
+	if !validModes[p.SmartTargetingMode] {
+		return errors.New("smart_targeting_mode值无效，允许值：SMART_TARGETING_MANUAL")
+	}
+
+	return nil
+}
+
+// validateSmartCouponMode 验证小店智券开关
+func (p *AdgroupsAddReq) validateSmartCouponMode() error {
+	if p.SmartCouponMode == "" {
+		p.SmartCouponMode = SwitchStatusOff // 默认关闭
+		return nil
+	}
+
+	if p.SmartCouponMode != SwitchStatusOff && p.SmartCouponMode != SwitchStatusOn {
+		return errors.New("smart_coupon_mode值无效，允许值：SWITCH_STATUS_OFF、SWITCH_STATUS_ON")
+	}
+
+	return nil
+}
+
+// validateTimeSeries 验证投放时间段
+func (p *AdgroupsAddReq) validateTimeSeries() error {
+	if p.TimeSeries == "" {
+		return errors.New("time_series为必填")
+	}
+	if len(p.TimeSeries) != TimeSeriesLength {
+		return errors.New("time_series长度必须为336")
+	}
+	// 检查是否只包含0和1
+	for _, c := range p.TimeSeries {
+		if c != '0' && c != '1' {
+			return errors.New("time_series只能包含0和1")
+		}
+	}
+	// 不允许全部传0
+	allZero := true
+	for _, c := range p.TimeSeries {
+		if c == '1' {
+			allZero = false
+			break
+		}
+	}
+	if allZero {
+		return errors.New("time_series不允许全部为0")
+	}
+	return nil
+}
+
+// validateSiteSet 验证站点集合
+func (p *AdgroupsAddReq) validateSiteSet() error {
+	// 使用智能版位时无需传site_set
+	if p.AutomaticSiteEnabled {
+		if len(p.SiteSet) > 0 {
+			return errors.New("使用智能版位时，site_set字段无需传值")
+		}
+		return nil
+	}
+
+	// 非智能版位时，site_set为必填
+	if len(p.SiteSet) == 0 {
+		return errors.New("未开启智能版位时，site_set为必填")
+	}
+	if len(p.SiteSet) < MinSiteSetCount || len(p.SiteSet) > MaxSiteSetCount {
+		return errors.New("site_set数组长度必须在1-32之间")
+	}
+
+	// 验证站点集合值是否有效
+	validSiteSets := map[string]bool{
+		SiteSetMobileUnion:       true,
+		SiteSetWechat:            true,
+		SiteSetTencentNews:       true,
+		SiteSetTencentVideo:      true,
+		SiteSetMobileYyb:         true,
+		SiteSetPcqq:              true,
+		SiteSetKandian:           true,
+		SiteSetQqMusicGame:       true,
+		SiteSetMoments:           true,
+		SiteSetChannels:          true,
+		SiteSetWechatSearch:      true,
+		SiteSetWechatPlugin:      true,
+		SiteSetQbsearch:          true,
+		SiteSetSearchScene:       true,
+		SiteSetSearchMobileUnion: true,
+		SiteSetSmart:             true,
+	}
+	for _, site := range p.SiteSet {
+		if !validSiteSets[site] {
+			return errors.New("site_set包含无效值，请参考文档中的枚举值")
+		}
+	}
+	return nil
+}
+
+// validateExplorationStrategy 验证自动版位探索策略
+func (p *AdgroupsAddReq) validateExplorationStrategy() error {
+	if p.ExplorationStrategy == "" {
+		return nil
+	}
+	if p.ExplorationStrategy != ExplorationStrategySteady && p.ExplorationStrategy != ExplorationStrategyFast {
+		return errors.New("exploration_strategy值无效，允许值：STEADY_EXPLORATION、FAST_EXPLORATION")
+	}
+
+	// 稳步探索策略需要设置优先级位集合
+	if p.ExplorationStrategy == ExplorationStrategySteady && len(p.PrioritySiteSet) == 0 {
+		return errors.New("exploration_strategy为STEADY_EXPLORATION时，priority_site_set为必填")
+	}
+
+	// 验证优先级位集合
+	if len(p.PrioritySiteSet) > MaxSiteSetCount {
+		return errors.New("priority_site_set数组长度不能超过32")
+	}
+	return nil
+}
+
+// validateDailyBudget 验证日预算
+func (p *AdgroupsAddReq) validateDailyBudget() error {
+	if p.DailyBudget == 0 {
+		return nil // 0表示不设预算
+	}
+	if p.DailyBudget < DailyBudgetMin {
+		return errors.New("daily_budget不能小于5000分（50元）")
+	}
+	if p.DailyBudget > DailyBudgetMax {
+		return errors.New("daily_budget不能大于400000000分（4,000,000元）")
+	}
+	return nil
+}
+
+// validateFirstDayBeginTime 验证首日开始投放时间
+func (p *AdgroupsAddReq) validateFirstDayBeginTime() error {
+	if p.FirstDayBeginTime == "" {
+		return nil
+	}
+
+	// 验证长度
+	if len(p.FirstDayBeginTime) < MinFirstDayBeginTimeLength || len(p.FirstDayBeginTime) > MaxFirstDayBeginTimeLength {
+		return errors.New("first_day_begin_time长度必须在0-8字节之间")
+	}
+
+	// 验证时间格式 HH:ii:ss
+	_, err := time.Parse(TimeFormat, p.FirstDayBeginTime)
+	if err != nil {
+		return errors.New("first_day_begin_time格式错误，应为HH:ii:ss")
+	}
+
+	return nil
+}
+
+// validateBidAmount 验证广告出价
+func (p *AdgroupsAddReq) validateBidAmount() error {
+	if p.BidAmount <= 0 {
+		return errors.New("bid_amount必须大于0")
+	}
+	return nil
+}
+
+// Validate 验证营销载体详情
+func (m *MarketingCarrierDetail) Validate() error {
+	// 营销载体id长度验证
+	if len(m.MarketingCarrierID) > 2048 {
+		return errors.New("marketing_carrier_id长度不能超过2048字节")
+	}
+	return nil
+}
+
+// validateDates 验证日期
+func (p *AdgroupsAddReq) validateDates() error {
+	// 验证开始日期
+	if p.BeginDate == "" {
+		return errors.New("begin_date为必填")
+	}
+	if len(p.BeginDate) != 10 {
+		return errors.New("begin_date格式错误，应为YYYY-MM-DD")
+	}
+	begin, err := time.Parse(DateFormat, p.BeginDate)
+	if err != nil {
+		return errors.New("begin_date格式错误，应为YYYY-MM-DD")
+	}
+
+	// 验证结束日期
+	if p.EndDate == "" {
+		return errors.New("end_date为必填")
+	}
+	if len(p.EndDate) > 10 {
+		return errors.New("end_date长度不能超过10字节")
+	}
+	end, err := time.Parse(DateFormat, p.EndDate)
+	if err != nil {
+		return errors.New("end_date格式错误，应为YYYY-MM-DD")
+	}
+
+	// 开始日期 <= 结束日期
+	if begin.After(end) {
+		return errors.New("begin_date不能大于end_date")
+	}
+
+	// 结束日期 >= 今天
+	today := time.Now().Truncate(24 * time.Hour)
+	if end.Before(today) {
+		return errors.New("end_date不能小于今天")
+	}
+
+	return nil
+}
+
+// isValidMarketingCarrierType 验证营销载体类型是否有效
+func isValidMarketingCarrierType(carrierType string) bool {
+	validTypes := map[string]bool{
+		MarketingCarrierTypeUnknown:                       true,
+		MarketingCarrierTypeAppAndroid:                    true,
+		MarketingCarrierTypeAppIOS:                        true,
+		MarketingCarrierTypeWechatOfficialAccount:         true,
+		MarketingCarrierTypeJumpPage:                      true,
+		MarketingCarrierTypeWechatMiniGame:                true,
+		MarketingCarrierTypeWechatChannelsLive:            true,
+		MarketingCarrierTypeWechatChannels:                true,
+		MarketingCarrierTypeWechatChannelsLiveReservation: true,
+		MarketingCarrierTypeMiniProgramWechat:             true,
+		MarketingCarrierTypeAppQuickApp:                   true,
+		MarketingCarrierTypePCGame:                        true,
+		MarketingCarrierTypeQQMiniGame:                    true,
+		MarketingCarrierTypeAppHarmony:                    true,
+	}
+	return validTypes[carrierType]
+}
+
+// isValidMarketingGoal 验证营销目的类型是否有效
+func isValidMarketingGoal(goal string) bool {
+	validGoals := map[string]bool{
+		MarketingGoalUnknown:                 true,
+		MarketingGoalUserGrowth:              true,
+		MarketingGoalProductSales:            true,
+		MarketingGoalLeadRetention:           true,
+		MarketingGoalBrandPromotion:          true,
+		MarketingGoalIncreaseFansInteraction: true,
+	}
+	return validGoals[goal]
+}
+
+// isValidMarketingSubGoal 验证二级营销目的类型是否有效
+func isValidMarketingSubGoal(subGoal string) bool {
+	validSubGoals := map[string]bool{
+		MarketingSubGoalUnknown:                          true,
+		MarketingSubGoalNewGameReserve:                   true,
+		MarketingSubGoalNewGameTest:                      true,
+		MarketingSubGoalNewGameLaunch:                    true,
+		MarketingSubGoalPlateauPhaseLaunch:               true,
+		MarketingSubGoalMinigameNewCustomerGrowth:        true,
+		MarketingSubGoalMiniGameReturnCustomerEngagement: true,
+		MarketingSubGoalAppAcquisition:                   true,
+		MarketingSubGoalAppActivation:                    true,
+		MarketingSubGoalNotInstallUser:                   true,
+		MarketingSubGoalPreInstallUser:                   true,
+		MarketingSubGoalUnloadedUser:                     true,
+		MarketingSubGoalShortInactiveUser:                true,
+		MarketingSubGoalLongInactiveUser:                 true,
+		MarketingSubGoalGameVersionUpgrade:               true,
+		MarketingSubGoalNewStoreOpening:                  true,
+		MarketingSubGoalEveningPromotion:                 true,
+		MarketingSubGoalSpecialRelease:                   true,
+	}
+	return validSubGoals[subGoal]
 }
