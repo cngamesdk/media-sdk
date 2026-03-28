@@ -38,6 +38,13 @@ func (p *GlobalReq) Format() {
 	}
 }
 
+func (p *GlobalReq) Clear() {
+	p.AccessToken = ""
+	p.Timestamp = 0
+	p.Nonce = ""
+	p.UserToken = ""
+}
+
 // Validate 验证API请求公共参数
 func (p *GlobalReq) Validate() error {
 	// 1. 验证access_token
@@ -294,4 +301,10 @@ type CursorPageInfoV2 struct {
 	TotalNumber    int    `json:"total_number"`    // 总条数
 	NextCursor     string `json:"next_cursor"`     // 下一页游标值，若为空则无下一页
 	PreviousCursor string `json:"previous_cursor"` // 上一页游标值，若为空则无上一页
+}
+
+type Headers map[string]string
+
+func (p Headers) Json() {
+	p["Content-Type"] = "application/json"
 }
