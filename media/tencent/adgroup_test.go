@@ -43,3 +43,18 @@ func TestAdgroupsAddSelf(t *testing.T) {
 	}
 	fmt.Printf("result: %+v", result)
 }
+
+// 删除广告
+func TestAdgroupsDeleteSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupID = 123
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
