@@ -1157,3 +1157,36 @@ func isValidMarketingSubGoal(subGoal string) bool {
 type AdgroupsAddResp struct {
 	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
 }
+
+type AdgroupsDeleteReq struct {
+	GlobalReq
+	AccountID int64 `json:"account_id"` // 广告主账号 id (必填)
+	AdgroupID int64 `json:"adgroup_id"` // 广告 id (必填)
+}
+
+func (p *AdgroupsDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证广告组更新请求
+func (p *AdgroupsDeleteReq) Validate() error {
+	// 1. 验证account_id
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+
+	// 2. 验证adgroup_id
+	if p.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+
+	if validateErr := p.GlobalReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	return nil
+}
+
+type AdgroupsDeleteResp struct {
+	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
+}
