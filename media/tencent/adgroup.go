@@ -75,3 +75,29 @@ func (a *TencentAdapter) AdgroupsDeleteSelf(ctx context.Context, req *model.Adgr
 	resp = &result
 	return
 }
+
+// AdgroupsUpdateSelf 更新广告
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update
+func (a *TencentAdapter) AdgroupsUpdateSelf(ctx context.Context, req *model.AdgroupsUpdateReq) (
+	resp *model.AdgroupsUpdateResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.AdgroupsUpdateResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/adgroups/update?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
