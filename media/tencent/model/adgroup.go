@@ -1190,3 +1190,219 @@ func (p *AdgroupsDeleteReq) Validate() error {
 type AdgroupsDeleteResp struct {
 	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
 }
+
+// AdgroupsUpdateReq 广告组更新请求
+type AdgroupsUpdateReq struct {
+	GlobalReq
+	AccountID                         int64                          `json:"account_id"`                     // 广告主帐号id (必填)
+	AdgroupID                         int64                          `json:"adgroup_id"`                     // 广告id (必填)
+	AdgroupName                       string                         `json:"adgroup_name,omitempty"`         // 广告名称
+	BeginDate                         string                         `json:"begin_date,omitempty"`           // 开始投放日期
+	EndDate                           string                         `json:"end_date,omitempty"`             // 结束投放日期
+	FirstDayBeginTime                 string                         `json:"first_day_begin_time,omitempty"` // 首日开始投放时间
+	BidAmount                         int64                          `json:"bid_amount,omitempty"`           // 广告出价，单位分
+	OptimizationGoal                  string                         `json:"optimization_goal,omitempty"`    // 广告优化目标类型
+	TimeSeries                        string                         `json:"time_series"`                    // 投放时间段 (必填)
+	DailyBudget                       int64                          `json:"daily_budget"`                   // 日预算，单位分
+	Targeting                         *Targeting                     `json:"targeting,omitempty"`
+	SceneSpec                         *SceneSpec                     `json:"scene_spec,omitempty"`                            // 场景定向
+	UserActionSets                    []*UserActionSet               `json:"user_action_sets,omitempty"`                      // 用户行为数据源
+	DeepConversionSpec                *DeepConversionSpec            `json:"deep_conversion_spec,omitempty"`                  // oCPA 深度优化内容
+	ConversionID                      int64                          `json:"conversion_id,omitempty"`                         // 转化id
+	DeepConversionBehaviorBid         int64                          `json:"deep_conversion_behavior_bid,omitempty"`          // 深度优化行为出价，单位分
+	DeepConversionWorthRate           float64                        `json:"deep_conversion_worth_rate,omitempty"`            // 深度优化价值出价
+	DeepConversionWorthAdvancedRate   float64                        `json:"deep_conversion_worth_advanced_rate,omitempty"`   // 强化优化价值的期望ROI
+	DeepConversionBehaviorAdvancedBid int64                          `json:"deep_conversion_behavior_advanced_bid,omitempty"` // 深度辅助优化OG出价，单位分
+	BidMode                           string                         `json:"bid_mode"`                                        // 出价方式 (必填)
+	AutoAcquisitionEnabled            bool                           `json:"auto_acquisition_enabled,omitempty"`              // 一键起量开关
+	AutoAcquisitionBudget             int64                          `json:"auto_acquisition_budget,omitempty"`               // 一键起量预算，单位分
+	SmartBidType                      string                         `json:"smart_bid_type,omitempty"`                        // 出价类型
+	SmartCostCap                      int64                          `json:"smart_cost_cap,omitempty"`                        // 自动出价下预计成本上限，单位分
+	AutoDerivedCreativeEnabled        bool                           `json:"auto_derived_creative_enabled,omitempty"`         // 创意增强MAX开关
+	AutoDerivedCreativePreference     *AutoDerivedCreativePreference `json:"auto_derived_creative_preference,omitempty"`
+	ConfiguredStatus                  string                         `json:"configured_status"`
+	FlowOptimizationEnabled           bool                           `json:"flow_optimization_enabled,omitempty"`
+	PoiList                           []string                       `json:"poi_list,omitempty"`
+	EcomPkamSwitch                    string                         `json:"ecom_pkam_switch,omitempty"`
+	RtaId                             int64                          `json:"rta_id,omitempty"`                          // RTA 客户 id
+	RtaTargetId                       string                         `json:"rta_target_id,omitempty"`                   // RTA 策略 id
+	CostConstraintScene               string                         `json:"cost_constraint_scene,omitempty"`           // 成本控制场景
+	CustomCostCap                     int64                          `json:"custom_cost_cap,omitempty"`                 // 用户输入的成本上限
+	FeedbackId                        int64                          `json:"feedback_id,omitempty"`                     // 监测链接组 id
+	AoiOptimizationStrategy           *AoiOptimizationStrategy       `json:"aoi_optimization_strategy,omitempty"`       // 高价值范围探索
+	SearchExpandTargetingSwitch       string                         `json:"search_expand_targeting_switch,omitempty"`  // 搜索定向拓展开关
+	CloudUnionSpec                    *CloudUnionSpec                `json:"cloud_union_spec,omitempty"`                // 云选相关参数
+	LiveRecommendStrategyEnabled      bool                           `json:"live_recommend_strategy_enabled,omitempty"` // 直播种草人群探索
+	CustomCostRoiCap                  float32                        `json:"custom_cost_roi_cap,omitempty"`             // 控制成本的期望 ROI
+	SmartTargetingMode                string                         `json:"smart_targeting_mode,omitempty"`            // 广告智能定向功能
+	SmartCouponMode                   string                         `json:"smart_coupon_mode,omitempty"`               // 小店智券开关
+}
+
+type CloudUnionSpec struct {
+	RoiGoal     string  `json:"roi_goal,omitempty"`     // 优化 ROI 目标
+	ExpectedRoi float32 `json:"expected_roi,omitempty"` // 深度优化价值效果值
+}
+
+func (p *AdgroupsUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// 长度限制常量
+const (
+	MinUpdateAdgroupNameLength = 1
+	MaxUpdateAdgroupNameLength = 180 // 字节长度
+	BeginDateLength            = 10
+	MaxEndDateLength           = 10
+)
+
+// Validate 验证广告组更新请求
+func (p *AdgroupsUpdateReq) Validate() error {
+
+	if validateErr := p.GlobalReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	// 1. 验证account_id
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+
+	// 2. 验证adgroup_id
+	if p.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+
+	// 3. 验证广告名称（如果传了）
+	if p.AdgroupName != "" {
+		if err := p.validateAdgroupName(); err != nil {
+			return err
+		}
+	}
+
+	// 4. 验证开始日期（如果传了）
+	if p.BeginDate != "" {
+		if err := p.validateBeginDate(); err != nil {
+			return err
+		}
+	}
+
+	// 5. 验证结束日期（如果传了）
+	if p.EndDate != "" {
+		if err := p.validateEndDate(); err != nil {
+			return err
+		}
+	}
+
+	// 6. 验证日期范围关系（如果两者都传了）
+	if p.BeginDate != "" && p.EndDate != "" {
+		if err := p.validateDateRange(); err != nil {
+			return err
+		}
+	}
+
+	// 7. 验证首日开始投放时间（如果传了）
+	if p.FirstDayBeginTime != "" {
+		if err := p.validateFirstDayBeginTime(); err != nil {
+			return err
+		}
+	}
+
+	// 8. 验证广告出价（如果传了）
+	if p.BidAmount != 0 {
+		if err := p.validateBidAmount(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// validateAdgroupName 验证广告名称
+func (p *AdgroupsUpdateReq) validateAdgroupName() error {
+	// 验证字节长度
+	if len(p.AdgroupName) < MinUpdateAdgroupNameLength || len(p.AdgroupName) > MaxUpdateAdgroupNameLength {
+		return errors.New("adgroup_name长度必须在1-180字节之间")
+	}
+	return nil
+}
+
+// validateBeginDate 验证开始日期
+func (p *AdgroupsUpdateReq) validateBeginDate() error {
+	if len(p.BeginDate) != BeginDateLength {
+		return errors.New("begin_date长度必须为10字节")
+	}
+
+	begin, err := time.Parse(DateFormat, p.BeginDate)
+	if err != nil {
+		return errors.New("begin_date格式错误，应为YYYY-MM-DD")
+	}
+
+	_ = begin
+	return nil
+}
+
+// validateEndDate 验证结束日期
+func (p *AdgroupsUpdateReq) validateEndDate() error {
+	if len(p.EndDate) > MaxEndDateLength {
+		return errors.New("end_date长度不能超过10字节")
+	}
+
+	end, err := time.Parse(DateFormat, p.EndDate)
+	if err != nil {
+		return errors.New("end_date格式错误，应为YYYY-MM-DD")
+	}
+
+	// 结束日期 >= 今天
+	today := time.Now().Truncate(24 * time.Hour)
+	if end.Before(today) {
+		return errors.New("end_date不能小于今天")
+	}
+
+	return nil
+}
+
+// validateDateRange 验证日期范围关系
+func (p *AdgroupsUpdateReq) validateDateRange() error {
+	begin, err := time.Parse(DateFormat, p.BeginDate)
+	if err != nil {
+		return err
+	}
+
+	end, err := time.Parse(DateFormat, p.EndDate)
+	if err != nil {
+		return err
+	}
+
+	// 开始日期 <= 结束日期
+	if begin.After(end) {
+		return errors.New("begin_date不能大于end_date")
+	}
+
+	return nil
+}
+
+// validateFirstDayBeginTime 验证首日开始投放时间
+func (p *AdgroupsUpdateReq) validateFirstDayBeginTime() error {
+	if len(p.FirstDayBeginTime) > MaxFirstDayBeginTimeLength {
+		return errors.New("first_day_begin_time长度不能超过8字节")
+	}
+
+	_, err := time.Parse(TimeFormat, p.FirstDayBeginTime)
+	if err != nil {
+		return errors.New("first_day_begin_time格式错误，应为HH:ii:ss")
+	}
+
+	return nil
+}
+
+// validateBidAmount 验证广告出价
+func (p *AdgroupsUpdateReq) validateBidAmount() error {
+	if p.BidAmount <= 0 {
+		return errors.New("bid_amount必须大于0")
+	}
+	return nil
+}
+
+type AdgroupsUpdateResp struct {
+	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
+}
