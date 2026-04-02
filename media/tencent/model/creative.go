@@ -336,3 +336,257 @@ type CreativeComponent struct {
 	Value       interface{} `json:"value,omitempty"`        // 组件值内容
 	IsDeleted   bool        `json:"is_deleted,omitempty"`   // 是否已删除
 }
+
+// ========== 创建创意 ==========
+
+// DynamicCreativesAddReq 创建创意请求
+// https://developers.e.qq.com/v3.0/docs/api/dynamic_creatives/add
+type DynamicCreativesAddReq struct {
+	GlobalReq
+	AccountID                        int64                `json:"account_id"`                                     // 广告主帐号id (必填)
+	AdgroupID                        int64                `json:"adgroup_id"`                                     // 广告id (必填)
+	DynamicCreativeName              string               `json:"dynamic_creative_name"`                          // 广告创意名称，同账号下不重复，1-60等宽字符 (必填)
+	CreativeComponents               *CreativeComponents  `json:"creative_components"`                            // 创意组件 (必填)
+	CreativeTemplateID               int64                `json:"creative_template_id,omitempty"`                 // 创意形式id
+	DeliveryMode                     string               `json:"delivery_mode,omitempty"`                        // 投放模式
+	DynamicCreativeType              string               `json:"dynamic_creative_type,omitempty"`                // 动态创意类型
+	ImpressionTrackingURL            string               `json:"impression_tracking_url,omitempty"`              // 曝光监控地址
+	ClickTrackingURL                 string               `json:"click_tracking_url,omitempty"`                   // 点击监控链接
+	ProgramCreativeInfo              *ProgramCreativeInfo `json:"program_creative_info,omitempty"`                // 程序化创意信息
+	PageTrackURL                     string               `json:"page_track_url,omitempty"`                       // 页面级转化跟踪URL
+	AutoDerivedProgramCreativeSwitch bool                 `json:"auto_derived_program_creative_switch,omitempty"` // 自动衍生程序化创意开关
+	ConfiguredStatus                 string               `json:"configured_status,omitempty"`                    // 客户设置的状态
+	SiteSetValidateModel             string               `json:"site_set_validate_model,omitempty"`              // 版位校验模式
+}
+
+// 常量定义 - 投放模式
+const (
+	DeliveryModeComponent = "DELIVERY_MODE_COMPONENT" // 组件化投放
+	DeliveryModeCustomize = "DELIVERY_MODE_CUSTOMIZE" // 自定义投放
+)
+
+// 常量定义 - 动态创意类型
+const (
+	DynamicCreativeTypeCommon  = "DYNAMIC_CREATIVE_TYPE_COMMON"  // 普通动态创意
+	DynamicCreativeTypeProgram = "DYNAMIC_CREATIVE_TYPE_PROGRAM" // 程序化动态创意
+)
+
+// 常量定义 - 落地页类型
+const (
+	PageTypeAndroidApp              = "PAGE_TYPE_ANDROID_APP"                // Android应用
+	PageTypeIosApp                  = "PAGE_TYPE_IOS_APP"                    // iOS应用
+	PageTypeXjAndroidAppH5          = "PAGE_TYPE_XJ_ANDROID_APP_H5"          // 蹊径Android H5
+	PageTypeXjIosAppH5              = "PAGE_TYPE_XJ_IOS_APP_H5"              // 蹊径iOS H5
+	PageTypeXjWebH5                 = "PAGE_TYPE_XJ_WEB_H5"                  // 蹊径网页H5
+	PageTypeXjQuick                 = "PAGE_TYPE_XJ_QUICK"                   // 蹊径快应用
+	PageTypeFengyeEcommerce         = "PAGE_TYPE_FENGYE_ECOMMERCE"           // 枫叶电商
+	PageTypeAppDeepLink             = "PAGE_TYPE_APP_DEEP_LINK"              // 应用直达
+	PageTypeAppMarket               = "PAGE_TYPE_APP_MARKET"                 // 厂商下载
+	PageTypeAndroidQuickApp         = "PAGE_TYPE_ANDROID_QUICK_APP"          // Android快应用
+	PageTypeWechatCanvas            = "PAGE_TYPE_WECHAT_CANVAS"              // 微信原生页
+	PageTypeWechatMiniProgram       = "PAGE_TYPE_WECHAT_MINI_PROGRAM"        // 微信小程序
+	PageTypeWechatMiniGame          = "PAGE_TYPE_WECHAT_MINI_GAME"           // 微信小游戏
+	PageTypeWechatChannelsFeed      = "PAGE_TYPE_WECHAT_CHANNELS_FEED"       // 视频号动态
+	PageTypeWechatChannelsWatchLive = "PAGE_TYPE_WECHAT_CHANNELS_WATCH_LIVE" // 视频号观看直播
+	PageTypeWechatShop              = "PAGE_TYPE_WECHAT_SHOP"                // 微信小店
+	PageTypeH5                      = "PAGE_TYPE_H5"                         // 自定义H5
+	PageTypeQqAppMiniProgram        = "PAGE_TYPE_QQ_APP_MINI_PROGRAM"        // QQ小程序
+	PageTypeQqMiniGame              = "PAGE_TYPE_QQ_MINI_GAME"               // QQ小游戏
+)
+
+// 常量定义 - 落地页媒体平台类型
+const (
+	PlatformTypeDefault     = "DEFAULT"
+	PlatformTypeAll         = "ALL"
+	PlatformTypeScreenPc    = "SCREEN_PC"
+	PlatformTypeScreenPhone = "SCREEN_PHONE"
+	PlatformTypeOsAndroid   = "OS_ANDROID"
+	PlatformTypeOsIos       = "OS_IOS"
+)
+
+// 常量定义 - 微信原生页顶部素材替换关系
+const (
+	OptionCanvasOverrideCreative        = "OPTION_CANVAS_OVERRIDE_CREATIVE"
+	OptionCreativeOverrideCanvas        = "OPTION_CREATIVE_OVERRIDE_CANVAS"
+	OptionKeepDifferent                 = "OPTION_KEEP_DIFFERENT"
+	OptionCreativeOverrideCanvasDynamic = "OPTION_CREATIVE_OVERRIDE_CANVAS_DYNAMIC"
+)
+
+// 创意名称长度限制
+const (
+	MaxDynamicCreativeNameBytes = 180
+)
+
+func (p *DynamicCreativesAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证创建创意请求参数
+func (p *DynamicCreativesAddReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+	if len(p.DynamicCreativeName) == 0 {
+		return errors.New("dynamic_creative_name为必填")
+	}
+	if len(p.DynamicCreativeName) > MaxDynamicCreativeNameBytes {
+		return errors.New("dynamic_creative_name长度不能超过180字节")
+	}
+	if p.CreativeComponents == nil {
+		return errors.New("creative_components为必填")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// DynamicCreativesAddResp 创建创意响应
+type DynamicCreativesAddResp struct {
+	DynamicCreativeID int64 `json:"dynamic_creative_id"` // 创建的动态创意id
+}
+
+// ========== 组件值类型 ==========
+
+// TextComponentValue 文本组件值（标题/描述）
+type TextComponentValue struct {
+	Content string `json:"content"` // 文本内容
+}
+
+// ImageComponentValue 单图组件值
+type ImageComponentValue struct {
+	ImageID  string    `json:"image_id"`            // 素材图片id (必填)
+	ImageURL string    `json:"image_url,omitempty"` // 素材图片url
+	JumpInfo *JumpInfo `json:"jump_info,omitempty"` // 落地页内容
+}
+
+// ImageListComponentValue 图集组件值
+type ImageListComponentValue struct {
+	JumpInfo *JumpInfo        `json:"jump_info,omitempty"` // 落地页内容
+	List     []*ImageListItem `json:"list,omitempty"`      // 图集列表
+}
+
+// ImageListItem 图集列表项
+type ImageListItem struct {
+	ImageID         string    `json:"image_id"`                    // 素材图片id (必填)
+	ImageURL        string    `json:"image_url,omitempty"`         // 素材图片url
+	JumpInfo        *JumpInfo `json:"jump_info,omitempty"`         // 落地页内容
+	OriginalImageID string    `json:"original_image_id,omitempty"` // 原始素材图片id
+}
+
+// VideoComponentValue 视频组件值
+type VideoComponentValue struct {
+	VideoID  string    `json:"video_id"`            // 视频id (必填)
+	CoverID  string    `json:"cover_id,omitempty"`  // 视频封面图片id
+	JumpInfo *JumpInfo `json:"jump_info,omitempty"` // 落地页内容
+}
+
+// BrandComponentValue 品牌形象组件值
+type BrandComponentValue struct {
+	BrandName    string    `json:"brand_name,omitempty"`     // 品牌名称
+	BrandImageID string    `json:"brand_image_id,omitempty"` // 品牌形象图片id
+	JumpInfo     *JumpInfo `json:"jump_info,omitempty"`      // 落地页内容
+}
+
+// MainJumpInfoComponentValue 主跳转组件值
+type MainJumpInfoComponentValue struct {
+	JumpInfo *JumpInfo `json:"jump_info,omitempty"` // 落地页内容
+}
+
+// ========== 落地页结构 ==========
+
+// JumpInfo 落地页内容
+type JumpInfo struct {
+	PageType          string      `json:"page_type"`                     // 落地页类型 (必填)
+	PageSpec          *PageSpec   `json:"page_spec"`                     // 落地页内容 (必填)
+	JumpinfoAccountID int64       `json:"jumpinfo_account_id,omitempty"` // 推广帐号id
+	PlatformType      string      `json:"platform_type,omitempty"`       // 落地页媒体平台类型
+	Backups           []*JumpInfo `json:"backups,omitempty"`             // 兜底落地页
+}
+
+// PageSpec 落地页内容规格（根据 page_type 选填对应字段）
+type PageSpec struct {
+	AndroidAppSpec              *AndroidAppSpec              `json:"android_app_spec,omitempty"`                // Android应用
+	IosAppSpec                  *IosAppSpec                  `json:"ios_app_spec,omitempty"`                    // iOS应用
+	XjAndroidAppH5Spec          *XjPageSpec                  `json:"xj_android_app_h5_spec,omitempty"`          // 蹊径Android H5
+	XjIosAppH5Spec              *XjPageSpec                  `json:"xj_ios_app_h5_spec,omitempty"`              // 蹊径iOS H5
+	XjWebH5Spec                 *XjPageSpec                  `json:"xj_web_h5_spec,omitempty"`                  // 蹊径网页H5
+	XjQuickSpec                 *XjPageSpec                  `json:"xj_quick_spec,omitempty"`                   // 蹊径快应用
+	WechatCanvasSpec            *WechatCanvasSpec            `json:"wechat_canvas_spec,omitempty"`              // 微信原生页
+	WechatMiniProgramSpec       *WechatMiniProgramSpec       `json:"wechat_mini_program_spec,omitempty"`        // 微信小程序
+	WechatMiniGameSpec          *WechatMiniGameSpec          `json:"wechat_mini_game_spec,omitempty"`           // 微信小游戏
+	WechatChannelsFeedSpec      *WechatChannelsFeedSpec      `json:"wechat_channels_feed_spec,omitempty"`       // 视频号动态
+	WechatChannelsWatchLiveSpec *WechatChannelsWatchLiveSpec `json:"wechat_channels_watch_live_spec,omitempty"` // 视频号观看直播
+	WechatShopSpec              *WechatShopSpec              `json:"wechat_shop_spec,omitempty"`                // 微信小店
+	H5Spec                      *H5Spec                      `json:"h5_spec,omitempty"`                         // 自定义H5
+}
+
+// AndroidAppSpec Android应用落地页
+type AndroidAppSpec struct {
+	AndroidAppID       string `json:"android_app_id,omitempty"`        // 安卓应用AppId
+	WechatCanvasPageID int64  `json:"wechat_canvas_page_id,omitempty"` // 落地页id
+	AndroidChannelID   string `json:"android_channel_id,omitempty"`    // 安卓应用渠道包id
+}
+
+// IosAppSpec iOS应用落地页
+type IosAppSpec struct {
+	IosAppID string `json:"ios_app_id,omitempty"` // iOS应用AppId
+}
+
+// XjPageSpec 蹊径落地页（Android H5 / iOS H5 / 网页H5 / 快应用通用）
+type XjPageSpec struct {
+	PageID                      int64  `json:"page_id"`                                   // 落地页id (必填)
+	WechatChannelsLiveReserveID string `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号直播预约id
+	CustomParam                 string `json:"custom_param,omitempty"`                    // 官方落地页自定义参数
+}
+
+// WechatCanvasSpec 微信原生页落地页
+type WechatCanvasSpec struct {
+	PageID                      int64  `json:"page_id"`                                   // 落地页id (必填)
+	OverrideCanvasHeadOption    string `json:"override_canvas_head_option,omitempty"`     // 顶部素材替换关系
+	WechatChannelsLiveReserveID string `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号直播预约id
+}
+
+// WechatMiniProgramSpec 微信小程序落地页
+type WechatMiniProgramSpec struct {
+	MiniProgramID             string   `json:"mini_program_id,omitempty"`               // 小程序id
+	MiniProgramPath           string   `json:"mini_program_path,omitempty"`             // 小程序路径
+	MiniProgramPaths          []string `json:"mini_program_paths,omitempty"`            // 小程序path列表
+	MpaMiniProgramWildcardURL string   `json:"mpa_mini_program_wildcard_url,omitempty"` // 通配符
+}
+
+// WechatMiniGameSpec 微信小游戏落地页
+type WechatMiniGameSpec struct {
+	MiniProgramID   string `json:"mini_program_id,omitempty"`   // 小游戏id
+	MiniProgramPath string `json:"mini_program_path,omitempty"` // 小游戏路径
+}
+
+// WechatChannelsFeedSpec 视频号动态落地页
+type WechatChannelsFeedSpec struct {
+	FeedID                  string                    `json:"feed_id"`                              // 视频号动态id (必填)
+	ActionButton            *ChannelsFeedActionButton `json:"action_button,omitempty"`              // 行动按钮
+	WechatChannelsAccountID string                    `json:"wechat_channels_account_id,omitempty"` // 视频号账号id
+}
+
+// ChannelsFeedActionButton 视频号动态行动按钮
+type ChannelsFeedActionButton struct {
+	ButtonText string    `json:"button_text,omitempty"` // 按钮文案
+	JumpInfo   *JumpInfo `json:"jump_info,omitempty"`   // 落地页内容
+}
+
+// WechatChannelsWatchLiveSpec 视频号观看直播落地页
+type WechatChannelsWatchLiveSpec struct {
+	WechatChannelsAccountID     string `json:"wechat_channels_account_id,omitempty"`      // 视频号账号id
+	WechatChannelsLiveReserveID string `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号直播预约id
+}
+
+// WechatShopSpec 微信小店落地页
+type WechatShopSpec struct {
+	ShopID string `json:"shop_id"` // 微信小店id (必填)
+}
+
+// H5Spec 自定义H5落地页
+type H5Spec struct {
+	PageURL          string `json:"page_url,omitempty"`            // 落地页url
+	MpaH5WildcardURL string `json:"mpa_h5_wildcard_url,omitempty"` // 通配符
+}
