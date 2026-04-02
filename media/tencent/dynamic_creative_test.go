@@ -333,3 +333,46 @@ func TestDynamicCreativesAddWithImageListSelf(t *testing.T) {
 	}
 	fmt.Printf("result: %+v", result)
 }
+
+// TestDynamicCreativesDeleteSelf 测试删除动态创意
+func TestDynamicCreativesDeleteSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.DynamicCreativeID = 40958977
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// TestDynamicCreativesDeleteValidateAccountID 测试删除创意缺少account_id时的校验
+func TestDynamicCreativesDeleteValidateAccountID(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesDeleteReq{}
+	req.AccessToken = "123"
+	req.DynamicCreativeID = 40958977
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.DynamicCreativesDeleteSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v", err)
+}
+
+// TestDynamicCreativesDeleteValidateCreativeID 测试删除创意缺少dynamic_creative_id时的校验
+func TestDynamicCreativesDeleteValidateCreativeID(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.DynamicCreativesDeleteSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v", err)
+}
