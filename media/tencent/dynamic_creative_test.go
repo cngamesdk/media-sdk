@@ -101,3 +101,147 @@ func TestDynamicCreativesGetWithCursorSelf(t *testing.T) {
 	}
 	fmt.Printf("result: %+v", result)
 }
+
+// 创建创意（图片+H5落地页）
+func TestDynamicCreativesAddSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupID = 456
+	req.DynamicCreativeName = "test_creative_001"
+	req.CreativeComponents = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				ComponentID: 111,
+				Value:       &model.TextComponentValue{Content: "测试广告标题"},
+			},
+		},
+		Image: []*model.CreativeComponent{
+			{
+				ComponentID: 222,
+				Value: &model.ImageComponentValue{
+					ImageID: "image_id_001",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeH5,
+						PageSpec: &model.PageSpec{
+							H5Spec: &model.H5Spec{
+								PageURL: "https://www.example.com/landing",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// 创建创意（视频+微信小程序落地页）
+func TestDynamicCreativesAddWithVideoSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupID = 456
+	req.DynamicCreativeName = "test_video_creative_001"
+	req.DeliveryMode = model.DeliveryModeComponent
+	req.ClickTrackingURL = "https://track.example.com/click"
+	req.ImpressionTrackingURL = "https://track.example.com/impression"
+	req.CreativeComponents = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				ComponentID: 111,
+				Value:       &model.TextComponentValue{Content: "视频广告标题"},
+			},
+		},
+		Video: []*model.CreativeComponent{
+			{
+				ComponentID: 333,
+				Value: &model.VideoComponentValue{
+					VideoID: "video_id_001",
+					CoverID: "cover_id_001",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeWechatMiniProgram,
+						PageSpec: &model.PageSpec{
+							WechatMiniProgramSpec: &model.WechatMiniProgramSpec{
+								MiniProgramID:   "wx1234567890",
+								MiniProgramPath: "pages/index/index",
+							},
+						},
+					},
+				},
+			},
+		},
+		Brand: []*model.CreativeComponent{
+			{
+				ComponentID: 444,
+				Value: &model.BrandComponentValue{
+					BrandName:    "测试品牌",
+					BrandImageID: "brand_image_001",
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// 创建创意（图集+Android应用落地页）
+func TestDynamicCreativesAddWithImageListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupID = 456
+	req.DynamicCreativeName = "test_imagelist_creative_001"
+	req.CreativeComponents = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				ComponentID: 111,
+				Value:       &model.TextComponentValue{Content: "图集广告标题"},
+			},
+		},
+		Description: []*model.CreativeComponent{
+			{
+				ComponentID: 555,
+				Value:       &model.TextComponentValue{Content: "广告描述文案"},
+			},
+		},
+		ImageList: []*model.CreativeComponent{
+			{
+				ComponentID: 666,
+				Value: &model.ImageListComponentValue{
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeAndroidApp,
+						PageSpec: &model.PageSpec{
+							AndroidAppSpec: &model.AndroidAppSpec{
+								AndroidAppID: "com.example.app",
+							},
+						},
+					},
+					List: []*model.ImageListItem{
+						{ImageID: "img_001"},
+						{ImageID: "img_002"},
+						{ImageID: "img_003"},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
