@@ -24,7 +24,32 @@ func (a *TencentAdapter) DynamicCreativesGetSelf(ctx context.Context, req *model
 	return
 }
 
-// DynamicCreativesAddSelf 创建创意
+// DynamicCreativesUpdateSelf 更新创意
+// https://developers.e.qq.com/v3.0/docs/api/dynamic_creatives/update
+func (a *TencentAdapter) DynamicCreativesUpdateSelf(ctx context.Context, req *model.DynamicCreativesUpdateReq) (
+	resp *model.DynamicCreativesUpdateResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.DynamicCreativesUpdateResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/dynamic_creatives/update?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
 // https://developers.e.qq.com/v3.0/docs/api/dynamic_creatives/add
 func (a *TencentAdapter) DynamicCreativesAddSelf(ctx context.Context, req *model.DynamicCreativesAddReq) (
 	resp *model.DynamicCreativesAddResp, err error) {

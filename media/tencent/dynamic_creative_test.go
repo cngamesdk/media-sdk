@@ -196,6 +196,94 @@ func TestDynamicCreativesAddWithVideoSelf(t *testing.T) {
 	fmt.Printf("result: %+v", result)
 }
 
+// 更新创意（基础：改名）
+func TestDynamicCreativesUpdateSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.DynamicCreativeID = 40958977
+	req.DynamicCreativeName = "updated_creative_name_001"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// 更新创意（替换创意组件：标题+图片）
+func TestDynamicCreativesUpdateComponentsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.DynamicCreativeID = 40958977
+	req.CreativeComponents = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				ComponentID: 111,
+				Value:       &model.TextComponentValue{Content: "更新后的广告标题"},
+			},
+		},
+		Image: []*model.CreativeComponent{
+			{
+				ComponentID: 222,
+				Value: &model.ImageComponentValue{
+					ImageID: "image_id_new",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeH5,
+						PageSpec: &model.PageSpec{
+							H5Spec: &model.H5Spec{
+								PageURL: "https://www.example.com/new-landing",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// 更新创意（修改配置状态）
+func TestDynamicCreativesUpdateStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.DynamicCreativeID = 40958977
+	req.ConfiguredStatus = model.CreativeConfiguredStatusNormal
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
+// 更新创意（更新监测链接）
+func TestDynamicCreativesUpdateTrackingURLSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.DynamicCreativesUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.DynamicCreativeID = 40958977
+	req.ClickTrackingURL = "https://track.example.com/new-click"
+	req.ImpressionTrackingURL = "https://track.example.com/new-impression"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.DynamicCreativesUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v", result)
+}
+
 // 创建创意（图集+Android应用落地页）
 func TestDynamicCreativesAddWithImageListSelf(t *testing.T) {
 	ctx := context.Background()
