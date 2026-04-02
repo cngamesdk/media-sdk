@@ -878,3 +878,33 @@ func (p *DynamicCreativesUpdateReq) Validate() error {
 type DynamicCreativesUpdateResp struct {
 	DynamicCreativeID int64 `json:"dynamic_creative_id"` // 更新的动态创意id
 }
+
+// ========== 删除创意 ==========
+
+// DynamicCreativesDeleteReq 删除创意请求
+// https://developers.e.qq.com/v3.0/docs/api/dynamic_creatives/delete
+type DynamicCreativesDeleteReq struct {
+	GlobalReq
+	AccountID         int64 `json:"account_id"`          // 广告主帐号id (必填)
+	DynamicCreativeID int64 `json:"dynamic_creative_id"` // 广告创意id (必填)
+}
+
+func (p *DynamicCreativesDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除创意请求参数
+func (p *DynamicCreativesDeleteReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.DynamicCreativeID == 0 {
+		return errors.New("dynamic_creative_id为必填")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// DynamicCreativesDeleteResp 删除创意响应
+type DynamicCreativesDeleteResp struct {
+	DynamicCreativeID int64 `json:"dynamic_creative_id"` // 删除的动态创意id
+}
