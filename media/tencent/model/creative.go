@@ -590,3 +590,291 @@ type H5Spec struct {
 	PageURL          string `json:"page_url,omitempty"`            // 落地页url
 	MpaH5WildcardURL string `json:"mpa_h5_wildcard_url,omitempty"` // 通配符
 }
+
+// ========== 组件值类型（补全）==========
+
+// ConsultComponentValue 咨询组件值
+type ConsultComponentValue struct {
+	ID           int64       `json:"id,omitempty"`             // 咨询组件值
+	JumpInfoList []*JumpInfo `json:"jump_info_list,omitempty"` // 兜底落地页内容列表
+}
+
+// PhoneComponentValue 电话组件值
+type PhoneComponentValue struct {
+	ID int64 `json:"id"` // 电话组件值 (必填)
+}
+
+// FormComponentValue 表单组件值
+type FormComponentValue struct {
+	ID int64 `json:"id"` // 表单组件值 (必填)
+}
+
+// ActionButtonComponentValue 行动按钮组件值
+type ActionButtonComponentValue struct {
+	ButtonText string    `json:"button_text,omitempty"` // 按钮文案
+	JumpInfo   *JumpInfo `json:"jump_info,omitempty"`   // 落地页内容
+}
+
+// ChosenButtonComponentValue 选择按钮组件值
+type ChosenButtonComponentValue struct {
+	LeftButton  *ButtonItem `json:"left_button,omitempty"`  // 左按钮
+	RightButton *ButtonItem `json:"right_button,omitempty"` // 右按钮
+}
+
+// ButtonItem 按钮项
+type ButtonItem struct {
+	Text     string    `json:"text,omitempty"`      // 按钮文案
+	JumpInfo *JumpInfo `json:"jump_info,omitempty"` // 落地页内容
+}
+
+// 常量定义 - 标签类型
+const (
+	LabelTypeUnknown       = "LABEL_TYPE_UNKNOWN"       // 未知
+	LabelTypeCommon        = "LABEL_TYPE_COMMON"        // 通用
+	LabelTypePromotional   = "LABEL_TYPE_PROMOTIONAL"   // 促销
+	LabelTypeCustomizeText = "LABEL_TYPE_CUSTOMIZETEXT" // 自定义文字
+	LabelTypeIcon          = "LABEL_TYPE_ICON"          // 图标
+)
+
+// LabelComponentValue 标签组件值
+type LabelComponentValue struct {
+	List []*LabelItem `json:"list,omitempty"` // 标签列表
+}
+
+// LabelItem 标签列表项
+type LabelItem struct {
+	Content        string `json:"content,omitempty"`         // 标签内容
+	Type           string `json:"type,omitempty"`            // 标签类型
+	DisplayContent string `json:"display_content,omitempty"` // 标签显示内容，最大100字节
+}
+
+// ShowDataComponentValue 数据外显组件值
+type ShowDataComponentValue struct {
+	ConversionDataType   string `json:"conversion_data_type,omitempty"`   // 数据外显转换数据类型
+	ConversionTargetType string `json:"conversion_target_type,omitempty"` // 数据外显转化目标量类型
+}
+
+// MarketingPendantComponentValue 营销挂件组件值
+type MarketingPendantComponentValue struct {
+	ImageID string `json:"image_id"` // 挂件图id (必填)
+}
+
+// AppGiftPackCodeComponentValue 礼包码组件值
+type AppGiftPackCodeComponentValue struct {
+	Code            string `json:"code,omitempty"`               // 礼包码，最大450字节
+	Tips            string `json:"tips,omitempty"`               // 礼包码提示
+	Description     string `json:"description,omitempty"`        // 礼包描述，最大36字节
+	GameGiftID      string `json:"game_gift_id,omitempty"`       // 游戏圈礼包id
+	GameActID       string `json:"game_act_id,omitempty"`        // 游戏圈活动id
+	GameGiftImageID string `json:"game_gift_image_id,omitempty"` // 游戏圈礼包图片
+}
+
+// ShopImageComponentValue 卖点图组件值
+type ShopImageComponentValue struct {
+	ShopImageSwitch        bool   `json:"shop_image_switch,omitempty"`         // 卖点图开关
+	DynamicShopImageSwitch bool   `json:"dynamic_shop_image_switch,omitempty"` // 卖点图轮播开关
+	ShopImageID            string `json:"shop_image_id,omitempty"`             // 卖点图片id
+	ShopImageTitle         string `json:"shop_image_title,omitempty"`          // 卖点图标题
+	ShopImageDescription   string `json:"shop_image_description,omitempty"`    // 卖点图文案
+}
+
+// 常量定义 - 倒计时时间类型
+const (
+	CountdownTimeStart = "COUNTDOWN_TIME_START" // 开始时间
+	CountdownTimeEnd   = "COUNTDOWN_TIME_END"   // 结束时间
+)
+
+// CountDownComponentValue 倒计时组件值
+type CountDownComponentValue struct {
+	Price             string `json:"price,omitempty"`              // 倒计时价格，单位：分
+	TimeType          string `json:"time_type,omitempty"`          // 倒计时时间类型
+	ExpiringTimestamp int64  `json:"expiring_timestamp,omitempty"` // 倒计时时间锚点，unix时间戳
+}
+
+// BarrageComponentValue 弹幕组件值
+type BarrageComponentValue struct {
+	List []*BarrageItem `json:"list,omitempty"` // 弹幕列表
+}
+
+// BarrageItem 弹幕列表项
+type BarrageItem struct {
+	ID   int64  `json:"id,omitempty"`   // 弹幕id
+	Text string `json:"text,omitempty"` // 弹幕文案，1-12个字
+}
+
+// 常量定义 - 浮层卡片类型
+const (
+	FloatingZoneTypeUnknown     = "FLOATING_ZONE_TYPE_UNKNOWN"      // 未知
+	FloatingZoneTypeImageText   = "FLOATING_ZONE_TYPE_IMAGE_TEXT"   // 图文
+	FloatingZoneTypeSingleImage = "FLOATING_ZONE_TYPE_SINGLE_IMAGE" // 单图
+	FloatingZoneTypeMultiButton = "FLOATING_ZONE_TYPE_MULTI_BUTTON" // 多按钮
+	FloatingZoneTypeSliderCard  = "FLOATING_ZONE_TYPE_SLIDER_CARD"  // 滑动卡片
+)
+
+// FloatingZoneComponentValue 浮层卡片组件值
+type FloatingZoneComponentValue struct {
+	FloatingZoneSwitch                bool      `json:"floating_zone_switch,omitempty"`                   // 浮层卡片开关
+	FloatingZoneImageID               string    `json:"floating_zone_image_id,omitempty"`                 // 浮层卡片图片id（512*512，不超过50KB）
+	FloatingZoneName                  string    `json:"floating_zone_name,omitempty"`                     // 文案一，1-10等宽字符
+	FloatingZoneDesc                  string    `json:"floating_zone_desc,omitempty"`                     // 文案二，1-14等宽字符
+	FloatingZoneButtonText            string    `json:"floating_zone_button_text,omitempty"`              // 按钮文案，1-10等宽字符
+	FloatingZoneShowAppPropertySwitch bool      `json:"floating_zone_show_app_property_switch,omitempty"` // 显示已下载人数及评分开关
+	FloatingZoneType                  string    `json:"floating_zone_type,omitempty"`                     // 浮层卡片类型
+	FloatingZoneSingleImageID         string    `json:"floating_zone_single_image_id,omitempty"`          // 单图片id（482*270，不超过50KB）
+	ButtonBaseText                    string    `json:"button_base_text,omitempty"`                       // 视频号基础态文案内容，最大10字节
+	JumpInfo                          *JumpInfo `json:"jump_info,omitempty"`                              // 落地页内容
+	FloatingZoneInfoType              string    `json:"floating_zone_info_type,omitempty"`                // 浮层卡片外显类型
+}
+
+// TextLinkComponentValue 文字链组件值
+type TextLinkComponentValue struct {
+	LinkNameType string    `json:"link_name_type,omitempty"` // 链接名称类型
+	LinkNameText string    `json:"link_name_text,omitempty"` // 文字链文案
+	JumpInfo     *JumpInfo `json:"jump_info,omitempty"`      // 落地页内容
+}
+
+// EndPageComponentValue 视频结束页组件值
+type EndPageComponentValue struct {
+	EndPageType string `json:"end_page_type,omitempty"` // 结束页类型
+	EndPageDesc string `json:"end_page_desc,omitempty"` // 结束页文案，最大192字节
+}
+
+// LivingDescComponentValue 轮播文案组件值
+type LivingDescComponentValue struct {
+	LivingDescSwitch bool     `json:"living_desc_switch,omitempty"` // 轮播组件开关
+	DescList         []string `json:"desc_list,omitempty"`          // 轮播文案，2-5条，每条最大1024字节
+}
+
+// 常量定义 - 视频号直播推广形式
+const (
+	LivePromotedTypeNativeVideo = "LIVE_PROMOTED_TYPE_NATIVE_VIDEO" // 原生视频
+	LivePromotedTypeShortVideo  = "LIVE_PROMOTED_TYPE_SHORT_VIDEO"  // 短视频
+)
+
+// WechatChannelsComponentValue 视频号信息组件值
+type WechatChannelsComponentValue struct {
+	LivePromotedType       string `json:"live_promoted_type,omitempty"`       // 视频号直播推广形式
+	Username               string `json:"username,omitempty"`                 // 视频号username，最大1024字节
+	FinderObjectVisibility bool   `json:"finder_object_visibility,omitempty"` // 是否保存至视频号
+}
+
+// ShortVideoComponentValue 短视频组件值
+type ShortVideoComponentValue struct {
+	ShortVideo1 string `json:"short_video1,omitempty"` // 视频id，最大64字节
+	ShortVideo2 string `json:"short_video2,omitempty"` // 视频id，最大64字节
+}
+
+// ElementStoryComponentValue 集装箱创意组合组件值
+type ElementStoryComponentValue struct {
+	List []*ElementStoryItem `json:"list,omitempty"` // 集装箱创意组合，1-14条
+}
+
+// ElementStoryItem 集装箱创意组合项
+type ElementStoryItem struct {
+	Image       string `json:"image,omitempty"`       // 图片id
+	Image2      string `json:"image2,omitempty"`      // 素材图片2的id
+	Description string `json:"description,omitempty"` // 广告描述
+	URL         string `json:"url,omitempty"`         // 跳转链接
+	Title       string `json:"title,omitempty"`       // 广告文案
+}
+
+// WxgamePlayablePageComponentValue 小游戏试玩页组件值
+type WxgamePlayablePageComponentValue struct {
+	WxgamePlayablePageSwitch        bool     `json:"wxgame_playable_page_switch,omitempty"`                // 小游戏试玩页开关
+	WxgamePlayablePagePath          string   `json:"wxgame_playable_page_path,omitempty"`                  // 小游戏试玩页，最大1024字节
+	WxgamePlayablePageEndCoverImg   string   `json:"wxgame_playable_page_end_cover_img,omitempty"`         // 结束页图片id，最大64字节
+	WxgamePlayablePageEndDesc       string   `json:"wxgame_playable_page_end_desc,omitempty"`              // 结束页文案，最大200字节
+	WxgamePlayablePageTriggerTypes  []string `json:"wxgame_playable_page_trigger_types,omitempty"`         // 开启方式，1-100条
+	WxgamePlayablePageTriggerText   string   `json:"wxgame_playable_page_trigger_text,omitempty"`          // 开启文案
+	WxgamePlayablePageCardLinkImage string   `json:"wxgame_playable_page_card_link_image,omitempty"`       // 图文链接图片id，最大64字节
+	WxgamePlayablePageCardLinkDesc  string   `json:"wxgame_playable_page_card_link_description,omitempty"` // 图文链接描述文案
+	WxgamePlayablePageEndTimeType   string   `json:"wxgame_playable_page_end_time_type,omitempty"`         // 结束时间类型
+}
+
+// QrcodePosition 二维码坐标
+type QrcodePosition struct {
+	PositionX string `json:"position_x,omitempty"` // x坐标
+	PositionY string `json:"position_y,omitempty"` // y坐标
+}
+
+// AppPromotionVideoComponentValue OTT视频组件值
+type AppPromotionVideoComponentValue struct {
+	Video          string          `json:"video,omitempty"`           // 视频id
+	Video2         string          `json:"video2,omitempty"`          // 视频id
+	Video3         string          `json:"video3,omitempty"`          // 视频id
+	AllowTvQrcode  bool            `json:"allow_tv_qrcode,omitempty"` // 支持TV二维码
+	QrcodePosition *QrcodePosition `json:"qrcode_position,omitempty"` // 二维码坐标
+	QrcodeWidth    int64           `json:"qrcode_width,omitempty"`    // 二维码边长
+}
+
+// VideoShowcaseVideo 橱窗视频
+type VideoShowcaseVideo struct {
+	VideoID  string    `json:"video_id"`            // 视频id (必填)
+	CoverID  string    `json:"cover_id,omitempty"`  // 封面图片id
+	JumpInfo *JumpInfo `json:"jump_info,omitempty"` // 落地页内容
+}
+
+// VideoShowcaseComponentValue 橱窗视频组件值
+type VideoShowcaseComponentValue struct {
+	Video     *VideoShowcaseVideo      `json:"video"`                // 视频 (必填)
+	ImageList *ImageListComponentValue `json:"image_list,omitempty"` // 图集
+}
+
+// ImageShowcaseComponentValue 橱窗图片组件值
+type ImageShowcaseComponentValue struct {
+	Image     *ImageComponentValue     `json:"image"`                // 图片 (必填)
+	ImageList *ImageListComponentValue `json:"image_list,omitempty"` // 图集
+}
+
+// SocialSkillComponentValue 首评回复组件值
+type SocialSkillComponentValue struct {
+	SocialSkillFirstCommentSwitch bool   `json:"social_skill_first_comment_switch,omitempty"` // 首条评论开关
+	SocialSkillFirstComment       string `json:"social_skill_first_comment,omitempty"`        // 首条评论内容，最大200字节
+}
+
+// MiniCardLinkComponentValue 图文链接组件值
+type MiniCardLinkComponentValue struct {
+	MiniCardLinkDescription string `json:"mini_card_link_description,omitempty"` // 图文链接描述文案
+	MiniCardLinkImage       string `json:"mini_card_link_image,omitempty"`       // 图文链接图片，最大384字节
+}
+
+// ========== 更新创意 ==========
+
+// DynamicCreativesUpdateReq 更新创意请求
+// https://developers.e.qq.com/v3.0/docs/api/dynamic_creatives/update
+type DynamicCreativesUpdateReq struct {
+	GlobalReq
+	AccountID                        int64               `json:"account_id"`                                     // 广告主帐号id (必填)
+	DynamicCreativeID                int64               `json:"dynamic_creative_id"`                            // 广告创意id (必填)
+	DynamicCreativeName              string              `json:"dynamic_creative_name,omitempty"`                // 广告创意名称，同账号下不重复，1-60等宽字符
+	CreativeComponents               *CreativeComponents `json:"creative_components,omitempty"`                  // 创意组件
+	ImpressionTrackingURL            string              `json:"impression_tracking_url,omitempty"`              // 曝光监控地址
+	ClickTrackingURL                 string              `json:"click_tracking_url,omitempty"`                   // 点击监控链接
+	AutoDerivedProgramCreativeSwitch bool                `json:"auto_derived_program_creative_switch,omitempty"` // 自动衍生程序化创意开关
+	ConfiguredStatus                 string              `json:"configured_status,omitempty"`                    // 配置状态
+	IsRetryBatchUpdate               bool                `json:"is_retry_batch_update,omitempty"`                // 是否重试批量更新
+	SiteSetValidateModel             string              `json:"site_set_validate_model,omitempty"`              // 站点集验证模型
+}
+
+func (p *DynamicCreativesUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证更新创意请求参数
+func (p *DynamicCreativesUpdateReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.DynamicCreativeID == 0 {
+		return errors.New("dynamic_creative_id为必填")
+	}
+	if len(p.DynamicCreativeName) > MaxDynamicCreativeNameBytes {
+		return errors.New("dynamic_creative_name长度不能超过180字节")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// DynamicCreativesUpdateResp 更新创意响应
+type DynamicCreativesUpdateResp struct {
+	DynamicCreativeID int64 `json:"dynamic_creative_id"` // 更新的动态创意id
+}
