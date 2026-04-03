@@ -380,3 +380,44 @@ func (p *ComponentsAddReq) Validate() error {
 type ComponentsAddResp struct {
 	ComponentID int64 `json:"component_id"` // 创建的创意组件id
 }
+
+// ========== 删除创意组件 ==========
+// https://developers.e.qq.com/v3.0/docs/api/components/delete
+
+// 常量定义 - 组件删除策略
+const (
+	DeleteStrategyForce      = "DELETE_STRATEGY_FORCE"      // 强制删除
+	DeleteStrategyRestricted = "DELETE_STRATEGY_RESTRICTED" // 受限删除（使用中不可删除）
+)
+
+// ComponentsDeleteReq 删除创意组件请求
+// https://developers.e.qq.com/v3.0/docs/api/components/delete
+type ComponentsDeleteReq struct {
+	GlobalReq
+	AccountID      int64  `json:"account_id,omitempty"`      // 广告主帐号id
+	OrganizationID int64  `json:"organization_id,omitempty"` // 业务单元id
+	ComponentID    int64  `json:"component_id"`              // 创意组件id (必填)
+	DeleteStrategy string `json:"delete_strategy,omitempty"` // 删除策略
+}
+
+func (p *ComponentsDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除创意组件请求参数
+func (p *ComponentsDeleteReq) Validate() error {
+	if p.ComponentID == 0 {
+		return errors.New("component_id为必填")
+	}
+	if p.DeleteStrategy != "" &&
+		p.DeleteStrategy != DeleteStrategyForce &&
+		p.DeleteStrategy != DeleteStrategyRestricted {
+		return errors.New("delete_strategy值无效，允许值：DELETE_STRATEGY_FORCE、DELETE_STRATEGY_RESTRICTED")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ComponentsDeleteResp 删除创意组件响应
+type ComponentsDeleteResp struct {
+	ComponentID int64 `json:"component_id"` // 删除的创意组件id
+}

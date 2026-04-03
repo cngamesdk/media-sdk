@@ -578,3 +578,98 @@ func TestComponentsAddValidateComponentValueSelf(t *testing.T) {
 	}
 	fmt.Printf("expected error: %v\n", err)
 }
+
+// ========== 删除创意组件测试用例 ==========
+
+// TestComponentsDeleteSelf 测试删除创意组件（默认策略）
+func TestComponentsDeleteSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentID = 111111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsDeleteWithForceStrategySelf 测试强制删除创意组件
+func TestComponentsDeleteWithForceStrategySelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentID = 111111
+	req.DeleteStrategy = model.DeleteStrategyForce
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsDeleteWithRestrictedStrategySelf 测试受限删除创意组件
+func TestComponentsDeleteWithRestrictedStrategySelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentID = 111111
+	req.DeleteStrategy = model.DeleteStrategyRestricted
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsDeleteWithOrganizationIDSelf 测试通过业务单元删除创意组件
+func TestComponentsDeleteWithOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.DeleteStrategy = model.DeleteStrategyRestricted
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsDeleteValidateComponentIDSelf 测试缺少component_id时的校验
+func TestComponentsDeleteValidateComponentIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentsDeleteValidateStrategySelf 测试传入无效delete_strategy时的校验
+func TestComponentsDeleteValidateStrategySelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentID = 111111
+	req.DeleteStrategy = "INVALID_STRATEGY"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentsDeleteSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
