@@ -983,8 +983,10 @@ type SocialSkillComponentValue struct {
 
 // MiniCardLinkComponentValue 图文链接组件值
 type MiniCardLinkComponentValue struct {
-	MiniCardLinkDescription string `json:"mini_card_link_description,omitempty"` // 图文链接描述文案
-	MiniCardLinkImage       string `json:"mini_card_link_image,omitempty"`       // 图文链接图片，最大384字节
+	MiniCardLinkDescription string    `json:"mini_card_link_description,omitempty"` // 图文链接描述文案
+	MiniCardLinkImage       string    `json:"mini_card_link_image,omitempty"`       // 图文链接图片，最大384字节
+	MiniCardLinkButtonText  string    `json:"mini_card_link_button_text,omitempty"` // 图文链接按钮文案
+	JumpInfo                *JumpInfo `json:"jump_info,omitempty"`                  // 落地页内容
 }
 
 // ========== 更新创意 ==========

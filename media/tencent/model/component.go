@@ -247,3 +247,136 @@ type ComponentsGetResp struct {
 	List []*ComponentsGetListItem `json:"list,omitempty"` // 创意组件列表
 	PageInfoContainer
 }
+
+// ========== 创建创意组件 ==========
+// https://developers.e.qq.com/v3.0/docs/api/components/add
+
+// 常量定义 - 组件子类型 (component_sub_type)
+const (
+	// 视频类
+	ComponentSubTypeVideo16X9     = "VIDEO_16X9"      // 视频 16:9
+	ComponentSubTypeVideo9X16     = "VIDEO_9X16"      // 视频 9:16
+	ComponentSubTypeVideo4X3      = "VIDEO_4X3"       // 视频 4:3
+	ComponentSubTypeVideoShowcase = "VIDEO_SHOWCASE"  // 橱窗视频
+	ComponentSubTypeShortVideo4X3 = "SHORT_VIDEO_4X3" // 短视频 4:3
+
+	// 图片类
+	ComponentSubTypeImage16X9     = "IMAGE_16X9"     // 图片 16:9
+	ComponentSubTypeImage9X16     = "IMAGE_9X16"     // 图片 9:16
+	ComponentSubTypeImage1X1      = "IMAGE_1X1"      // 图片 1:1
+	ComponentSubTypeImage3X2      = "IMAGE_3X2"      // 图片 3:2
+	ComponentSubTypeImage3X4      = "IMAGE_3X4"      // 图片 3:4
+	ComponentSubTypeImage4X3      = "IMAGE_4X3"      // 图片 4:3
+	ComponentSubTypeImage5X4      = "IMAGE_5X4"      // 图片 5:4
+	ComponentSubTypeImage4X5      = "IMAGE_4X5"      // 图片 4:5
+	ComponentSubTypeImage20X7     = "IMAGE_20X7"     // 图片 20:7
+	ComponentSubTypeImage7X2      = "IMAGE_7X2"      // 图片 7:2
+	ComponentSubTypeImageShowcase = "IMAGE_SHOWCASE" // 橱窗图片
+	ComponentSubTypeImage100X9    = "IMAGE_100X9"    // 图片 100:9
+
+	// 图集类
+	ComponentSubTypeImageList9X16_4 = "IMAGE_LIST_9X16_4" // 图集 9:16×4
+	ComponentSubTypeImageList1X1_3  = "IMAGE_LIST_1X1_3"  // 图集 1:1×3
+	ComponentSubTypeImageList1X1_4  = "IMAGE_LIST_1X1_4"  // 图集 1:1×4
+	ComponentSubTypeImageList1X1_6  = "IMAGE_LIST_1X1_6"  // 图集 1:1×6
+	ComponentSubTypeImageList3X2_3  = "IMAGE_LIST_3X2_3"  // 图集 3:2×3
+	ComponentSubTypeImageList1X1_1  = "IMAGE_LIST_1X1_1"  // 图集 1:1×1
+	ComponentSubTypeImageList16X9_1 = "IMAGE_LIST_16X9_1" // 图集 16:9×1
+	ComponentSubTypeImageList1X1_9  = "IMAGE_LIST_1X1_9"  // 图集 1:1×9
+
+	// 文案类
+	ComponentSubTypeElementStory = "ELEMENT_STORY" // 集装箱创意组合
+	ComponentSubTypeDescription  = "DESCRIPTION"   // 描述
+	ComponentSubTypeTitle        = "TITLE"         // 标题
+
+	// 交互类
+	ComponentSubTypeActionButton              = "ACTION_BUTTON"                 // 行动按钮
+	ComponentSubTypeLabel                     = "LABEL"                         // 标签
+	ComponentSubTypeShowData                  = "SHOW_DATA"                     // 数据外显
+	ComponentSubTypeFloatingZoneImageText     = "FLOATING_ZONE_IMAGE_TEXT"      // 浮层卡片（图文）
+	ComponentSubTypeFloatingZoneImage         = "FLOATING_ZONE_IMAGE"           // 浮层卡片（单图）
+	ComponentSubTypeBarrage                   = "BARRAGE"                       // 弹幕
+	ComponentSubTypeAppGiftPackCode           = "APP_GIFT_PACK_CODE"            // 礼包码
+	ComponentSubTypeShopImage                 = "SHOP_IMAGE"                    // 卖点图
+	ComponentSubTypeMarketingPendant          = "MARKETING_PENDANT"             // 营销挂件
+	ComponentSubTypeChosenButton              = "CHOSEN_BUTTON"                 // 选择按钮
+	ComponentSubTypeCountDown                 = "COUNT_DOWN"                    // 倒计时
+	ComponentSubTypeLivingDesc                = "LIVING_DESC"                   // 轮播文案
+	ComponentSubTypeTextLink                  = "TEXT_LINK"                     // 文字链
+	ComponentSubTypeEndPage                   = "END_PAGE"                      // 视频结束页
+	ComponentSubTypeWxgamePlayablePage        = "WXGAME_PLAYABLE_PAGE"          // 小游戏试玩页
+	ComponentSubTypeSocialSkill               = "SOCIAL_SKILL"                  // 首评回复
+	ComponentSubTypeMiniCardLink              = "MINI_CARD_LINK"                // 图文链接
+	ComponentSubTypeFloatingZoneImageTextList = "FLOATING_ZONE_IMAGE_TEXT_LIST" // 多卡轮播
+	ComponentSubTypeConsultLink               = "CONSULT_LINK"                  // 咨询链接
+	ComponentSubTypeAudio                     = "AUDIO"                         // 音频
+	ComponentSubTypeWechatShopActivityBulkBuy = "WECHAT_SHOP_ACTIVITY_BULK_BUY" // 微信小店活动团购
+	ComponentSubTypeWxgameDirectPage          = "WXGAME_DIRECT_PAGE"            // 小游戏直玩
+
+	// 品牌类
+	ComponentSubTypeBrand              = "BRAND"                // 品牌形象
+	ComponentSubTypeBrandPage          = "BRAND_PAGE"           // 品牌落地页
+	ComponentSubTypeBrandSearch        = "BRAND_SEARCH"         // 品牌搜索
+	ComponentSubTypeBrandWechatChannel = "BRAND_WECHAT_CHANNEL" // 品牌视频号
+	ComponentSubTypeBrandWechat        = "BRAND_WECHAT"         // 品牌微信
+	ComponentSubTypeBrandWecom         = "BRAND_WECOM"          // 品牌企业微信
+	ComponentSubTypeBrandWechatShop    = "BRAND_WECHAT_SHOP"    // 品牌微信小店
+	ComponentSubTypeBrandCustomLink    = "BRAND_CUSTOM_LINK"    // 品牌自定义链接
+
+	// 跳转信息类
+	ComponentSubTypeJumpInfoOfficial                    = "JUMP_INFO_OFFICIAL"                       // 官方落地页跳转
+	ComponentSubTypeJumpInfoH5                          = "JUMP_INFO_H5"                             // H5跳转
+	ComponentSubTypeJumpInfoWechatMiniProgram           = "JUMP_INFO_WECHAT_MINI_PROGRAM"            // 微信小程序跳转
+	ComponentSubTypeJumpInfoWechatConsult               = "JUMP_INFO_WECHAT_CONSULT"                 // 微信客服跳转
+	ComponentSubTypeJumpInfoWecomConsult                = "JUMP_INFO_WECOM_CONSULT"                  // 企业微信客服跳转
+	ComponentSubTypeJumpInfoWechatChannelsWatchLive     = "JUMP_INFO_WECHAT_CHANNELS_WATCH_LIVE"     // 视频号观看直播跳转
+	ComponentSubTypeJumpInfoWechatChannelsFeed          = "JUMP_INFO_WECHAT_CHANNELS_FEED"           // 视频号动态跳转
+	ComponentSubTypeJumpInfoWechatOfficialAccountDetail = "JUMP_INFO_WECHAT_OFFICIAL_ACCOUNT_DETAIL" // 微信公众号详情跳转
+	ComponentSubTypeJumpInfoWechatMiniGame              = "JUMP_INFO_WECHAT_MINI_GAME"               // 微信小游戏跳转
+	ComponentSubTypeJumpInfoAndroidApp                  = "JUMP_INFO_ANDROID_APP"                    // Android应用跳转
+	ComponentSubTypeJumpInfoIosApp                      = "JUMP_INFO_IOS_APP"                        // iOS应用跳转
+	ComponentSubTypeJumpInfoAndroidDirectDownload       = "JUMP_INFO_ANDROID_DIRECT_DOWNLOAD"        // Android一键下载跳转
+	ComponentSubTypeJumpInfoAppMarket                   = "JUMP_INFO_APP_MARKET"                     // 厂商下载跳转
+	ComponentSubTypeJumpInfoAppDeepLink                 = "JUMP_INFO_APP_DEEP_LINK"                  // 应用直达跳转
+	ComponentSubTypeJumpInfoWechatChannelsShopProduct   = "JUMP_INFO_WECHAT_CHANNELS_SHOP_PRODUCT"   // 微信小店商品跳转
+	ComponentSubTypeJumpInfoQqMiniGame                  = "JUMP_INFO_QQ_MINI_GAME"                   // QQ小游戏跳转
+)
+
+// 创意组件字段限制常量
+const (
+	MaxComponentCustomNameBytes = 512 // component_custom_name 最大字节数
+)
+
+// ComponentsAddReq 创建创意组件请求
+// https://developers.e.qq.com/v3.0/docs/api/components/add
+type ComponentsAddReq struct {
+	GlobalReq
+	AccountID           int64               `json:"account_id,omitempty"`            // 广告主帐号id
+	OrganizationID      int64               `json:"organization_id,omitempty"`       // 业务单元id
+	ComponentSubType    string              `json:"component_sub_type"`              // 创意组件子类型 (必填)
+	ComponentValue      *CreativeComponents `json:"component_value"`                 // 创意组件内容 (必填)
+	ComponentCustomName string              `json:"component_custom_name,omitempty"` // 创意组件自定义名称，1-512字节
+}
+
+func (p *ComponentsAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证创建创意组件请求参数
+func (p *ComponentsAddReq) Validate() error {
+	if p.ComponentSubType == "" {
+		return errors.New("component_sub_type为必填")
+	}
+	if p.ComponentValue == nil {
+		return errors.New("component_value为必填")
+	}
+	if len(p.ComponentCustomName) > MaxComponentCustomNameBytes {
+		return errors.New("component_custom_name长度不能超过512字节")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ComponentsAddResp 创建创意组件响应
+type ComponentsAddResp struct {
+	ComponentID int64 `json:"component_id"` // 创建的创意组件id
+}

@@ -223,3 +223,358 @@ func TestComponentsGetValidateAccountID(t *testing.T) {
 	}
 	fmt.Printf("expected error: %v\n", err)
 }
+
+// ========== 创建创意组件测试用例 ==========
+
+// TestComponentsAddTitleSelf 测试创建标题组件
+func TestComponentsAddTitleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeTitle
+	req.ComponentCustomName = "测试标题组件"
+	req.ComponentValue = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				Value: &model.TextComponentValue{Content: "这是一个广告标题"},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddDescriptionSelf 测试创建描述组件
+func TestComponentsAddDescriptionSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeDescription
+	req.ComponentCustomName = "测试描述组件"
+	req.ComponentValue = &model.CreativeComponents{
+		Description: []*model.CreativeComponent{
+			{
+				Value: &model.TextComponentValue{Content: "这是广告描述文案内容"},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddImageSelf 测试创建单图组件（H5落地页）
+func TestComponentsAddImageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeImage16X9
+	req.ComponentCustomName = "测试单图16:9组件"
+	req.ComponentValue = &model.CreativeComponents{
+		Image: []*model.CreativeComponent{
+			{
+				Value: &model.ImageComponentValue{
+					ImageID: "image_id_001",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeH5,
+						PageSpec: &model.PageSpec{
+							H5Spec: &model.H5Spec{
+								PageURL: "https://www.example.com/landing",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddImageWithMiniProgramSelf 测试创建单图组件（微信小程序落地页）
+func TestComponentsAddImageWithMiniProgramSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeImage1X1
+	req.ComponentValue = &model.CreativeComponents{
+		Image: []*model.CreativeComponent{
+			{
+				Value: &model.ImageComponentValue{
+					ImageID: "image_id_001",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeWechatMiniProgram,
+						PageSpec: &model.PageSpec{
+							WechatMiniProgramSpec: &model.WechatMiniProgramSpec{
+								MiniProgramID:   "wx1234567890",
+								MiniProgramPath: "pages/index/index",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddVideoSelf 测试创建视频组件（Android应用落地页）
+func TestComponentsAddVideoSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeVideo16X9
+	req.ComponentCustomName = "测试视频16:9组件"
+	req.ComponentValue = &model.CreativeComponents{
+		Video: []*model.CreativeComponent{
+			{
+				Value: &model.VideoComponentValue{
+					VideoID: "video_id_001",
+					CoverID: "cover_id_001",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeAndroidApp,
+						PageSpec: &model.PageSpec{
+							AndroidAppSpec: &model.AndroidAppSpec{
+								AndroidAppID: "com.example.app",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddImageListSelf 测试创建图集组件
+func TestComponentsAddImageListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeImageList1X1_3
+	req.ComponentValue = &model.CreativeComponents{
+		ImageList: []*model.CreativeComponent{
+			{
+				Value: &model.ImageListComponentValue{
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeH5,
+						PageSpec: &model.PageSpec{
+							H5Spec: &model.H5Spec{PageURL: "https://www.example.com/landing"},
+						},
+					},
+					List: []*model.ImageListItem{
+						{ImageID: "img_001"},
+						{ImageID: "img_002"},
+						{ImageID: "img_003"},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddActionButtonSelf 测试创建行动按钮组件
+func TestComponentsAddActionButtonSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeActionButton
+	req.ComponentValue = &model.CreativeComponents{
+		ActionButton: []*model.CreativeComponent{
+			{
+				Value: &model.ActionButtonComponentValue{
+					ButtonText: "立即下载",
+					JumpInfo: &model.JumpInfo{
+						PageType: model.PageTypeAppDeepLink,
+						PageSpec: &model.PageSpec{
+							AppDeepLinkSpec: &model.AppDeepLinkSpec{
+								AndroidDeepLinkURL: "myapp://main",
+								IosDeepLinkURL:     "myapp://main",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddLabelSelf 测试创建标签组件
+func TestComponentsAddLabelSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeLabel
+	req.ComponentValue = &model.CreativeComponents{
+		Label: []*model.CreativeComponent{
+			{
+				Value: &model.LabelComponentValue{
+					List: []*model.LabelItem{
+						{
+							Content:        "限时优惠",
+							Type:           model.LabelTypePromotional,
+							DisplayContent: "限时特惠",
+						},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddBarrageSelf 测试创建弹幕组件
+func TestComponentsAddBarrageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeBarrage
+	req.ComponentValue = &model.CreativeComponents{
+		Barrage: []*model.CreativeComponent{
+			{
+				Value: &model.BarrageComponentValue{
+					List: []*model.BarrageItem{
+						{Text: "好产品"},
+						{Text: "强烈推荐"},
+						{Text: "性价比超高"},
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddCountDownSelf 测试创建倒计时组件
+func TestComponentsAddCountDownSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeCountDown
+	req.ComponentValue = &model.CreativeComponents{
+		CountDown: []*model.CreativeComponent{
+			{
+				Value: &model.CountDownComponentValue{
+					Price:             "9900",
+					TimeType:          model.CountdownTimeEnd,
+					ExpiringTimestamp: 1800000000,
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddWithOrganizationIDSelf 测试通过业务单元创建组件
+func TestComponentsAddWithOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentSubType = model.ComponentSubTypeTitle
+	req.ComponentValue = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{
+				Value: &model.TextComponentValue{Content: "业务单元共享标题组件"},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentsAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentsAddValidateSubTypeSelf 测试缺少component_sub_type时的校验
+func TestComponentsAddValidateSubTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentValue = &model.CreativeComponents{
+		Title: []*model.CreativeComponent{
+			{Value: &model.TextComponentValue{Content: "测试"}},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentsAddSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentsAddValidateComponentValueSelf 测试缺少component_value时的校验
+func TestComponentsAddValidateComponentValueSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentsAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.ComponentSubType = model.ComponentSubTypeTitle
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentsAddSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
