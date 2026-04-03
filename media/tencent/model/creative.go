@@ -506,19 +506,39 @@ type JumpInfo struct {
 
 // PageSpec 落地页内容规格（根据 page_type 选填对应字段）
 type PageSpec struct {
-	AndroidAppSpec              *AndroidAppSpec              `json:"android_app_spec,omitempty"`                // Android应用
-	IosAppSpec                  *IosAppSpec                  `json:"ios_app_spec,omitempty"`                    // iOS应用
-	XjAndroidAppH5Spec          *XjPageSpec                  `json:"xj_android_app_h5_spec,omitempty"`          // 蹊径Android H5
-	XjIosAppH5Spec              *XjPageSpec                  `json:"xj_ios_app_h5_spec,omitempty"`              // 蹊径iOS H5
-	XjWebH5Spec                 *XjPageSpec                  `json:"xj_web_h5_spec,omitempty"`                  // 蹊径网页H5
-	XjQuickSpec                 *XjPageSpec                  `json:"xj_quick_spec,omitempty"`                   // 蹊径快应用
-	WechatCanvasSpec            *WechatCanvasSpec            `json:"wechat_canvas_spec,omitempty"`              // 微信原生页
-	WechatMiniProgramSpec       *WechatMiniProgramSpec       `json:"wechat_mini_program_spec,omitempty"`        // 微信小程序
-	WechatMiniGameSpec          *WechatMiniGameSpec          `json:"wechat_mini_game_spec,omitempty"`           // 微信小游戏
-	WechatChannelsFeedSpec      *WechatChannelsFeedSpec      `json:"wechat_channels_feed_spec,omitempty"`       // 视频号动态
-	WechatChannelsWatchLiveSpec *WechatChannelsWatchLiveSpec `json:"wechat_channels_watch_live_spec,omitempty"` // 视频号观看直播
-	WechatShopSpec              *WechatShopSpec              `json:"wechat_shop_spec,omitempty"`                // 微信小店
-	H5Spec                      *H5Spec                      `json:"h5_spec,omitempty"`                         // 自定义H5
+	AndroidAppSpec                  *AndroidAppSpec                  `json:"android_app_spec,omitempty"`                    // Android应用
+	IosAppSpec                      *IosAppSpec                      `json:"ios_app_spec,omitempty"`                        // iOS应用
+	XjAndroidAppH5Spec              *XjPageSpec                      `json:"xj_android_app_h5_spec,omitempty"`              // 蹊径Android H5
+	XjIosAppH5Spec                  *XjPageSpec                      `json:"xj_ios_app_h5_spec,omitempty"`                  // 蹊径iOS H5
+	XjWebH5Spec                     *XjPageSpec                      `json:"xj_web_h5_spec,omitempty"`                      // 蹊径网页H5
+	XjQuickSpec                     *XjPageSpec                      `json:"xj_quick_spec,omitempty"`                       // 蹊径快应用
+	FengyeEcommerceSpec             *FengyeEcommerceSpec             `json:"fengye_ecommmerce_spec,omitempty"`              // 枫叶电商（注：官方接口拼写为3个m）
+	WechatCanvasSpec                *WechatCanvasSpec                `json:"wechat_canvas_spec,omitempty"`                  // 微信原生页
+	WechatMiniProgramSpec           *WechatMiniProgramSpec           `json:"wechat_mini_program_spec,omitempty"`            // 微信小程序
+	WechatCanvasMiniProgramSpec     *WechatCanvasMiniProgramSpec     `json:"wechat_canvas_mini_program_spec,omitempty"`     // 微信原生页（小程序）
+	QqAppMiniProgramSpec            *QqAppMiniProgramSpec            `json:"qq_app_mini_program_spec,omitempty"`            // QQ小程序
+	QqMiniGameSpec                  *QqMiniGameSpec                  `json:"qq_mini_game_spec,omitempty"`                   // QQ小游戏
+	SimpleWechatCanvasSpec          *SimpleWechatCanvasSpec          `json:"simple_wechat_canvas_spec,omitempty"`           // 简化原生页
+	WechatFocusDialogSpec           *WechatFocusDialogSpec           `json:"wechat_focus_dialog_spec,omitempty"`            // 微信一键关注页
+	WechatConsultSpec               *WechatConsultSpec               `json:"wechat_consult_spec,omitempty"`                 // 微信客服落地页
+	WecomConsultSpec                *WecomConsultSpec                `json:"wecom_consult_spec,omitempty"`                  // 企业微信客服落地页
+	WechatOfficialAccountDetailSpec *WechatOfficialAccountDetailSpec `json:"wechat_official_account_detail_spec,omitempty"` // 微信公众号详情
+	AppDeepLinkSpec                 *AppDeepLinkSpec                 `json:"app_deep_link_spec,omitempty"`                  // 应用直达
+	AppMarketSpec                   *AppMarketSpec                   `json:"app_market_spec,omitempty"`                     // 厂商下载
+	AndroidDirectDownloadSpec       *AndroidDirectDownloadSpec       `json:"android_direct_download_spec,omitempty"`        // Android一键下载
+	OfficialSpec                    *OfficialSpec                    `json:"official_spec,omitempty"`                       // 蹊径官方落地页
+	H5ProfileSpec                   *H5ProfileSpec                   `json:"h5_profile_spec,omitempty"`                     // 品牌形象页
+	SearchAreaBrandSpec             *SearchAreaBrandSpec             `json:"search_area_brand_spec,omitempty"`              // 超级品牌头像页
+	WechatChannelsProfileSpec       *WechatChannelsProfileSpec       `json:"wechat_channels_profile_spec,omitempty"`        // 视频号主页
+	H5Spec                          *H5Spec                          `json:"h5_spec,omitempty"`                             // 自定义H5
+	WechatMiniGameSpec              *WechatMiniGameSpec              `json:"wechat_mini_game_spec,omitempty"`               // 微信小游戏
+	WechatChannelsFeedSpec          *WechatChannelsFeedSpec          `json:"wechat_channels_feed_spec,omitempty"`           // 视频号动态
+	WechatChannelsReserveSpec       *WechatChannelsReserveSpec       `json:"wechat_channels_reserve_spec,omitempty"`        // 视频号直播预约
+	AndroidQuickAppSpec             *AndroidQuickAppSpec             `json:"android_quick_app_spec,omitempty"`              // Android快应用
+	WechatChannelsShopProductSpec   *WechatChannelsShopProductSpec   `json:"wechat_channels_shop_product_spec,omitempty"`   // 微信小店商品详情
+	WechatShopSpec                  *WechatShopSpec                  `json:"wechat_shop_spec,omitempty"`                    // 微信小店
+	WechatChannelsWatchLiveSpec     *WechatChannelsWatchLiveSpec     `json:"wechat_channels_watch_live_spec,omitempty"`     // 视频号观看直播
+	HarmonyAppSpec                  *HarmonyAppSpec                  `json:"harmony_app_spec,omitempty"`                    // 鸿蒙
 }
 
 // AndroidAppSpec Android应用落地页
@@ -557,8 +577,10 @@ type WechatMiniProgramSpec struct {
 
 // WechatMiniGameSpec 微信小游戏落地页
 type WechatMiniGameSpec struct {
-	MiniProgramID   string `json:"mini_program_id,omitempty"`   // 小游戏id
-	MiniProgramPath string `json:"mini_program_path,omitempty"` // 小游戏路径
+	MiniProgramID             string `json:"mini_program_id,omitempty"`              // 小游戏id
+	MiniProgramPath           string `json:"mini_program_path,omitempty"`            // 小游戏路径
+	MiniGameTrackingParameter string `json:"mini_game_tracking_parameter,omitempty"` // 小游戏监控参数
+	MiniGameID                string `json:"mini_game_id,omitempty"`                 // 小游戏id
 }
 
 // WechatChannelsFeedSpec 视频号动态落地页
@@ -589,6 +611,133 @@ type WechatShopSpec struct {
 type H5Spec struct {
 	PageURL          string `json:"page_url,omitempty"`            // 落地页url
 	MpaH5WildcardURL string `json:"mpa_h5_wildcard_url,omitempty"` // 通配符
+}
+
+// FengyeEcommerceSpec 枫叶电商落地页（注：官方接口字段名 fengye_ecommmerce_spec 含3个m）
+type FengyeEcommerceSpec struct {
+	PageID int64 `json:"page_id"` // 落地页id (必填)
+}
+
+// WechatCanvasMiniProgramSpec 微信原生页（小程序）落地页
+type WechatCanvasMiniProgramSpec struct {
+	PageID                      int64  `json:"page_id"`                                   // 落地页id (必填)
+	OverrideCanvasHeadOption    string `json:"override_canvas_head_option,omitempty"`     // 原生推广页顶部素材与广告创意素材替换关系
+	WechatChannelsLiveReserveID string `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号直播预约id
+}
+
+// QqAppMiniProgramSpec QQ小程序落地页
+type QqAppMiniProgramSpec struct {
+	MiniProgramID   string `json:"mini_program_id"`             // 小程序id (必填)
+	MiniProgramPath string `json:"mini_program_path,omitempty"` // 小程序路径
+}
+
+// QqMiniGameSpec QQ小游戏落地页
+type QqMiniGameSpec struct {
+	MiniGameTrackingParameter string `json:"mini_game_tracking_parameter,omitempty"` // QQ小游戏监控参数
+	MiniGameID                string `json:"mini_game_id,omitempty"`                 // QQ小游戏id
+}
+
+// SimpleWechatCanvasSpec 简化原生页落地页
+type SimpleWechatCanvasSpec struct {
+	SimpleCanvasWebviewType           string `json:"simple_canvas_webview_type,omitempty"`             // 简化原生页嵌入落地页类型
+	SimpleCanvasWebviewPageID         string `json:"simple_canvas_webview_page_id,omitempty"`          // 简化原生页嵌入落地页id
+	SimpleCanvasSubType               string `json:"simple_canvas_sub_type,omitempty"`                 // 简化原生页子类型
+	SimpleCanvasShareTitle            string `json:"simple_canvas_share_title,omitempty"`              // 分享标题
+	SimpleCanvasShareDesc             string `json:"simple_canvas_share_desc,omitempty"`               // 分享描述
+	SimpleCanvasWebviewURL            string `json:"simple_canvas_webview_url,omitempty"`              // 简化原生页嵌入 webview URL
+	WechatChannelsLiveReserveID       string `json:"wechat_channels_live_reserve_id,omitempty"`        // 视频号直播预约id
+	MpaSimpleCanvasWebviewWildcardURL string `json:"mpa_simple_canvas_webview_wildcard_url,omitempty"` // MPA/DCA落地页通配符
+}
+
+// WechatFocusDialogSpec 微信一键关注页落地页
+type WechatFocusDialogSpec struct{}
+
+// WechatConsultSpec 微信客服落地页
+type WechatConsultSpec struct {
+	PageURL string `json:"page_url,omitempty"` // 落地页url
+}
+
+// WecomConsultSpec 企业微信客服落地页
+type WecomConsultSpec struct {
+	PageID    int64  `json:"page_id"`              // 落地页id (必填)
+	GroupType string `json:"group_type,omitempty"` // 企微客服群类型
+}
+
+// WechatOfficialAccountDetailSpec 微信公众号详情落地页
+type WechatOfficialAccountDetailSpec struct {
+	AppID string `json:"app_id,omitempty"` // 公众号appId
+}
+
+// AppDeepLinkSpec 应用直达落地页
+type AppDeepLinkSpec struct {
+	AndroidDeepLinkAppID          string `json:"android_deep_link_app_id,omitempty"`           // Android应用直达AppId
+	AndroidDeepLinkURL            string `json:"android_deep_link_url,omitempty"`              // Android应用直达schema
+	IosDeepLinkAppID              string `json:"ios_deep_link_app_id,omitempty"`               // iOS应用直达AppId
+	IosDeepLinkURL                string `json:"ios_deep_link_url,omitempty"`                  // iOS应用直达schema
+	UniversalLinkURL              string `json:"universal_link_url,omitempty"`                 // Universal link URL
+	MpaAndroidDeepLinkWildcardURL string `json:"mpa_android_deep_link_wildcard_url,omitempty"` // Android deeplink/ulink通配符
+	MpaIosDeepLinkWildcardURL     string `json:"mpa_ios_deep_link_wildcard_url,omitempty"`     // iOS deeplink/ulink通配符
+	MpaUniversalLinkWildcardURL   string `json:"mpa_universal_link_wildcard_url,omitempty"`    // universal link通配符
+	DeepLinkURL                   string `json:"deep_link_url,omitempty"`                      // 应用直达schema
+}
+
+// AppMarketSpec 厂商下载落地页
+type AppMarketSpec struct {
+	AndroidAppID     string `json:"android_app_id,omitempty"`     // 厂商下载AppId
+	AndroidChannelID string `json:"android_channel_id,omitempty"` // 安卓应用渠道包id
+}
+
+// AndroidDirectDownloadSpec Android一键下载落地页
+type AndroidDirectDownloadSpec struct {
+	AndroidAppID     string `json:"android_app_id,omitempty"`     // Android下载AppId
+	AndroidChannelID string `json:"android_channel_id,omitempty"` // 安卓应用渠道包id
+}
+
+// OfficialSpec 蹊径官方落地页
+type OfficialSpec struct {
+	PageID                      int64  `json:"page_id"`                                   // 落地页id (必填)
+	WechatChannelsLiveReserveID string `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号直播预约id
+	CustomParam                 string `json:"custom_param,omitempty"`                    // 官方落地页自定义参数
+}
+
+// H5ProfileSpec 品牌形象页落地页
+type H5ProfileSpec struct {
+	PageID          int64 `json:"page_id"`                     // 落地页id (必填)
+	HideCompanyInfo bool  `json:"hide_company_info,omitempty"` // 是否隐藏商家主体信息
+}
+
+// SearchAreaBrandSpec 超级品牌头像页落地页
+type SearchAreaBrandSpec struct {
+	SearchBrandAreaKeyword string `json:"search_brand_area_keyword,omitempty"` // 跳转超级品牌搜索词
+}
+
+// WechatChannelsProfileSpec 视频号主页落地页
+type WechatChannelsProfileSpec struct {
+	Username string `json:"username,omitempty"` // 视频号username
+}
+
+// WechatChannelsReserveSpec 视频号直播预约落地页
+type WechatChannelsReserveSpec struct {
+	ReserveID               string `json:"reserve_id,omitempty"`                 // 视频号直播预约id
+	WechatChannelsAccountID string `json:"wechat_channels_account_id,omitempty"` // 视频号账号id
+}
+
+// AndroidQuickAppSpec Android快应用落地页
+type AndroidQuickAppSpec struct {
+	JumpURL string `json:"jump_url,omitempty"` // 应用直达schema
+}
+
+// WechatChannelsShopProductSpec 微信小店商品详情落地页
+type WechatChannelsShopProductSpec struct {
+	ProductID int64  `json:"product_id,omitempty"` // 微信小店商品id
+	ShopID    string `json:"shop_id,omitempty"`    // 微信小店id
+	CatalogID string `json:"catalog_id,omitempty"` // 微信小店商品库id
+	SetID     string `json:"set_id,omitempty"`     // 微信小店商品集合id
+}
+
+// HarmonyAppSpec 鸿蒙落地页
+type HarmonyAppSpec struct {
+	HarmonyAppID string `json:"harmony_app_id,omitempty"` // 鸿蒙应用AppId
 }
 
 // ========== 组件值类型（补全）==========
