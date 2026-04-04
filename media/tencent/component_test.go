@@ -673,3 +673,414 @@ func TestComponentsDeleteValidateStrategySelf(t *testing.T) {
 	}
 	fmt.Printf("expected error: %v\n", err)
 }
+
+// ========== 修改创意组件共享测试用例 ==========
+
+// TestComponentSharingUpdateToAdvertiserSelf 测试共享给广告主账号
+func TestComponentSharingUpdateToAdvertiserSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{
+		{
+			SharedAccountID:   789,
+			SharedAccountType: model.SharedAccountTypeAdvertiser,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingUpdateToOrganizationSelf 测试共享给业务单元
+func TestComponentSharingUpdateToOrganizationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{
+		{
+			SharedAccountID:   789,
+			SharedAccountType: model.SharedAccountTypeOrganization,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingUpdateMultipleAccountsSelf 测试共享给多个账号
+func TestComponentSharingUpdateMultipleAccountsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{
+		{
+			SharedAccountID:   101,
+			SharedAccountType: model.SharedAccountTypeAdvertiser,
+		},
+		{
+			SharedAccountID:   102,
+			SharedAccountType: model.SharedAccountTypeAdvertiser,
+		},
+		{
+			SharedAccountID:   201,
+			SharedAccountType: model.SharedAccountTypeOrganization,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingUpdateValidateOrganizationIDSelf 测试缺少organization_id时的校验
+func TestComponentSharingUpdateValidateOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{
+		{SharedAccountID: 789, SharedAccountType: model.SharedAccountTypeAdvertiser},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentSharingUpdateValidateComponentIDSelf 测试缺少component_id时的校验
+func TestComponentSharingUpdateValidateComponentIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.SharedAccountList = []*model.SharedAccount{
+		{SharedAccountID: 789, SharedAccountType: model.SharedAccountTypeAdvertiser},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentSharingUpdateValidateEmptyListSelf 测试shared_account_list为空时的校验
+func TestComponentSharingUpdateValidateEmptyListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentSharingUpdateValidateInvalidTypeSelf 测试无效shared_account_type时的校验
+func TestComponentSharingUpdateValidateInvalidTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	req.SharedAccountList = []*model.SharedAccount{
+		{SharedAccountID: 789, SharedAccountType: "INVALID_TYPE"},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingUpdateSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// ========== 查询创意组件共享信息测试用例 ==========
+
+// TestComponentSharingGetSelf 测试查询组件共享信息（基础）
+func TestComponentSharingGetSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingGetByComponentIDSelf 测试按组件id查询共享信息
+func TestComponentSharingGetByComponentIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.ComponentID = 111111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingGetWithPaginationSelf 测试分页查询共享信息
+func TestComponentSharingGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.Page = 2
+	req.PageSize = 20
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingGetDeletedSelf 测试查询已删除的共享信息
+func TestComponentSharingGetDeletedSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.IsDeleted = true
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentSharingGetValidateOrganizationIDSelf 测试缺少organization_id时的校验
+func TestComponentSharingGetValidateOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestComponentSharingGetValidatePageSelf 测试page超出范围时的校验
+func TestComponentSharingGetValidatePageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentSharingGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	req.Page = 100000 // 超出最大值99999
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	_, err := adapter.ComponentSharingGetSelf(ctx, req)
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// ========== 获取创意组件详情测试 ==========
+
+// TestComponentDetailGetSelf 测试获取创意组件详情（按account_id）
+func TestComponentDetailGetSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetByOrganizationIDSelf 测试按organization_id获取创意组件详情
+func TestComponentDetailGetByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 456
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetWithFilterByComponentIDSelf 测试按component_id过滤获取创意组件详情
+func TestComponentDetailGetWithFilterByComponentIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.ComponentDetailQueryFilter{
+		{
+			Field:    model.ComponentDetailFilterFieldComponentID,
+			Operator: model.OperatorIn,
+			Values:   []int64{1001, 1002},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetWithFilterBySubTypeSelf 测试按component_sub_type过滤获取创意组件详情
+func TestComponentDetailGetWithFilterBySubTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.ComponentDetailQueryFilter{
+		{
+			Field:    model.ComponentDetailFilterFieldComponentSubType,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.ComponentSubTypeShortVideo4X3},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetWithAdContextSelf 测试携带ad_context获取创意组件详情
+func TestComponentDetailGetWithAdContextSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdContext = &model.AdContext{
+		MarketingGoal:        model.MarketingGoalAppPromotion,
+		MarketingCarrierType: model.MarketingCarrierTypeApp,
+		MarketingTargetType:  model.MarketingTargetTypeAppDownload,
+		SiteSet:              []string{model.SiteSetWechat},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetWithPaginationSelf 测试分页获取创意组件详情
+func TestComponentDetailGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Page = 2
+	req.PageSize = 50
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetWithMultipleFiltersSelf 测试多过滤条件获取创意组件详情（最多4个）
+func TestComponentDetailGetWithMultipleFiltersSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.ComponentDetailQueryFilter{
+		{
+			Field:    model.ComponentDetailFilterFieldComponentSubType,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.ComponentSubTypeShortVideo4X3},
+		},
+		{
+			Field:    model.ComponentDetailFilterFieldGenerationType,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.ComponentGenerationTypeManual},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ComponentDetailGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestComponentDetailGetValidateNoAccountAndOrg 测试account_id和organization_id均未填写时的验证
+func TestComponentDetailGetValidateNoAccountAndOrg(t *testing.T) {
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("应该返回错误：account_id和organization_id至少填写一个")
+	}
+	fmt.Printf("预期错误: %v\n", err)
+}
+
+// TestComponentDetailGetValidateFilterMaxSelf 测试过滤条件超过4个时的验证
+func TestComponentDetailGetValidateFilterMaxSelf(t *testing.T) {
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.ComponentDetailQueryFilter{
+		{Field: model.ComponentDetailFilterFieldComponentID, Operator: model.OperatorIn, Values: []int64{1}},
+		{Field: model.ComponentDetailFilterFieldComponentType, Operator: model.OperatorEquals, Values: []string{"IMAGE"}},
+		{Field: model.ComponentDetailFilterFieldComponentSubType, Operator: model.OperatorEquals, Values: []string{model.ComponentSubTypeShortVideo4X3}},
+		{Field: model.ComponentDetailFilterFieldGenerationType, Operator: model.OperatorEquals, Values: []string{model.ComponentGenerationTypeManual}},
+		{Field: model.ComponentDetailFilterFieldCustomName, Operator: model.OperatorContains, Values: []string{"test"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("应该返回错误：filtering最多4个过滤条件")
+	}
+	fmt.Printf("预期错误: %v\n", err)
+}
+
+// TestComponentDetailGetValidatePageSizeSelf 测试page_size超过200时的验证
+func TestComponentDetailGetValidatePageSizeSelf(t *testing.T) {
+	req := &model.ComponentDetailGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.PageSize = 201
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("应该返回错误：page_size最大为200")
+	}
+	fmt.Printf("预期错误: %v\n", err)
+}
