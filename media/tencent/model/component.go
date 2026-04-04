@@ -421,3 +421,443 @@ func (p *ComponentsDeleteReq) Validate() error {
 type ComponentsDeleteResp struct {
 	ComponentID int64 `json:"component_id"` // 删除的创意组件id
 }
+
+// ========== 修改创意组件共享 ==========
+// https://developers.e.qq.com/v3.0/docs/api/component_sharing/update
+
+// 常量定义 - 共享账号类型
+const (
+	SharedAccountTypeInvalid      = "INVALID"      // 无效
+	SharedAccountTypeAdvertiser   = "ADVERTISER"   // 广告主账号
+	SharedAccountTypeOrganization = "ORGANIZATION" // 业务单元
+)
+
+// SharedAccount 共享账号信息
+type SharedAccount struct {
+	SharedAccountID   int64  `json:"shared_account_id"`   // 共享账号id (必填)
+	SharedAccountType string `json:"shared_account_type"` // 共享账号类型 (必填)
+}
+
+// ComponentSharingUpdateReq 修改创意组件共享请求
+// https://developers.e.qq.com/v3.0/docs/api/component_sharing/update
+type ComponentSharingUpdateReq struct {
+	GlobalReq
+	OrganizationID    int64            `json:"organization_id"`     // 业务单元id (必填)
+	ComponentID       int64            `json:"component_id"`        // 创意组件id (必填)
+	SharedAccountList []*SharedAccount `json:"shared_account_list"` // 共享账号列表 (必填)，1-100条
+}
+
+func (p *ComponentSharingUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证修改创意组件共享请求参数
+func (p *ComponentSharingUpdateReq) Validate() error {
+	if p.OrganizationID == 0 {
+		return errors.New("organization_id为必填")
+	}
+	if p.ComponentID == 0 {
+		return errors.New("component_id为必填")
+	}
+	if len(p.SharedAccountList) == 0 {
+		return errors.New("shared_account_list为必填，至少包含1条记录")
+	}
+	if len(p.SharedAccountList) > 100 {
+		return errors.New("shared_account_list数组长度不能超过100")
+	}
+	for _, a := range p.SharedAccountList {
+		if a.SharedAccountID == 0 {
+			return errors.New("shared_account_id为必填")
+		}
+		if a.SharedAccountType == "" {
+			return errors.New("shared_account_type为必填")
+		}
+		if a.SharedAccountType != SharedAccountTypeInvalid &&
+			a.SharedAccountType != SharedAccountTypeAdvertiser &&
+			a.SharedAccountType != SharedAccountTypeOrganization {
+			return errors.New("shared_account_type值无效，允许值：INVALID、ADVERTISER、ORGANIZATION")
+		}
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ComponentSharingUpdateResp 修改创意组件共享响应
+type ComponentSharingUpdateResp struct {
+	ComponentID int64 `json:"component_id"` // 创意组件id
+}
+
+// ========== 查询创意组件共享信息 ==========
+// https://developers.e.qq.com/v3.0/docs/api/component_sharing/get
+
+// 分页限制常量（共享查询接口特有）
+const (
+	MaxComponentSharingPage = 99999 // page 最大值
+)
+
+// ComponentSharingGetReq 查询创意组件共享信息请求
+// https://developers.e.qq.com/v3.0/docs/api/component_sharing/get
+type ComponentSharingGetReq struct {
+	GlobalReq
+	OrganizationID int64 `json:"organization_id"`        // 业务单元id (必填)
+	ComponentID    int64 `json:"component_id,omitempty"` // 创意组件id
+	Page           int   `json:"page,omitempty"`         // 搜索页码，默认1，最大99999
+	PageSize       int   `json:"page_size,omitempty"`    // 每页条数，默认10，最大100
+	IsDeleted      bool  `json:"is_deleted,omitempty"`   // 是否已删除
+}
+
+func (p *ComponentSharingGetReq) Format() {
+	p.GlobalReq.Format()
+	if p.Page <= 0 {
+		p.Page = DefaultComponentPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = DefaultComponentPageSize
+	}
+}
+
+// Validate 验证查询创意组件共享信息请求参数
+func (p *ComponentSharingGetReq) Validate() error {
+	if p.OrganizationID == 0 {
+		return errors.New("organization_id为必填")
+	}
+	if p.Page < MinPage || p.Page > MaxComponentSharingPage {
+		return errors.New("page必须在1-99999之间")
+	}
+	if p.PageSize < MinPageSize || p.PageSize > MaxPageSize {
+		return errors.New("page_size必须在1-100之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ComponentSharingListItem 创意组件共享列表项
+type ComponentSharingListItem struct {
+	SharedAccountID   int64  `json:"shared_account_id"`   // 共享账号id
+	SharedAccountType string `json:"shared_account_type"` // 共享账号类型
+}
+
+// ComponentSharingGetResp 查询创意组件共享信息响应
+type ComponentSharingGetResp struct {
+	List []*ComponentSharingListItem `json:"list,omitempty"` // 共享信息列表
+	PageInfoContainer
+}
+
+// ========== 获取创意组件详情 ==========
+// https://developers.e.qq.com/v3.0/docs/api/component_detail/get
+
+// 分页限制常量（组件详情查询接口特有）
+const (
+	MaxComponentDetailPage     = 99999 // page 最大值
+	MaxComponentDetailPageSize = 200   // page_size 最大值
+)
+
+// 常量定义 - 组件详情过滤字段
+const (
+	ComponentDetailFilterFieldComponentID       = "component_id"
+	ComponentDetailFilterFieldComponentType     = "component_type"
+	ComponentDetailFilterFieldComponentSubType  = "component_sub_type"
+	ComponentDetailFilterFieldElementSpecID     = "element_spec_id"
+	ComponentDetailFilterFieldDynamicCreativeID = "dynamic_creative_id"
+	ComponentDetailFilterFieldDataModelVersion  = "data_model_version"
+	ComponentDetailFilterFieldCustomName        = "component_custom_name"
+	ComponentDetailFilterFieldGenerationType    = "generation_type"
+)
+
+// 常量定义 - 营销目标
+const (
+	MarketingGoalAppPromotion   = "MARKETING_GOAL_APP_PROMOTION"   // 推广应用
+	MarketingGoalWebsiteVisits  = "MARKETING_GOAL_WEBSITE_VISITS"  // 推广网站
+	MarketingGoalSalesLead      = "MARKETING_GOAL_SALES_LEAD"      // 销售线索收集
+	MarketingGoalLocalAds       = "MARKETING_GOAL_LOCAL_ADS"       // 推广本地店铺
+	MarketingGoalEcommerce      = "MARKETING_GOAL_ECOMMERCE"       // 商品销售
+	MarketingGoalBrandAwareness = "MARKETING_GOAL_BRAND_AWARENESS" // 品牌曝光
+	MarketingGoalVideoViews     = "MARKETING_GOAL_VIDEO_VIEWS"     // 视频推广
+	MarketingGoalLiveStreaming  = "MARKETING_GOAL_LIVE_STREAMING"  // 直播推广
+	MarketingGoalChannelFans    = "MARKETING_GOAL_CHANNEL_FANS"    // 视频号涨粉
+	MarketingGoalBrandInteract  = "MARKETING_GOAL_BRAND_INTERACT"  // 品牌互动
+	MarketingGoalSearchBrand    = "MARKETING_GOAL_SEARCH_BRAND"    // 搜索品牌专区
+	MarketingGoalShakeAd        = "MARKETING_GOAL_SHAKE_AD"        // 摇一摇广告
+)
+
+// 常量定义 - 营销载体类型（部分已在adgroup.go中定义）
+const (
+	MarketingCarrierTypeApp           = "MARKETING_CARRIER_TYPE_APP"             // 移动应用
+	MarketingCarrierTypeMinProgram    = "MARKETING_CARRIER_TYPE_MINI_PROGRAM"    // 小程序
+	MarketingCarrierTypeWechatCanvas  = "MARKETING_CARRIER_TYPE_WECHAT_CANVAS"   // 微信原生页
+	MarketingCarrierTypeH5            = "MARKETING_CARRIER_TYPE_H5"              // H5
+	MarketingCarrierTypeQqApp         = "MARKETING_CARRIER_TYPE_QQ_APP"          // QQ应用
+	MarketingCarrierTypeQqMiniProgram = "MARKETING_CARRIER_TYPE_QQ_MINI_PROGRAM" // QQ小程序
+	MarketingCarrierTypeQqMiniGame    = "MARKETING_CARRIER_TYPE_QQ_MINI_GAME"    // QQ小游戏
+)
+
+// 常量定义 - 营销诉求类型
+const (
+	MarketingTargetTypeAppDownload        = "MARKETING_TARGET_TYPE_APP_DOWNLOAD"         // 应用下载
+	MarketingTargetTypeVisitWechatCanvas  = "MARKETING_TARGET_TYPE_VISIT_WECHAT_CANVAS"  // 访问微信原生页
+	MarketingTargetTypeVisitMiniProgram   = "MARKETING_TARGET_TYPE_VISIT_MINI_PROGRAM"   // 访问小程序
+	MarketingTargetTypeOnlineConsult      = "MARKETING_TARGET_TYPE_ONLINE_CONSULT"       // 在线咨询
+	MarketingTargetTypeFormConsult        = "MARKETING_TARGET_TYPE_FORM_CONSULT"         // 表单咨询
+	MarketingTargetTypeWechatMiniGame     = "MARKETING_TARGET_TYPE_WECHAT_MINI_GAME"     // 微信小游戏
+	MarketingTargetTypeVisitH5            = "MARKETING_TARGET_TYPE_VISIT_H5"             // 访问H5
+	MarketingTargetTypeEcommerce          = "MARKETING_TARGET_TYPE_ECOMMERCE"            // 电商
+	MarketingTargetTypeVisitStore         = "MARKETING_TARGET_TYPE_VISIT_STORE"          // 访问门店
+	MarketingTargetTypeWechatChannelsLive = "MARKETING_TARGET_TYPE_WECHAT_CHANNELS_LIVE" // 视频号直播
+)
+
+// 常量定义 - 站点集合（部分已在adgroup.go中定义）
+const (
+	SiteSetQQ          = "SITE_SET_QQ"           // QQ
+	SiteSetQZone       = "SITE_SET_QZONE"        // QQ空间
+	SiteSetOceanEngine = "SITE_SET_OCEAN_ENGINE" // 优量汇
+	SiteSetOther       = "SITE_SET_OTHER"        // 其他
+)
+
+// OptimizationGoalStruct 优化目标结构
+type OptimizationGoalStruct struct {
+	OptimizationGoal   string `json:"optimization_goal,omitempty"`    // 优化目标
+	BidObjective       string `json:"bid_objective,omitempty"`        // 出价目标
+	DeepConversionType string `json:"deep_conversion_type,omitempty"` // 深度优化类型
+	DeepConversionSpec string `json:"deep_conversion_spec,omitempty"` // 深度优化规格
+}
+
+// AdContext 广告上下文
+type AdContext struct {
+	MarketingGoal           string                   `json:"marketing_goal,omitempty"`             // 营销目标
+	MarketingCarrierType    string                   `json:"marketing_carrier_type,omitempty"`     // 营销载体类型
+	MarketingTargetType     string                   `json:"marketing_target_type,omitempty"`      // 营销诉求类型
+	SiteSet                 []string                 `json:"site_set,omitempty"`                   // 站点集合
+	CreativeTemplateID      int64                    `json:"creative_template_id,omitempty"`       // 创意模版id
+	MarketingCarrierDetail  *MarketingCarrierDetail  `json:"marketing_carrier_detail,omitempty"`   // 营销载体详情
+	OptimizationGoalStruct  *OptimizationGoalStruct  `json:"optimization_goal_struct,omitempty"`   // 优化目标结构
+	MpaSpec                 *MpaSpec                 `json:"mpa_spec,omitempty"`                   // MPA规格
+	MarketingAssetOuterSpec *MarketingAssetOuterSpec `json:"marketing_asset_outer_spec,omitempty"` // 营销资产外层规格
+}
+
+// ComponentDetailQueryFilter 组件详情过滤条件
+type ComponentDetailQueryFilter struct {
+	Field    string      `json:"field"`    // 过滤字段
+	Operator string      `json:"operator"` // 操作符
+	Values   interface{} `json:"values"`   // 过滤值
+}
+
+// OfficialDetail 官方页面详情
+type OfficialDetail struct {
+	PageID                      int64  `json:"page_id,omitempty"`                         // 页面id
+	PageName                    string `json:"page_name,omitempty"`                       // 页面名称
+	PlayableType                string `json:"playable_type,omitempty"`                   // 可玩类型
+	PreviewURL                  string `json:"preview_url,omitempty"`                     // 预览链接
+	PageStatus                  string `json:"page_status,omitempty"`                     // 页面状态
+	WechatChannelsLiveReserveID int64  `json:"wechat_channels_live_reserve_id,omitempty"` // 视频号预约直播id
+	DisableCode                 string `json:"disable_code,omitempty"`                    // 禁用原因码
+	DisableMessage              string `json:"disable_message,omitempty"`                 // 禁用原因
+	QuoteCreativeMaterial       bool   `json:"quote_creative_material,omitempty"`         // 是否引用创意素材
+}
+
+// WechatMiniProgramPageDetail 微信小程序页面详情
+type WechatMiniProgramPageDetail struct {
+	MiniProgramID       int64    `json:"mini_program_id,omitempty"`        // 小程序id
+	MiniProgramNickName string   `json:"mini_program_nick_name,omitempty"` // 小程序名称
+	MiniProgramIconURL  string   `json:"mini_program_icon_url,omitempty"`  // 小程序图标url
+	MiniProgramPath     string   `json:"mini_program_path,omitempty"`      // 小程序路径
+	MiniProgramPaths    []string `json:"mini_program_paths,omitempty"`     // 小程序路径列表
+}
+
+// WechatMiniGamePageDetail 微信小游戏页面详情
+type WechatMiniGamePageDetail struct {
+	MiniGameID                int64  `json:"mini_game_id,omitempty"`                 // 小游戏id
+	MiniGameNickName          string `json:"mini_game_nick_name,omitempty"`          // 小游戏名称
+	MiniGameIconURL           string `json:"mini_game_icon_url,omitempty"`           // 小游戏图标url
+	MiniGameTrackingParameter string `json:"mini_game_tracking_parameter,omitempty"` // 小游戏追踪参数
+}
+
+// H5Detail H5页面详情
+type H5Detail struct {
+	PageURL string `json:"page_url,omitempty"` // 页面url
+}
+
+// AndroidAppDetail Android应用详情
+type AndroidAppDetail struct {
+	AndroidAppID              int64  `json:"android_app_id,omitempty"`               // Android应用id
+	AndroidChannelPackageID   int64  `json:"android_channel_package_id,omitempty"`   // Android渠道包id
+	AndroidAppName            string `json:"android_app_name,omitempty"`             // Android应用名称
+	AndroidChannelPackageName string `json:"android_channel_package_name,omitempty"` // Android渠道包名称
+}
+
+// IosAppDetail iOS应用详情
+type IosAppDetail struct {
+	IosAppID   int64  `json:"ios_app_id,omitempty"`   // iOS应用id
+	IosAppName string `json:"ios_app_name,omitempty"` // iOS应用名称
+}
+
+// QqMiniProgramPageDetail QQ小程序页面详情
+type QqMiniProgramPageDetail struct {
+	MiniProgramID       int64  `json:"mini_program_id,omitempty"`        // 小程序id
+	MiniProgramNickName string `json:"mini_program_nick_name,omitempty"` // 小程序名称
+	MiniProgramIconURL  string `json:"mini_program_icon_url,omitempty"`  // 小程序图标url
+	MiniProgramPath     string `json:"mini_program_path,omitempty"`      // 小程序路径
+}
+
+// QqMiniGamePageDetail QQ小游戏页面详情
+type QqMiniGamePageDetail struct {
+	MiniGameID       int64  `json:"mini_game_id,omitempty"`        // 小游戏id
+	MiniGameNickName string `json:"mini_game_nick_name,omitempty"` // 小游戏名称
+	MiniGameIconURL  string `json:"mini_game_icon_url,omitempty"`  // 小游戏图标url
+}
+
+// WechatOfficialAccountDetailDetail 微信公众号详情
+type WechatOfficialAccountDetailDetail struct {
+	OfficialAccountID   int64  `json:"official_account_id,omitempty"`   // 公众号id
+	OfficialAccountName string `json:"official_account_name,omitempty"` // 公众号名称
+}
+
+// ChannelsShopProductDetail 视频号商品详情
+type ChannelsShopProductDetail struct {
+	ProductID   int64  `json:"product_id,omitempty"`   // 商品id
+	ProductName string `json:"product_name,omitempty"` // 商品名称
+}
+
+// ChannelsReserveLiveDetail 视频号预约直播详情
+type ChannelsReserveLiveDetail struct {
+	ReserveLiveID   int64  `json:"reserve_live_id,omitempty"`   // 预约直播id
+	ReserveLiveName string `json:"reserve_live_name,omitempty"` // 预约直播名称
+}
+
+// ChannelsWatchLiveDetail 视频号看直播详情
+type ChannelsWatchLiveDetail struct {
+	LiveID   int64  `json:"live_id,omitempty"`   // 直播id
+	LiveName string `json:"live_name,omitempty"` // 直播名称
+}
+
+// WecomConsultPageDetail 企业微信咨询页面详情
+type WecomConsultPageDetail struct {
+	WecomConsultID   int64  `json:"wecom_consult_id,omitempty"`   // 企业微信咨询id
+	WecomConsultName string `json:"wecom_consult_name,omitempty"` // 企业微信咨询名称
+}
+
+// WechatChannelsFeedPageDetail 微信视频号信息流页面详情
+type WechatChannelsFeedPageDetail struct {
+	ChannelsID   int64  `json:"channels_id,omitempty"`   // 视频号id
+	ChannelsName string `json:"channels_name,omitempty"` // 视频号名称
+}
+
+// H5ProfilePageDetail H5个人主页详情
+type H5ProfilePageDetail struct {
+	ProfileID   int64  `json:"profile_id,omitempty"`   // 主页id
+	ProfileName string `json:"profile_name,omitempty"` // 主页名称
+}
+
+// ComponentDetailPageDetail 组件详情页面详情（包含15种子类型）
+type ComponentDetailPageDetail struct {
+	OfficialDetail                    *OfficialDetail                    `json:"official_detail,omitempty"`                       // 官方页面详情
+	WechatMiniProgramPageDetail       *WechatMiniProgramPageDetail       `json:"wechat_mini_program_page_detail,omitempty"`       // 微信小程序页面详情
+	WechatMiniGamePageDetail          *WechatMiniGamePageDetail          `json:"wechat_mini_game_page_detail,omitempty"`          // 微信小游戏页面详情
+	H5Detail                          *H5Detail                          `json:"h5_detail,omitempty"`                             // H5页面详情
+	AndroidAppDetail                  *AndroidAppDetail                  `json:"android_app_detail,omitempty"`                    // Android应用详情
+	IosAppDetail                      *IosAppDetail                      `json:"ios_app_detail,omitempty"`                        // iOS应用详情
+	QqMiniProgramPageDetail           *QqMiniProgramPageDetail           `json:"qq_mini_program_page_detail,omitempty"`           // QQ小程序页面详情
+	QqMiniGamePageDetail              *QqMiniGamePageDetail              `json:"qq_mini_game_page_detail,omitempty"`              // QQ小游戏页面详情
+	WechatOfficialAccountDetailDetail *WechatOfficialAccountDetailDetail `json:"wechat_official_account_detail_detail,omitempty"` // 微信公众号详情
+	ChannelsShopProductDetail         *ChannelsShopProductDetail         `json:"channels_shop_product_detail,omitempty"`          // 视频号商品详情
+	ChannelsReserveLiveDetail         *ChannelsReserveLiveDetail         `json:"channels_reserve_live_detail,omitempty"`          // 视频号预约直播详情
+	ChannelsWatchLiveDetail           *ChannelsWatchLiveDetail           `json:"channels_watch_live_detail,omitempty"`            // 视频号看直播详情
+	WecomConsultPageDetail            *WecomConsultPageDetail            `json:"wecom_consult_page_detail,omitempty"`             // 企业微信咨询详情
+	WechatChannelsFeedPageDetail      *WechatChannelsFeedPageDetail      `json:"wechat_channels_feed_page_detail,omitempty"`      // 微信视频号信息流详情
+	H5ProfilePageDetail               *H5ProfilePageDetail               `json:"h5_profile_page_detail,omitempty"`                // H5个人主页详情
+	IsBackup                          bool                               `json:"is_backup,omitempty"`                             // 是否备用
+	BackupIndex                       int                                `json:"backup_index,omitempty"`                          // 备用索引
+	DisableCode                       string                             `json:"disable_code,omitempty"`                          // 禁用原因码
+	DisableMessage                    string                             `json:"disable_message,omitempty"`                       // 禁用原因
+}
+
+// ComponentDetailJumpInfoItem 组件详情跳转信息项
+type ComponentDetailJumpInfoItem struct {
+	PageType   string                     `json:"page_type,omitempty"`   // 页面类型
+	PageDetail *ComponentDetailPageDetail `json:"page_detail,omitempty"` // 页面详情
+}
+
+// ComponentDetailImageItem 组件详情图片项
+type ComponentDetailImageItem struct {
+	ImageID  int64       `json:"image_id,omitempty"`  // 图片id
+	ImageURL string      `json:"image_url,omitempty"` // 图片url
+	JumpInfo interface{} `json:"jump_info,omitempty"` // 跳转信息
+}
+
+// ComponentDetailVideoItem 组件详情视频项
+type ComponentDetailVideoItem struct {
+	VideoID  int64  `json:"video_id,omitempty"`  // 视频id
+	VideoURL string `json:"video_url,omitempty"` // 视频url
+	CoverID  int64  `json:"cover_id,omitempty"`  // 封面id
+	CoverURL string `json:"cover_url,omitempty"` // 封面url
+}
+
+// ComponentDetailBrand 组件详情品牌信息
+type ComponentDetailBrand struct {
+	BrandName    string      `json:"brand_name,omitempty"`     // 品牌名称
+	BrandImageID int64       `json:"brand_image_id,omitempty"` // 品牌图片id
+	JumpInfo     interface{} `json:"jump_info,omitempty"`      // 跳转信息
+}
+
+// ComponentDetail 组件详情
+type ComponentDetail struct {
+	JumpInfo  *ComponentDetailJumpInfo    `json:"jump_info,omitempty"`  // 跳转信息
+	ImageList []*ComponentDetailImageItem `json:"image_list,omitempty"` // 图片列表
+	VideoList []*ComponentDetailVideoItem `json:"video_list,omitempty"` // 视频列表
+	Brand     *ComponentDetailBrand       `json:"brand,omitempty"`      // 品牌信息
+}
+
+// ComponentDetailJumpInfo 组件详情跳转信息
+type ComponentDetailJumpInfo struct {
+	JumpInfoList []*ComponentDetailJumpInfoItem `json:"jump_info_list,omitempty"` // 跳转信息列表
+}
+
+// ComponentDetailListItem 创意组件详情列表项
+type ComponentDetailListItem struct {
+	AccountID       int64            `json:"account_id,omitempty"`       // 广告主id
+	OrganizationID  int64            `json:"organization_id,omitempty"`  // 业务单元id
+	ComponentID     int64            `json:"component_id,omitempty"`     // 组件id
+	ComponentDetail *ComponentDetail `json:"component_detail,omitempty"` // 组件详情
+}
+
+// ComponentDetailGetReq 获取创意组件详情请求
+// https://developers.e.qq.com/v3.0/docs/api/component_detail/get
+type ComponentDetailGetReq struct {
+	GlobalReq
+	AccountID      int64                         `json:"account_id,omitempty"`      // 广告主id
+	OrganizationID int64                         `json:"organization_id,omitempty"` // 业务单元id
+	Filtering      []*ComponentDetailQueryFilter `json:"filtering,omitempty"`       // 过滤条件，最多4个
+	Page           int                           `json:"page,omitempty"`            // 搜索页码，默认1，最大99999
+	PageSize       int                           `json:"page_size,omitempty"`       // 每页条数，默认10，最大200
+	AdContext      *AdContext                    `json:"ad_context,omitempty"`      // 广告上下文
+}
+
+func (p *ComponentDetailGetReq) Format() {
+	p.GlobalReq.Format()
+	if p.Page <= 0 {
+		p.Page = DefaultComponentPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = DefaultComponentPageSize
+	}
+}
+
+// Validate 验证获取创意组件详情请求参数
+func (p *ComponentDetailGetReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id和organization_id至少填写一个")
+	}
+	if len(p.Filtering) > 4 {
+		return errors.New("filtering最多4个过滤条件")
+	}
+	if p.Page < MinPage || p.Page > MaxComponentDetailPage {
+		return errors.New("page必须在1-99999之间")
+	}
+	if p.PageSize < MinPageSize || p.PageSize > MaxComponentDetailPageSize {
+		return errors.New("page_size必须在1-200之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ComponentDetailGetResp 获取创意组件详情响应
+type ComponentDetailGetResp struct {
+	List []*ComponentDetailListItem `json:"list,omitempty"` // 组件详情列表
+	PageInfoContainer
+}
