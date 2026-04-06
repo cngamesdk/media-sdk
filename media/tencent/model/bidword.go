@@ -374,3 +374,237 @@ type BidwordDeleteResp struct {
 	SuccessList []*BidwordResultItem `json:"success_list"` // 返回成功的关键词列表
 	ErrorList   []*BidwordResultItem `json:"error_list"`   // 返回失败的关键词列表
 }
+
+// ========== 查询关键词 ==========
+// https://developers.e.qq.com/v3.0/docs/api/bidword/get
+
+// 常量定义 - 查询关键词过滤字段
+const (
+	BidwordFilterFieldBidwordID        = "bidword_id"
+	BidwordFilterFieldAdgroupID        = "adgroup_id"
+	BidwordFilterFieldCampaignID       = "campaign_id"
+	BidwordFilterFieldBidword          = "bidword"
+	BidwordFilterFieldMatchType        = "match_type"
+	BidwordFilterFieldCreatedTime      = "created_time"
+	BidwordFilterFieldLastModifiedTime = "last_modified_time"
+	BidwordFilterFieldDeleteTime       = "delete_time"
+	BidwordFilterFieldConfiguredStatus = "configured_status"
+	BidwordFilterFieldBidwordStatus    = "bidword_status"
+)
+
+// 常量定义 - 关键词状态（bidword_status）
+const (
+	BidwordStatusApprovalPassed         = "BIDWORD_STATUS_APPROVAL_PASSED"           // 审核通过
+	BidwordStatusApprovalPending        = "BIDWORD_STATUS_APPROVAL_PENDING"          // 审核中
+	BidwordStatusApprovalDenied         = "BIDWORD_STATUS_APPROVAL_DENIED"           // 审核不通过
+	BidwordStatusBidPriceLower          = "BIDWORD_STATUS_BID_PRICE_LOWER"           // 出价低
+	BidwordStatusBidPricePartiallyLower = "BIDWORD_STATUS_BID_PRICE_PARTIALLY_LOWER" // 出价部分偏低
+	BidwordStatusNormalStatus           = "BIDWORD_STATUS_NORMAL"                    // 正常
+	BidwordStatusDisplayLimited         = "BIDWORD_STATUS_DISPLAY_LIMITED"           // 展示受限
+	BidwordStatusNormalButNotFill       = "BIDWORD_STATUS_NORMAL_BUT_NOT_FILL"       // 正常但未填充
+)
+
+// 字段限制常量 - 查询关键词
+const (
+	MaxBidwordGetFilteringCount = 255   // filtering 最大长度
+	MaxBidwordGetPage           = 99999 // page 最大值
+	MaxBidwordGetPageSize       = 1000  // page_size 最大值
+	DefaultBidwordGetPage       = 1     // page 默认值
+	DefaultBidwordGetPageSize   = 10    // page_size 默认值
+)
+
+// BidwordGetFilter 查询关键词过滤条件
+type BidwordGetFilter struct {
+	Field    string   `json:"field"`    // 过滤字段 (必填)
+	Operator string   `json:"operator"` // 操作符 (必填)
+	Values   []string `json:"values"`   // 字段取值 (必填)
+}
+
+// Validate 验证单个过滤条件
+func (f *BidwordGetFilter) Validate() error {
+	if f.Field == "" {
+		return errors.New("filtering.field为必填")
+	}
+	if !isValidBidwordFilterField(f.Field) {
+		return errors.New("filtering.field值无效，支持：bidword_id,adgroup_id,campaign_id,bidword,match_type,created_time,last_modified_time,delete_time,configured_status,bidword_status")
+	}
+	if f.Operator == "" {
+		return errors.New("filtering.operator为必填")
+	}
+	if !isValidBidwordOperatorForField(f.Field, f.Operator) {
+		return errors.New("filtering.operator值无效，不支持该字段的此操作符")
+	}
+	if len(f.Values) == 0 {
+		return errors.New("filtering.values为必填")
+	}
+	return validateBidwordFilterValues(f)
+}
+
+// isValidBidwordFilterField 验证过滤字段是否有效
+func isValidBidwordFilterField(field string) bool {
+	switch field {
+	case BidwordFilterFieldBidwordID,
+		BidwordFilterFieldAdgroupID,
+		BidwordFilterFieldCampaignID,
+		BidwordFilterFieldBidword,
+		BidwordFilterFieldMatchType,
+		BidwordFilterFieldCreatedTime,
+		BidwordFilterFieldLastModifiedTime,
+		BidwordFilterFieldDeleteTime,
+		BidwordFilterFieldConfiguredStatus,
+		BidwordFilterFieldBidwordStatus:
+		return true
+	}
+	return false
+}
+
+// isValidBidwordOperatorForField 验证字段支持的操作符
+func isValidBidwordOperatorForField(field, operator string) bool {
+	switch field {
+	case BidwordFilterFieldBidwordID,
+		BidwordFilterFieldAdgroupID,
+		BidwordFilterFieldCampaignID,
+		BidwordFilterFieldMatchType,
+		BidwordFilterFieldConfiguredStatus,
+		BidwordFilterFieldBidwordStatus:
+		return operator == OperatorEquals || operator == OperatorIn
+	case BidwordFilterFieldBidword:
+		return operator == OperatorEquals || operator == OperatorContains || operator == OperatorIn
+	case BidwordFilterFieldCreatedTime,
+		BidwordFilterFieldLastModifiedTime,
+		BidwordFilterFieldDeleteTime:
+		return operator == OperatorEquals ||
+			operator == OperatorLess ||
+			operator == OperatorLessEquals ||
+			operator == OperatorGreater ||
+			operator == OperatorGreaterEquals
+	}
+	return false
+}
+
+// validateBidwordFilterValues 验证字段取值
+func validateBidwordFilterValues(f *BidwordGetFilter) error {
+	switch f.Field {
+	case BidwordFilterFieldMatchType:
+		if len(f.Values) != 1 {
+			return errors.New("match_type过滤时values数组长度必须为1")
+		}
+		v := f.Values[0]
+		if v != BidwordMatchTypeExact && v != BidwordMatchTypeWide &&
+			v != BidwordMatchTypeWord && v != BidwordMatchTypePhrase {
+			return errors.New("match_type值无效，允许值：EXACT_MATCH、WIDE_MATCH、WORD_MATCH、PHRASE_MATCH")
+		}
+	case BidwordFilterFieldCreatedTime,
+		BidwordFilterFieldLastModifiedTime,
+		BidwordFilterFieldDeleteTime:
+		if len(f.Values) != 1 {
+			return errors.New("时间字段过滤时values数组长度必须为1")
+		}
+		if len(f.Values[0]) != CreatedTimeLength {
+			return errors.New("时间字段长度必须为10字节")
+		}
+	case BidwordFilterFieldConfiguredStatus:
+		if len(f.Values) != 1 {
+			return errors.New("configured_status过滤时values数组长度必须为1")
+		}
+		v := f.Values[0]
+		if v != BidwordStatusNormal && v != BidwordStatusSuspend {
+			return errors.New("configured_status值无效，允许值：KEYWORD_STATUS_NORMAL、KEYWORD_STATUS_SUSPEND")
+		}
+	case BidwordFilterFieldBidwordStatus:
+		if len(f.Values) != 1 {
+			return errors.New("bidword_status过滤时values数组长度必须为1")
+		}
+		if !isValidBidwordStatusValue(f.Values[0]) {
+			return errors.New("bidword_status值无效")
+		}
+	}
+	return nil
+}
+
+// isValidBidwordStatusValue 验证关键词状态值
+func isValidBidwordStatusValue(v string) bool {
+	switch v {
+	case BidwordStatusApprovalPassed,
+		BidwordStatusApprovalPending,
+		BidwordStatusApprovalDenied,
+		BidwordStatusBidPriceLower,
+		BidwordStatusBidPricePartiallyLower,
+		BidwordStatusNormalStatus,
+		BidwordStatusDisplayLimited,
+		BidwordStatusNormalButNotFill:
+		return true
+	}
+	return false
+}
+
+// BidwordGetReq 查询关键词请求
+// https://developers.e.qq.com/v3.0/docs/api/bidword/get
+type BidwordGetReq struct {
+	GlobalReq
+	AccountID int64               `json:"account_id"` // 广告主帐号 id (必填)
+	Filtering []*BidwordGetFilter `json:"filtering"`  // 过滤条件 (0-255)
+	Page      int                 `json:"page"`       // 搜索页码，1-99999，默认1
+	PageSize  int                 `json:"page_size"`  // 每页条数，1-1000，默认10
+	IsDeleted bool                `json:"is_deleted"` // 是否已删除
+}
+
+func (p *BidwordGetReq) Format() {
+	p.GlobalReq.Format()
+	if p.Page <= 0 {
+		p.Page = DefaultBidwordGetPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = DefaultBidwordGetPageSize
+	}
+}
+
+// Validate 验证查询关键词请求参数
+func (p *BidwordGetReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.Filtering) > MaxBidwordGetFilteringCount {
+		return errors.New("filtering数组长度不能超过255")
+	}
+	for _, f := range p.Filtering {
+		if f == nil {
+			return errors.New("filtering中存在空的过滤条件")
+		}
+		if err := f.Validate(); err != nil {
+			return err
+		}
+	}
+	if p.Page < MinPage || p.Page > MaxBidwordGetPage {
+		return errors.New("page必须在1-99999之间")
+	}
+	if p.PageSize < MinPageSize || p.PageSize > MaxBidwordGetPageSize {
+		return errors.New("page_size必须在1-1000之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// BidwordGetListItem 查询关键词返回的单条记录
+type BidwordGetListItem struct {
+	BidwordID         int64                `json:"bidword_id,omitempty"`           // 关键词 id
+	CampaignID        int64                `json:"campaign_id,omitempty"`          // 推广计划 id
+	AdgroupID         int64                `json:"adgroup_id,omitempty"`           // 广告 id
+	Bidword           string               `json:"bidword,omitempty"`              // 关键词词面
+	BidPrice          int                  `json:"bid_price,omitempty"`            // 关键词出价，单位分
+	MatchType         string               `json:"match_type,omitempty"`           // 关键词匹配方式
+	ConfiguredStatus  string               `json:"configured_status,omitempty"`    // 暂停状态
+	BidwordStatus     string               `json:"bidword_status,omitempty"`       // 关键词状态
+	UseGroupPrice     string               `json:"use_group_price,omitempty"`      // 是否使用组出价
+	AuditMsg          string               `json:"audit_msg,omitempty"`            // 审核原因
+	SourceType        string               `json:"source_type,omitempty"`          // 来源类型
+	CreatedTime       int64                `json:"created_time,omitempty"`         // 创建时间，时间戳
+	LastModifiedTime  int64                `json:"last_modified_time,omitempty"`   // 最后修改时间，时间戳
+	PcLandingPageInfo []*PcLandingPageItem `json:"pc_landing_page_info,omitempty"` // 落地页信息列表
+}
+
+// BidwordGetResp 查询关键词响应
+// https://developers.e.qq.com/v3.0/docs/api/bidword/get
+type BidwordGetResp struct {
+	List []*BidwordGetListItem `json:"list,omitempty"` // 关键词列表
+	PageInfoContainer
+}
