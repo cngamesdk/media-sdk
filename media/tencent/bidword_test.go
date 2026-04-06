@@ -988,3 +988,443 @@ func TestBidwordDeleteValidateZeroIDSelf(t *testing.T) {
 	}
 	fmt.Printf("expected error: %v\n", err)
 }
+
+// ========== 查询关键词测试用例 ==========
+
+// TestBidwordGetBasicSelf 测试查询关键词（无过滤条件）
+func TestBidwordGetBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByAdgroupIDSelf 测试按广告id查询关键词
+func TestBidwordGetByAdgroupIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldAdgroupID,
+			Operator: model.OperatorEquals,
+			Values:   []string{"5076023598"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByBidwordIDsSelf 测试按关键词id列表查询
+func TestBidwordGetByBidwordIDsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldBidwordID,
+			Operator: model.OperatorIn,
+			Values:   []string{"2502973", "2502974", "2502975"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByCampaignIDSelf 测试按推广计划id查询关键词
+func TestBidwordGetByCampaignIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldCampaignID,
+			Operator: model.OperatorEquals,
+			Values:   []string{"5076023595"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByBidwordTextSelf 测试按关键词词面精确查询
+func TestBidwordGetByBidwordTextSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldBidword,
+			Operator: model.OperatorEquals,
+			Values:   []string{"游戏推荐"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByBidwordContainsSelf 测试按关键词词面模糊查询
+func TestBidwordGetByBidwordContainsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldBidword,
+			Operator: model.OperatorContains,
+			Values:   []string{"游戏"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByMatchTypeSelf 测试按匹配方式查询关键词
+func TestBidwordGetByMatchTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldMatchType,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordMatchTypeExact},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByConfiguredStatusSelf 测试按暂停状态查询关键词
+func TestBidwordGetByConfiguredStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldConfiguredStatus,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordStatusNormal},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByBidwordStatusSelf 测试按关键词状态查询（审核通过）
+func TestBidwordGetByBidwordStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldBidwordStatus,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordStatusApprovalPassed},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByCreatedTimeAfterSelf 测试按创建时间过滤（某时间之后）
+func TestBidwordGetByCreatedTimeAfterSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldCreatedTime,
+			Operator: model.OperatorGreaterEquals,
+			Values:   []string{"1711382400"}, // 2024-03-25 00:00:00
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByLastModifiedTimeSelf 测试按最后修改时间过滤
+func TestBidwordGetByLastModifiedTimeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldLastModifiedTime,
+			Operator: model.OperatorGreater,
+			Values:   []string{"1711382400"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetDeletedSelf 测试查询已删除的关键词
+func TestBidwordGetDeletedSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.IsDeleted = true
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldDeleteTime,
+			Operator: model.OperatorGreaterEquals,
+			Values:   []string{"1711382400"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetWithPaginationSelf 测试分页查询关键词
+func TestBidwordGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Page = 2
+	req.PageSize = 50
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetMultipleFiltersSelf 测试多过滤条件组合查询
+func TestBidwordGetMultipleFiltersSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldAdgroupID,
+			Operator: model.OperatorEquals,
+			Values:   []string{"5076023598"},
+		},
+		{
+			Field:    model.BidwordFilterFieldMatchType,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordMatchTypeWide},
+		},
+		{
+			Field:    model.BidwordFilterFieldConfiguredStatus,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordStatusNormal},
+		},
+	}
+	req.PageSize = 100
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordGetByApprovalPendingSelf 测试查询审核中的关键词
+func TestBidwordGetByApprovalPendingSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{
+			Field:    model.BidwordFilterFieldBidwordStatus,
+			Operator: model.OperatorEquals,
+			Values:   []string{model.BidwordStatusApprovalPending},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 查询关键词参数校验测试 ==========
+
+// TestBidwordGetValidateAccountIDSelf 测试缺少account_id时的校验
+func TestBidwordGetValidateAccountIDSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidateInvalidFieldSelf 测试无效过滤字段时的校验
+func TestBidwordGetValidateInvalidFieldSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{Field: "invalid_field", Operator: model.OperatorEquals, Values: []string{"1"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidateInvalidOperatorSelf 测试字段不支持的操作符时的校验
+func TestBidwordGetValidateInvalidOperatorSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		// match_type 不支持 CONTAINS
+		{Field: model.BidwordFilterFieldMatchType, Operator: model.OperatorContains, Values: []string{model.BidwordMatchTypeWide}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidateInvalidMatchTypeValueSelf 测试match_type值无效时的校验
+func TestBidwordGetValidateInvalidMatchTypeValueSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{Field: model.BidwordFilterFieldMatchType, Operator: model.OperatorEquals, Values: []string{"INVALID_MATCH"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidateInvalidBidwordStatusSelf 测试bidword_status值无效时的校验
+func TestBidwordGetValidateInvalidBidwordStatusSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{Field: model.BidwordFilterFieldBidwordStatus, Operator: model.OperatorEquals, Values: []string{"INVALID_STATUS"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidateTimeFieldLengthSelf 测试时间字段长度不为10时的校验
+func TestBidwordGetValidateTimeFieldLengthSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.BidwordGetFilter{
+		{Field: model.BidwordFilterFieldCreatedTime, Operator: model.OperatorEquals, Values: []string{"202403"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidatePageOutOfRangeSelf 测试page超出范围时的校验
+func TestBidwordGetValidatePageOutOfRangeSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Page = 100000 // 超出最大值 99999
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordGetValidatePageSizeOutOfRangeSelf 测试page_size超出范围时的校验
+func TestBidwordGetValidatePageSizeOutOfRangeSelf(t *testing.T) {
+	req := &model.BidwordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.PageSize = 1001 // 超出最大值 1000
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}

@@ -83,3 +83,21 @@ func (a *TencentAdapter) BidwordDeleteSelf(ctx context.Context, req *model.Bidwo
 	resp = &result
 	return
 }
+
+// BidwordGetSelf 查询关键词
+// https://developers.e.qq.com/v3.0/docs/api/bidword/get
+func (a *TencentAdapter) BidwordGetSelf(ctx context.Context, req *model.BidwordGetReq) (
+	resp *model.BidwordGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.BidwordGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/bidword/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
