@@ -327,3 +327,50 @@ type BidwordUpdateResp struct {
 	SuccessList []*BidwordResultItem `json:"success_list"` // 返回成功的关键词列表
 	ErrorList   []*BidwordResultItem `json:"error_list"`   // 返回失败的关键词列表
 }
+
+// ========== 删除关键词 ==========
+// https://developers.e.qq.com/v3.0/docs/api/bidword/delete
+
+// 字段限制常量 - 删除关键词
+const (
+	MaxBidwordDeleteListCount = 1000 // list 最大长度
+	MinBidwordDeleteListCount = 1    // list 最小长度
+)
+
+// BidwordDeleteReq 删除关键词请求
+// https://developers.e.qq.com/v3.0/docs/api/bidword/delete
+type BidwordDeleteReq struct {
+	GlobalReq
+	AccountID int64   `json:"account_id"` // 广告主帐号 id (必填)
+	List      []int64 `json:"list"`       // 关键词 id 列表 (必填)，1-1000
+}
+
+func (p *BidwordDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除关键词请求参数
+func (p *BidwordDeleteReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.List) < MinBidwordDeleteListCount {
+		return errors.New("list为必填，至少包含1个关键词id")
+	}
+	if len(p.List) > MaxBidwordDeleteListCount {
+		return errors.New("list数组长度不能超过1000")
+	}
+	for _, id := range p.List {
+		if id == 0 {
+			return errors.New("list中存在无效的关键词id")
+		}
+	}
+	return p.GlobalReq.Validate()
+}
+
+// BidwordDeleteResp 删除关键词响应
+// https://developers.e.qq.com/v3.0/docs/api/bidword/delete
+type BidwordDeleteResp struct {
+	SuccessList []*BidwordResultItem `json:"success_list"` // 返回成功的关键词列表
+	ErrorList   []*BidwordResultItem `json:"error_list"`   // 返回失败的关键词列表
+}

@@ -863,3 +863,128 @@ func TestBidwordUpdateValidateLandingPageMissingPageTypeSelf(t *testing.T) {
 	}
 	fmt.Printf("expected error: %v\n", err)
 }
+
+// ========== 删除关键词测试用例 ==========
+
+// TestBidwordDeleteSingleSelf 测试删除单个关键词
+func TestBidwordDeleteSingleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []int64{2502973}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordDeleteMultipleSelf 测试批量删除多个关键词
+func TestBidwordDeleteMultipleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []int64{2502973, 2502974, 2502975}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordDeleteMaxBatchSelf 测试删除接近上限数量的关键词（1000个）
+func TestBidwordDeleteMaxBatchSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	ids := make([]int64, 1000)
+	for i := range ids {
+		ids[i] = int64(2500000 + i)
+	}
+	req.List = ids
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 删除关键词参数校验测试 ==========
+
+// TestBidwordDeleteValidateAccountIDSelf 测试缺少account_id时的校验
+func TestBidwordDeleteValidateAccountIDSelf(t *testing.T) {
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.List = []int64{2502973}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordDeleteValidateEmptyListSelf 测试list为空时的校验
+func TestBidwordDeleteValidateEmptyListSelf(t *testing.T) {
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []int64{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordDeleteValidateNilListSelf 测试list为nil时的校验
+func TestBidwordDeleteValidateNilListSelf(t *testing.T) {
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordDeleteValidateExceedMaxListSelf 测试list超过最大长度时的校验
+func TestBidwordDeleteValidateExceedMaxListSelf(t *testing.T) {
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	ids := make([]int64, 1001)
+	for i := range ids {
+		ids[i] = int64(2500000 + i)
+	}
+	req.List = ids
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordDeleteValidateZeroIDSelf 测试list中包含无效id(0)时的校验
+func TestBidwordDeleteValidateZeroIDSelf(t *testing.T) {
+	req := &model.BidwordDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []int64{2502973, 0, 2502975}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
