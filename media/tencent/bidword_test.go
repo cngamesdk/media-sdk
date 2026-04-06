@@ -437,3 +437,429 @@ func TestBidwordAddWithAndroidAppLandingPageSelf(t *testing.T) {
 	}
 	fmt.Printf("result: %+v\n", result)
 }
+
+// ========== 更新关键词测试用例 ==========
+
+// TestBidwordUpdateBasicSelf 测试更新关键词出价（最简参数）
+func TestBidwordUpdateBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			BidPrice:  200,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateMatchTypeSelf 测试更新关键词匹配方式
+func TestBidwordUpdateMatchTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			MatchType: model.BidwordMatchTypeExact,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateConfiguredStatusSelf 测试更新关键词暂停状态
+func TestBidwordUpdateConfiguredStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:        2502973,
+			ConfiguredStatus: model.BidwordStatusSuspend,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithBidModeSelf 测试更新关键词出价方式
+func TestBidwordUpdateWithBidModeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			BidPrice:  300,
+			BidMode:   model.BidModeCPC,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithOCPMBidModeSelf 测试更新关键词为OCPM出价方式
+func TestBidwordUpdateWithOCPMBidModeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			BidPrice:  500,
+			BidMode:   model.BidModeOCPM,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithRaisePriceValueSelf 测试按数值修改出价
+func TestBidwordUpdateWithRaisePriceValueSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:       2502973,
+			PriceUpdateType: model.PriceUpdateTypeRaiseValue,
+			RaisePrice:      50, // 出价上调0.5元
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithRaisePricePercentSelf 测试按百分比修改出价
+func TestBidwordUpdateWithRaisePricePercentSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:       2502973,
+			PriceUpdateType: model.PriceUpdateTypeRaisePercent,
+			RaisePrice:      10, // 出价上调10%
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithNegativeRaisePriceSelf 测试按负值修改出价（降价）
+func TestBidwordUpdateWithNegativeRaisePriceSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:       2502973,
+			PriceUpdateType: model.PriceUpdateTypeRaiseValue,
+			RaisePrice:      -30, // 出价下调0.3元
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateUseGroupPriceSelf 测试更新关键词为使用组出价
+func TestBidwordUpdateUseGroupPriceSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:     2502973,
+			UseGroupPrice: model.BidwordUseGroupPrice,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithDynamicCreativeSelf 测试更新关键词绑定创意
+func TestBidwordUpdateWithDynamicCreativeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID:         2502973,
+			DynamicCreativeID: 789,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithH5LandingPageSelf 测试更新关键词落地页（H5）
+func TestBidwordUpdateWithH5LandingPageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			PcLandingPageInfo: &model.PcLandingPageInfo{
+				PageType: model.PageTypeH5,
+				PageSpec: &model.PageSpec{
+					H5Spec: &model.H5Spec{
+						PageURL: "https://www.example.com/new-landing",
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateWithMiniProgramLandingPageSelf 测试更新关键词落地页（微信小程序）
+func TestBidwordUpdateWithMiniProgramLandingPageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			PcLandingPageInfo: &model.PcLandingPageInfo{
+				PageType: model.PageTypeWechatMiniProgram,
+				PageSpec: &model.PageSpec{
+					WechatMiniProgramSpec: &model.WechatMiniProgramSpec{
+						MiniProgramID:   "wx1234567890",
+						MiniProgramPath: "pages/game/index",
+					},
+				},
+			},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBidwordUpdateMultipleKeywordsSelf 测试批量更新多个关键词
+func TestBidwordUpdateMultipleKeywordsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			BidPrice:  100,
+			MatchType: model.BidwordMatchTypeExact,
+		},
+		{
+			BidwordID:        2502974,
+			ConfiguredStatus: model.BidwordStatusNormal,
+		},
+		{
+			BidwordID:       2502975,
+			PriceUpdateType: model.PriceUpdateTypeRaisePercent,
+			RaisePrice:      20,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BidwordUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 更新关键词参数校验测试 ==========
+
+// TestBidwordUpdateValidateAccountIDSelf 测试缺少account_id时的校验
+func TestBidwordUpdateValidateAccountIDSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.List = []*model.BidwordUpdateListItem{
+		{BidwordID: 2502973, BidPrice: 100},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateEmptyListSelf 测试list为空时的校验
+func TestBidwordUpdateValidateEmptyListSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateMissingBidwordIDSelf 测试缺少bidword_id时的校验
+func TestBidwordUpdateValidateMissingBidwordIDSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{BidPrice: 100},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateInvalidBidModeSelf 测试无效bid_mode时的校验
+func TestBidwordUpdateValidateInvalidBidModeSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{BidwordID: 2502973, BidMode: "INVALID_BID_MODE"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateInvalidPriceUpdateTypeSelf 测试无效price_update_type时的校验
+func TestBidwordUpdateValidateInvalidPriceUpdateTypeSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{BidwordID: 2502973, PriceUpdateType: "INVALID_TYPE"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateRaisePriceOutOfRangeSelf 测试raise_price超出范围时的校验
+func TestBidwordUpdateValidateRaisePriceOutOfRangeSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{BidwordID: 2502973, RaisePrice: 100000},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateInvalidMatchTypeSelf 测试无效match_type时的校验
+func TestBidwordUpdateValidateInvalidMatchTypeSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{BidwordID: 2502973, MatchType: "INVALID_MATCH"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
+
+// TestBidwordUpdateValidateLandingPageMissingPageTypeSelf 测试落地页缺少page_type时的校验
+func TestBidwordUpdateValidateLandingPageMissingPageTypeSelf(t *testing.T) {
+	req := &model.BidwordUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.List = []*model.BidwordUpdateListItem{
+		{
+			BidwordID: 2502973,
+			PcLandingPageInfo: &model.PcLandingPageInfo{
+				PageSpec: &model.PageSpec{
+					H5Spec: &model.H5Spec{PageURL: "https://example.com"},
+				},
+			},
+		},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回校验错误，但未返回")
+	}
+	fmt.Printf("expected error: %v\n", err)
+}
