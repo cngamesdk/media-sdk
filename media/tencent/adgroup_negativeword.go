@@ -58,3 +58,21 @@ func (a *TencentAdapter) AdgroupNegativewordUpdateSelf(ctx context.Context, req 
 	resp = &result
 	return
 }
+
+// AdgroupNegativewordGetSelf 查询广告否定词
+// https://developers.e.qq.com/v3.0/docs/api/adgroup_negativewords/get
+func (a *TencentAdapter) AdgroupNegativewordGetSelf(ctx context.Context, req *model.AdgroupNegativewordGetReq) (
+	resp *model.AdgroupNegativewordGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.AdgroupNegativewordGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/adgroup_negativewords/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
