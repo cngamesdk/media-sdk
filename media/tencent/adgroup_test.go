@@ -430,3 +430,189 @@ func TestAdgroupsUpdateConfiguredStatusValidateNilSpecItemSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 批量修改广告出价测试用例 ==========
+
+// TestAdgroupsUpdateBidAmountSingleSelf 测试修改单个广告出价
+func TestAdgroupsUpdateBidAmountSingleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 13397328752, BidAmount: 5000},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateBidAmountSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateBidAmountMultipleSelf 测试批量修改多个广告出价
+func TestAdgroupsUpdateBidAmountMultipleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: 200},
+		{AdgroupID: 222, BidAmount: 1000},
+		{AdgroupID: 333, BidAmount: 50000},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateBidAmountSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateBidAmountAdxDefaultSelf 测试 ADX 程序化广告默认出价（200分）
+func TestAdgroupsUpdateBidAmountAdxDefaultSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 13397328752, BidAmount: 200},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateBidAmountSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 批量修改广告出价验证测试用例 ==========
+
+// TestAdgroupsUpdateBidAmountValidateMissingAccountIDSelf 测试缺少account_id
+func TestAdgroupsUpdateBidAmountValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: 5000},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateEmptySpecSelf 测试spec为空
+func TestAdgroupsUpdateBidAmountValidateEmptySpecSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：update_bid_amount_spec至少包含1个条件")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateExceedMaxSelf 测试spec超过100条
+func TestAdgroupsUpdateBidAmountValidateExceedMaxSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	specs := make([]*model.UpdateBidAmountSpec, 101)
+	for i := range specs {
+		specs[i] = &model.UpdateBidAmountSpec{AdgroupID: int64(i + 1), BidAmount: 5000}
+	}
+	req.UpdateBidAmountSpec = specs
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec超过100条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateMissingAdgroupIDSelf 测试spec中缺少adgroup_id
+func TestAdgroupsUpdateBidAmountValidateMissingAdgroupIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{BidAmount: 5000},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateZeroBidAmountSelf 测试bid_amount为0
+func TestAdgroupsUpdateBidAmountValidateZeroBidAmountSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: 0},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：bid_amount必须大于0")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateNegativeBidAmountSelf 测试bid_amount为负数
+func TestAdgroupsUpdateBidAmountValidateNegativeBidAmountSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: -100},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：bid_amount必须大于0")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateDuplicateAdgroupIDSelf 测试adgroup_id重复
+func TestAdgroupsUpdateBidAmountValidateDuplicateAdgroupIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: 5000},
+		{AdgroupID: 111, BidAmount: 8000},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_id不允许重复")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateBidAmountValidateNilSpecItemSelf 测试spec含nil项
+func TestAdgroupsUpdateBidAmountValidateNilSpecItemSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateBidAmountReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateBidAmountSpec = []*model.UpdateBidAmountSpec{
+		{AdgroupID: 111, BidAmount: 5000},
+		nil,
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec项不能为nil")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
