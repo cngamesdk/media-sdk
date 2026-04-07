@@ -428,3 +428,116 @@ func TestBatchAsyncRequestGetValidatePageSizeTooLargeSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 获取批量异步请求任务详情测试用例 ==========
+
+// TestBatchAsyncRequestSpecGetDefaultPageSelf 测试默认分页获取任务详情
+func TestBatchAsyncRequestSpecGetDefaultPageSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.TaskID = 10001
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestSpecGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestSpecGetWithPaginationSelf 测试自定义分页获取任务详情
+func TestBatchAsyncRequestSpecGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.TaskID = 10001
+	req.Page = 2
+	req.PageSize = 50
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestSpecGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestSpecGetMaxPageSizeSelf 测试最大 page_size（100）
+func TestBatchAsyncRequestSpecGetMaxPageSizeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.TaskID = 10001
+	req.Page = 1
+	req.PageSize = 100
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestSpecGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 获取任务详情验证测试用例 ==========
+
+// TestBatchAsyncRequestSpecGetValidateMissingAccountIDSelf 测试缺少 account_id
+func TestBatchAsyncRequestSpecGetValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.TaskID = 10001
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestSpecGetValidateMissingTaskIDSelf 测试缺少 task_id
+func TestBatchAsyncRequestSpecGetValidateMissingTaskIDSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：task_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestSpecGetValidatePageTooLargeSelf 测试 page 超过最大值 99999
+func TestBatchAsyncRequestSpecGetValidatePageTooLargeSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.TaskID = 10001
+	req.Page = 1
+	req.PageSize = 10
+	req.Format()
+	req.Page = 100000
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page超过99999")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestSpecGetValidatePageSizeTooLargeSelf 测试 page_size 超过最大值 100
+func TestBatchAsyncRequestSpecGetValidatePageSizeTooLargeSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestSpecGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.TaskID = 10001
+	req.Page = 1
+	req.PageSize = 101
+	req.Format()
+	req.PageSize = 101
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_size超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
