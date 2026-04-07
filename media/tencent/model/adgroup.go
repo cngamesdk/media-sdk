@@ -1406,3 +1406,81 @@ func (p *AdgroupsUpdateReq) validateBidAmount() error {
 type AdgroupsUpdateResp struct {
 	AdgroupId int64 `json:"adgroup_id,omitempty"` // 广告 id
 }
+
+// ========== 批量修改广告日限额 ==========
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_daily_budget
+
+// 字段限制常量
+const (
+	MinUpdateDailyBudgetSpecCount = 1         // update_daily_budget_spec 最小长度
+	MinUpdateDailyBudget          = 5000      // 日预算最小值（分），50元
+	MaxUpdateDailyBudget          = 400000000 // 日预算最大值（分），4000000元
+)
+
+// UpdateDailyBudgetSpec 更新日限额条件
+type UpdateDailyBudgetSpec struct {
+	AdgroupID   int64 `json:"adgroup_id"`   // 广告 id (必填)
+	DailyBudget int   `json:"daily_budget"` // 日预算，单位为分 (必填)，0=不限，否则 5000-400000000
+}
+
+// Validate 验证单个日限额条件
+func (s *UpdateDailyBudgetSpec) Validate() error {
+	if s.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+	if s.DailyBudget != 0 && (s.DailyBudget < MinUpdateDailyBudget || s.DailyBudget > MaxUpdateDailyBudget) {
+		return errors.New("daily_budget设置为0表示不限，否则须在5000-400000000分之间")
+	}
+	return nil
+}
+
+// AdgroupsUpdateDailyBudgetReq 批量修改广告日限额请求
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_daily_budget
+type AdgroupsUpdateDailyBudgetReq struct {
+	GlobalReq
+	AccountID             int64                    `json:"account_id"`               // 广告主帐号 id (必填)
+	UpdateDailyBudgetSpec []*UpdateDailyBudgetSpec `json:"update_daily_budget_spec"` // 更新日限额条件列表 (必填)
+}
+
+func (p *AdgroupsUpdateDailyBudgetReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证批量修改广告日限额请求参数
+func (p *AdgroupsUpdateDailyBudgetReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.UpdateDailyBudgetSpec) < MinUpdateDailyBudgetSpecCount {
+		return errors.New("update_daily_budget_spec为必填，至少包含1个条件")
+	}
+	seen := make(map[int64]bool)
+	for i, spec := range p.UpdateDailyBudgetSpec {
+		if spec == nil {
+			return errors.New("update_daily_budget_spec[" + itoa(i) + "]不能为空")
+		}
+		if err := spec.Validate(); err != nil {
+			return errors.New("update_daily_budget_spec[" + itoa(i) + "]: " + err.Error())
+		}
+		if seen[spec.AdgroupID] {
+			return errors.New("update_daily_budget_spec中adgroup_id不允许重复：" + itoa(int(spec.AdgroupID)))
+		}
+		seen[spec.AdgroupID] = true
+	}
+	return p.GlobalReq.Validate()
+}
+
+// UpdateDailyBudgetResultItem 批量修改日限额响应列表项
+type UpdateDailyBudgetResultItem struct {
+	Code      int    `json:"code"`       // 返回码
+	Message   string `json:"message"`    // 英文返回消息
+	MessageCn string `json:"message_cn"` // 中文返回消息
+	AdgroupID int64  `json:"adgroup_id"` // 广告 id
+}
+
+// AdgroupsUpdateDailyBudgetResp 批量修改广告日限额响应
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_daily_budget
+type AdgroupsUpdateDailyBudgetResp struct {
+	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
+	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
+}
