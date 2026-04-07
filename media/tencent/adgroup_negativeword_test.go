@@ -388,3 +388,114 @@ func TestAdgroupNegativewordUpdateValidateWordTooLongSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 查询广告否定词测试用例 ==========
+
+// TestAdgroupNegativewordGetSingleSelf 测试查询单个广告的否定词
+func TestAdgroupNegativewordGetSingleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupIDs = []int64{5076023598}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupNegativewordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupNegativewordGetMultipleSelf 测试查询多个广告的否定词
+func TestAdgroupNegativewordGetMultipleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupIDs = []int64{111, 222, 333}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupNegativewordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupNegativewordGetMaxCountSelf 测试查询100个广告（上限）
+func TestAdgroupNegativewordGetMaxCountSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	ids := make([]int64, 100)
+	for i := range ids {
+		ids[i] = int64(i + 1)
+	}
+	req.AdgroupIDs = ids
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupNegativewordGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 查询广告否定词验证测试用例 ==========
+
+// TestAdgroupNegativewordGetValidateMissingAccountIDSelf 测试缺少account_id
+func TestAdgroupNegativewordGetValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AdgroupIDs = []int64{123}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupNegativewordGetValidateMissingAdgroupIDsSelf 测试缺少adgroup_ids
+func TestAdgroupNegativewordGetValidateMissingAdgroupIDsSelf(t *testing.T) {
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_ids为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupNegativewordGetValidateEmptyAdgroupIDsSelf 测试adgroup_ids为空数组
+func TestAdgroupNegativewordGetValidateEmptyAdgroupIDsSelf(t *testing.T) {
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.AdgroupIDs = []int64{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_ids至少包含1个广告id")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupNegativewordGetValidateExceedCountSelf 测试adgroup_ids超过100
+func TestAdgroupNegativewordGetValidateExceedCountSelf(t *testing.T) {
+	req := &model.AdgroupNegativewordGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	ids := make([]int64, 101)
+	for i := range ids {
+		ids[i] = int64(i + 1)
+	}
+	req.AdgroupIDs = ids
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_ids超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
