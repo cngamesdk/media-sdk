@@ -7,6 +7,24 @@ import (
 	"github.com/cngamesdk/media-sdk/utils"
 )
 
+// BatchAsyncRequestGetSelf 获取批量异步请求任务列表
+// https://developers.e.qq.com/v3.0/docs/api/batch_async_requests/get
+func (a *TencentAdapter) BatchAsyncRequestGetSelf(ctx context.Context, req *model.BatchAsyncRequestGetReq) (
+	resp *model.BatchAsyncRequestGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.BatchAsyncRequestGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/batch_async_requests/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
 // BatchAsyncRequestAddSelf 创建批量异步请求任务
 // https://developers.e.qq.com/v3.0/docs/api/batch_async_requests/add
 func (a *TencentAdapter) BatchAsyncRequestAddSelf(ctx context.Context, req *model.BatchAsyncRequestAddReq) (

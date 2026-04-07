@@ -220,3 +220,211 @@ func TestBatchAsyncRequestAddValidateMissingTaskSpecSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 获取批量异步请求任务列表测试用例 ==========
+
+// TestBatchAsyncRequestGetNoFilterSelf 测试不带过滤条件查询任务列表
+func TestBatchAsyncRequestGetNoFilterSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestGetByTaskIDSelf 测试按 task_id 过滤
+func TestBatchAsyncRequestGetByTaskIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Field: model.BatchAsyncTaskFilterFieldTaskID, Operator: model.OperatorEquals, Values: []string{"10001"}},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestGetByTaskTypeSelf 测试按 task_type 过滤
+func TestBatchAsyncRequestGetByTaskTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Field: model.BatchAsyncTaskFilterFieldTaskType, Operator: model.OperatorIn, Values: []string{
+			model.TaskTypeDeleteAdgroupNew,
+			model.TaskTypeUpdateAdgroupConfiguredStatusNew,
+		}},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestGetByResultStatusSelf 测试按 result_status 过滤
+func TestBatchAsyncRequestGetByResultStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Field: model.BatchAsyncTaskFilterFieldResultStatus, Operator: model.OperatorIn, Values: []string{
+			model.TaskResultStatusSuccess,
+			model.TaskResultStatusPartialFail,
+		}},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestGetByStatusSelf 测试按 status 过滤
+func TestBatchAsyncRequestGetByStatusSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Field: model.BatchAsyncTaskFilterFieldStatus, Operator: model.OperatorEquals, Values: []string{model.TaskStatusCompleted}},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBatchAsyncRequestGetWithPaginationSelf 测试分页参数
+func TestBatchAsyncRequestGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Page = 2
+	req.PageSize = 20
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BatchAsyncRequestGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 获取任务列表验证测试用例 ==========
+
+// TestBatchAsyncRequestGetValidateMissingAccountIDSelf 测试缺少 account_id
+func TestBatchAsyncRequestGetValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestGetValidateFilteringExceedMaxSelf 测试 filtering 超过20条
+func TestBatchAsyncRequestGetValidateFilteringExceedMaxSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	filters := make([]*model.BatchAsyncTaskFilteringItem, 21)
+	for i := range filters {
+		filters[i] = &model.BatchAsyncTaskFilteringItem{
+			Field:    model.BatchAsyncTaskFilterFieldTaskID,
+			Operator: model.OperatorEquals,
+			Values:   []string{"1"},
+		}
+	}
+	req.Filtering = filters
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering超过20条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestGetValidateFilteringMissingFieldSelf 测试 filtering 缺少 field
+func TestBatchAsyncRequestGetValidateFilteringMissingFieldSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Operator: model.OperatorEquals, Values: []string{"1"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：field为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestGetValidateFilteringEmptyValuesSelf 测试 filtering values 为空
+func TestBatchAsyncRequestGetValidateFilteringEmptyValuesSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Filtering = []*model.BatchAsyncTaskFilteringItem{
+		{Field: model.BatchAsyncTaskFilterFieldStatus, Operator: model.OperatorEquals, Values: []string{}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：values为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestGetValidatePageTooLargeSelf 测试 page 超过最大值
+func TestBatchAsyncRequestGetValidatePageTooLargeSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Page = 100000
+	req.PageSize = 10
+	req.Format()
+	// reset Page after Format to bypass default assignment
+	req.Page = 100000
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page超过99999")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBatchAsyncRequestGetValidatePageSizeTooLargeSelf 测试 page_size 超过最大值100
+func TestBatchAsyncRequestGetValidatePageSizeTooLargeSelf(t *testing.T) {
+	req := &model.BatchAsyncRequestGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Page = 1
+	req.PageSize = 101
+	req.Format()
+	// reset PageSize after Format to bypass default assignment
+	req.PageSize = 101
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_size超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
