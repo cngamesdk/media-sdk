@@ -616,3 +616,333 @@ func TestAdgroupsUpdateBidAmountValidateNilSpecItemSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 批量修改广告投放起止时间测试用例 ==========
+
+// TestAdgroupsUpdateDatetimeBeginDateSelf 测试只更新开始日期
+func TestAdgroupsUpdateDatetimeBeginDateSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 5075803039, BeginDate: "2026-05-01"},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateDatetimeEndDateSelf 测试只更新结束日期
+func TestAdgroupsUpdateDatetimeEndDateSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 5075803039, EndDate: "2026-12-31"},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateDatetimeBothDatesSelf 测试同时更新开始和结束日期
+func TestAdgroupsUpdateDatetimeBothDatesSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 5075803039, BeginDate: "2026-05-01", EndDate: "2026-12-31"},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateDatetimeTimeSeriesSelf 测试只更新投放时间段（全时段投放）
+func TestAdgroupsUpdateDatetimeTimeSeriesSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	// 336 个 "1" 表示全时段投放
+	timeSeries := ""
+	for i := 0; i < 336; i++ {
+		timeSeries += "1"
+	}
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 5075803039, TimeSeries: timeSeries},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateDatetimeAllFieldsSelf 测试同时更新所有时间字段
+func TestAdgroupsUpdateDatetimeAllFieldsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	// 工作日 9:00-18:00 投放（每天 9:00-18:00 对应 18-36 块，即索引 18*2=36 到 36*2=72）
+	timeSeries := ""
+	for day := 0; day < 7; day++ {
+		for slot := 0; slot < 48; slot++ {
+			if slot >= 18 && slot < 36 { // 9:00-18:00
+				timeSeries += "1"
+			} else {
+				timeSeries += "0"
+			}
+		}
+	}
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{
+			AdgroupID:  5075803039,
+			BeginDate:  "2026-05-01",
+			EndDate:    "2026-12-31",
+			TimeSeries: timeSeries,
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateDatetimeMultipleSelf 测试批量修改多个广告的投放时间
+func TestAdgroupsUpdateDatetimeMultipleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 5075803039, EndDate: "2026-12-31"},
+		{AdgroupID: 5075801466, BeginDate: "2026-05-01", EndDate: "2026-09-30"},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateDatetimeSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 批量修改广告投放起止时间验证测试用例 ==========
+
+// TestAdgroupsUpdateDatetimeValidateMissingAccountIDSelf 测试缺少account_id
+func TestAdgroupsUpdateDatetimeValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, EndDate: "2026-12-31"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateEmptySpecSelf 测试spec为空
+func TestAdgroupsUpdateDatetimeValidateEmptySpecSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：update_datetime_spec至少包含1个条件")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateExceedMaxSelf 测试spec超过100条
+func TestAdgroupsUpdateDatetimeValidateExceedMaxSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	specs := make([]*model.UpdateDatetimeSpec, 101)
+	for i := range specs {
+		specs[i] = &model.UpdateDatetimeSpec{AdgroupID: int64(i + 1), EndDate: "2026-12-31"}
+	}
+	req.UpdateDatetimeSpec = specs
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec超过100条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateAllEmptySelf 测试三个时间字段全为空
+func TestAdgroupsUpdateDatetimeValidateAllEmptySelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：至少需要传入一个时间参数")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateInvalidBeginDateSelf 测试begin_date格式错误
+func TestAdgroupsUpdateDatetimeValidateInvalidBeginDateSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, BeginDate: "20260501"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：begin_date格式错误")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateEndDateBeforeTodaySelf 测试end_date早于今天
+func TestAdgroupsUpdateDatetimeValidateEndDateBeforeTodaySelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, EndDate: "2020-01-01"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：end_date不能早于今天")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateEndDateBeforeBeginDateSelf 测试end_date早于begin_date
+func TestAdgroupsUpdateDatetimeValidateEndDateBeforeBeginDateSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, BeginDate: "2026-12-31", EndDate: "2026-05-01"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：end_date不能早于begin_date")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateTimeSeriesWrongLengthSelf 测试time_series长度错误
+func TestAdgroupsUpdateDatetimeValidateTimeSeriesWrongLengthSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, TimeSeries: "111000"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：time_series长度必须为336字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateTimeSeriesAllZeroSelf 测试time_series全为0
+func TestAdgroupsUpdateDatetimeValidateTimeSeriesAllZeroSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	allZero := ""
+	for i := 0; i < 336; i++ {
+		allZero += "0"
+	}
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, TimeSeries: allZero},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：time_series不允许全为0")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateTimeSeriesInvalidCharSelf 测试time_series含非法字符
+func TestAdgroupsUpdateDatetimeValidateTimeSeriesInvalidCharSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	invalid := ""
+	for i := 0; i < 335; i++ {
+		invalid += "1"
+	}
+	invalid += "2" // 非法字符
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, TimeSeries: invalid},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：time_series含非法字符")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateDuplicateAdgroupIDSelf 测试adgroup_id重复
+func TestAdgroupsUpdateDatetimeValidateDuplicateAdgroupIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, EndDate: "2026-12-31"},
+		{AdgroupID: 111, BeginDate: "2026-05-01"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_id不允许重复")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateDatetimeValidateNilSpecItemSelf 测试spec含nil项
+func TestAdgroupsUpdateDatetimeValidateNilSpecItemSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateDatetimeReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateDatetimeSpec = []*model.UpdateDatetimeSpec{
+		{AdgroupID: 111, EndDate: "2026-12-31"},
+		nil,
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec项不能为nil")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
