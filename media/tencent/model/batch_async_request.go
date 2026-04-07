@@ -461,3 +461,87 @@ type BatchAsyncRequestGetResp struct {
 	List     []*BatchAsyncTaskListItem `json:"list"`      // 返回信息列表
 	PageInfo *PageInfo                 `json:"page_info"` // 分页配置信息
 }
+
+// ========== 获取批量异步请求任务详情 ==========
+// https://developers.e.qq.com/v3.0/docs/api/batch_async_request_specification/get
+
+// 任务详情结果类型枚举
+const (
+	TaskDetailResultTypeSuccess     = "TASK_DETAIL_RESULT_TYPE_SUCCESS"
+	TaskDetailResultTypeFail        = "TASK_DETAIL_RESULT_TYPE_FAIL"
+	TaskDetailResultTypeSystemError = "TASK_DETAIL_RESULT_TYPE_SYSTEM_ERROR"
+)
+
+// BatchAsyncRequestSpecGetReq 获取批量异步请求任务详情请求
+// https://developers.e.qq.com/v3.0/docs/api/batch_async_request_specification/get
+type BatchAsyncRequestSpecGetReq struct {
+	GlobalReq
+	AccountID int64 `json:"account_id"`          // 广告主帐号 id (必填)
+	TaskID    int64 `json:"task_id"`             // 任务 id (必填)
+	Page      int   `json:"page,omitempty"`      // 搜索页码，1-99999，默认1
+	PageSize  int   `json:"page_size,omitempty"` // 每页条数，1-100，默认10
+}
+
+func (p *BatchAsyncRequestSpecGetReq) Format() {
+	p.GlobalReq.Format()
+	if p.Page == 0 {
+		p.Page = DefaultBatchAsyncTaskGetPage
+	}
+	if p.PageSize == 0 {
+		p.PageSize = DefaultBatchAsyncTaskGetPageSize
+	}
+}
+
+// Validate 验证获取批量异步请求任务详情请求参数
+func (p *BatchAsyncRequestSpecGetReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.TaskID == 0 {
+		return errors.New("task_id为必填")
+	}
+	if p.Page < MinBatchAsyncTaskGetPage || p.Page > MaxBatchAsyncTaskGetPage {
+		return errors.New("page须在1-99999之间")
+	}
+	if p.PageSize < MinBatchAsyncTaskGetPageSize || p.PageSize > MaxBatchAsyncTaskGetPageSize {
+		return errors.New("page_size须在1-100之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// BatchAsyncTaskSummary 任务概要
+type BatchAsyncTaskSummary struct {
+	TaskID           int64  `json:"task_id"`            // 任务 id
+	TaskName         string `json:"task_name"`          // 任务名称
+	TaskType         string `json:"task_type"`          // 任务类型
+	TaskScope        string `json:"task_scope"`         // 任务操作业务对象范围
+	Status           string `json:"status"`             // 任务状态
+	ResultStatus     string `json:"result_status"`      // 任务结果状态
+	CreatedTime      int64  `json:"created_time"`       // 创建时间（时间戳）
+	EndTime          int64  `json:"end_time"`           // 结束时间（时间戳）
+	SuccessCount     int    `json:"success_count"`      // 成功的数量
+	FailCount        int    `json:"fail_count"`         // 失败的数量
+	SystemErrorCount int    `json:"system_error_count"` // 未知异常的数量
+	Progress         int    `json:"progress"`           // 处理任务进度，0-100
+}
+
+// BatchAsyncTaskSpecItem 任务详情列表项
+type BatchAsyncTaskSpecItem struct {
+	ScopeObjectID    int64  `json:"scope_object_id"`     // 任务操作业务对象 id
+	ScopeObjectName  string `json:"scope_object_name"`   // 任务操作业务对象的名称
+	DetailResultType string `json:"detail_result_type"`  // 任务详情每项执行结果类型
+	Message          string `json:"message"`             // 返回消息
+	AccountID        int64  `json:"account_id"`          // 通用的用户 id
+	ExtData          string `json:"ext_data"`            // 额外数据
+	ScopeObjectIDStr string `json:"scope_object_id_str"` // 任务操作业务对象 id（字符串）
+	Code             int    `json:"code"`                // 返回码，正常返回 0，异常返回大于 0
+	OrganizationID   int64  `json:"organization_id"`     // 业务单元 id
+}
+
+// BatchAsyncRequestSpecGetResp 获取批量异步请求任务详情响应
+// https://developers.e.qq.com/v3.0/docs/api/batch_async_request_specification/get
+type BatchAsyncRequestSpecGetResp struct {
+	Summary  *BatchAsyncTaskSummary    `json:"summary"`   // 任务概要
+	List     []*BatchAsyncTaskSpecItem `json:"list"`      // 返回信息列表
+	PageInfo *PageInfo                 `json:"page_info"` // 分页配置信息
+}
