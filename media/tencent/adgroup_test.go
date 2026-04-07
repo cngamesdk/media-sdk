@@ -241,3 +241,192 @@ func TestAdgroupsUpdateDailyBudgetValidateNilSpecItemSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 批量修改广告开启/暂停状态测试用例 ==========
+
+// TestAdgroupsUpdateConfiguredStatusSuspendSelf 测试批量暂停单个广告
+func TestAdgroupsUpdateConfiguredStatusSuspendSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 13397328752, ConfiguredStatus: model.ConfiguredStatusSuspend},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateConfiguredStatusSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateConfiguredStatusNormalSelf 测试批量开启单个广告
+func TestAdgroupsUpdateConfiguredStatusNormalSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 13397328752, ConfiguredStatus: model.ConfiguredStatusNormal},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateConfiguredStatusSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAdgroupsUpdateConfiguredStatusMultipleSelf 测试批量修改多个广告状态（混合开启/暂停）
+func TestAdgroupsUpdateConfiguredStatusMultipleSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111, ConfiguredStatus: model.ConfiguredStatusNormal},
+		{AdgroupID: 222, ConfiguredStatus: model.ConfiguredStatusSuspend},
+		{AdgroupID: 333, ConfiguredStatus: model.ConfiguredStatusNormal},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AdgroupsUpdateConfiguredStatusSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 批量修改广告状态验证测试用例 ==========
+
+// TestAdgroupsUpdateConfiguredStatusValidateMissingAccountIDSelf 测试缺少account_id
+func TestAdgroupsUpdateConfiguredStatusValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111, ConfiguredStatus: model.ConfiguredStatusNormal},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateEmptySpecSelf 测试spec为空
+func TestAdgroupsUpdateConfiguredStatusValidateEmptySpecSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：update_configured_status_spec至少包含1个条件")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateExceedMaxSelf 测试spec超过100条
+func TestAdgroupsUpdateConfiguredStatusValidateExceedMaxSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	specs := make([]*model.UpdateConfiguredStatusSpec, 101)
+	for i := range specs {
+		specs[i] = &model.UpdateConfiguredStatusSpec{
+			AdgroupID:        int64(i + 1),
+			ConfiguredStatus: model.ConfiguredStatusNormal,
+		}
+	}
+	req.UpdateConfiguredStatusSpec = specs
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec超过100条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateMissingAdgroupIDSelf 测试spec中缺少adgroup_id
+func TestAdgroupsUpdateConfiguredStatusValidateMissingAdgroupIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{ConfiguredStatus: model.ConfiguredStatusNormal},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateMissingStatusSelf 测试spec中缺少configured_status
+func TestAdgroupsUpdateConfiguredStatusValidateMissingStatusSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：configured_status为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateInvalidStatusSelf 测试configured_status值无效
+func TestAdgroupsUpdateConfiguredStatusValidateInvalidStatusSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111, ConfiguredStatus: "AD_STATUS_UNKNOWN"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：configured_status值无效")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateDuplicateAdgroupIDSelf 测试adgroup_id重复
+func TestAdgroupsUpdateConfiguredStatusValidateDuplicateAdgroupIDSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111, ConfiguredStatus: model.ConfiguredStatusNormal},
+		{AdgroupID: 111, ConfiguredStatus: model.ConfiguredStatusSuspend},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：adgroup_id不允许重复")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAdgroupsUpdateConfiguredStatusValidateNilSpecItemSelf 测试spec含nil项
+func TestAdgroupsUpdateConfiguredStatusValidateNilSpecItemSelf(t *testing.T) {
+	req := &model.AdgroupsUpdateConfiguredStatusReq{}
+	req.AccessToken = "123"
+	req.AccountID = 20458
+	req.UpdateConfiguredStatusSpec = []*model.UpdateConfiguredStatusSpec{
+		{AdgroupID: 111, ConfiguredStatus: model.ConfiguredStatusNormal},
+		nil,
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：spec项不能为nil")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}

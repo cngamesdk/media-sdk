@@ -1484,3 +1484,77 @@ type AdgroupsUpdateDailyBudgetResp struct {
 	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
 	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
 }
+
+// ========== 批量修改广告开启/暂停状态 ==========
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_configured_status
+
+// 字段限制常量
+const (
+	MaxUpdateConfiguredStatusSpecCount = 100 // update_configured_status_spec 最大长度
+)
+
+// UpdateConfiguredStatusSpec 更新客户设置状态条件
+type UpdateConfiguredStatusSpec struct {
+	AdgroupID        int64  `json:"adgroup_id"`        // 广告 id (必填)
+	ConfiguredStatus string `json:"configured_status"` // 客户设置的状态 (必填)：AD_STATUS_NORMAL / AD_STATUS_SUSPEND
+}
+
+// Validate 验证单个状态更新条件
+func (s *UpdateConfiguredStatusSpec) Validate() error {
+	if s.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+	if s.ConfiguredStatus == "" {
+		return errors.New("configured_status为必填")
+	}
+	if s.ConfiguredStatus != ConfiguredStatusNormal && s.ConfiguredStatus != ConfiguredStatusSuspend {
+		return errors.New("configured_status值无效，允许值：AD_STATUS_NORMAL、AD_STATUS_SUSPEND")
+	}
+	return nil
+}
+
+// AdgroupsUpdateConfiguredStatusReq 批量修改广告开启/暂停状态请求
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_configured_status
+type AdgroupsUpdateConfiguredStatusReq struct {
+	GlobalReq
+	AccountID                  int64                         `json:"account_id"`                    // 广告主帐号 id (必填)
+	UpdateConfiguredStatusSpec []*UpdateConfiguredStatusSpec `json:"update_configured_status_spec"` // 更新状态条件列表 (必填)，最大100
+}
+
+func (p *AdgroupsUpdateConfiguredStatusReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证批量修改广告状态请求参数
+func (p *AdgroupsUpdateConfiguredStatusReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.UpdateConfiguredStatusSpec) == 0 {
+		return errors.New("update_configured_status_spec为必填，至少包含1个条件")
+	}
+	if len(p.UpdateConfiguredStatusSpec) > MaxUpdateConfiguredStatusSpecCount {
+		return errors.New("update_configured_status_spec数组长度不能超过100")
+	}
+	seen := make(map[int64]bool)
+	for i, spec := range p.UpdateConfiguredStatusSpec {
+		if spec == nil {
+			return errors.New("update_configured_status_spec[" + itoa(i) + "]不能为空")
+		}
+		if err := spec.Validate(); err != nil {
+			return errors.New("update_configured_status_spec[" + itoa(i) + "]: " + err.Error())
+		}
+		if seen[spec.AdgroupID] {
+			return errors.New("update_configured_status_spec中adgroup_id不允许重复：" + itoa(int(spec.AdgroupID)))
+		}
+		seen[spec.AdgroupID] = true
+	}
+	return p.GlobalReq.Validate()
+}
+
+// AdgroupsUpdateConfiguredStatusResp 批量修改广告开启/暂停状态响应
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_configured_status
+type AdgroupsUpdateConfiguredStatusResp struct {
+	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
+	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
+}
