@@ -1629,3 +1629,121 @@ type AdgroupsUpdateBidAmountResp struct {
 	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
 	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
 }
+
+// ========== 批量修改广告投放起止时间 ==========
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_datetime
+
+// 字段限制常量
+const (
+	MaxUpdateDatetimeSpecCount = 100 // update_datetime_spec 最大长度
+	DateLength                 = 10  // 日期字段长度（YYYY-MM-DD）
+)
+
+// UpdateDatetimeSpec 更新投放时间条件
+type UpdateDatetimeSpec struct {
+	AdgroupID  int64  `json:"adgroup_id"`            // 广告 id (必填)
+	BeginDate  string `json:"begin_date,omitempty"`  // 开始投放日期，YYYY-MM-DD，<= end_date
+	EndDate    string `json:"end_date,omitempty"`    // 结束投放日期，YYYY-MM-DD，>= 今天，>= begin_date；长度 0-10 字节
+	TimeSeries string `json:"time_series,omitempty"` // 投放时间段，336字节的0/1字符串，不允许全为0
+}
+
+// Validate 验证单个投放时间更新条件
+func (s *UpdateDatetimeSpec) Validate() error {
+	if s.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+	if s.BeginDate == "" && s.EndDate == "" && s.TimeSeries == "" {
+		return errors.New("begin_date、end_date、time_series中至少需要传入一个参数")
+	}
+	if s.BeginDate != "" {
+		if len(s.BeginDate) != DateLength {
+			return errors.New("begin_date格式错误，应为YYYY-MM-DD")
+		}
+		if _, err := time.Parse(DateFormat, s.BeginDate); err != nil {
+			return errors.New("begin_date格式错误，应为YYYY-MM-DD")
+		}
+	}
+	if s.EndDate != "" {
+		if len(s.EndDate) != DateLength {
+			return errors.New("end_date格式错误，应为YYYY-MM-DD")
+		}
+		end, err := time.Parse(DateFormat, s.EndDate)
+		if err != nil {
+			return errors.New("end_date格式错误，应为YYYY-MM-DD")
+		}
+		today := time.Now().Truncate(24 * time.Hour)
+		if end.Before(today) {
+			return errors.New("end_date不能早于今天")
+		}
+		if s.BeginDate != "" {
+			begin, _ := time.Parse(DateFormat, s.BeginDate)
+			if end.Before(begin) {
+				return errors.New("end_date不能早于begin_date")
+			}
+		}
+	}
+	if s.TimeSeries != "" {
+		if len(s.TimeSeries) != TimeSeriesLength {
+			return errors.New("time_series长度必须为336字节")
+		}
+		allZero := true
+		for _, c := range s.TimeSeries {
+			if c != '0' && c != '1' {
+				return errors.New("time_series只能包含0和1")
+			}
+			if c == '1' {
+				allZero = false
+			}
+		}
+		if allZero {
+			return errors.New("time_series不允许全部为0")
+		}
+	}
+	return nil
+}
+
+// AdgroupsUpdateDatetimeReq 批量修改广告投放起止时间请求
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_datetime
+type AdgroupsUpdateDatetimeReq struct {
+	GlobalReq
+	AccountID          int64                 `json:"account_id"`           // 广告主帐号 id (必填)
+	UpdateDatetimeSpec []*UpdateDatetimeSpec `json:"update_datetime_spec"` // 更新投放时间条件列表 (必填)，最大100
+}
+
+func (p *AdgroupsUpdateDatetimeReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证批量修改广告投放时间请求参数
+func (p *AdgroupsUpdateDatetimeReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.UpdateDatetimeSpec) == 0 {
+		return errors.New("update_datetime_spec为必填，至少包含1个条件")
+	}
+	if len(p.UpdateDatetimeSpec) > MaxUpdateDatetimeSpecCount {
+		return errors.New("update_datetime_spec数组长度不能超过100")
+	}
+	seen := make(map[int64]bool)
+	for i, spec := range p.UpdateDatetimeSpec {
+		if spec == nil {
+			return errors.New("update_datetime_spec[" + itoa(i) + "]不能为空")
+		}
+		if err := spec.Validate(); err != nil {
+			return errors.New("update_datetime_spec[" + itoa(i) + "]: " + err.Error())
+		}
+		if seen[spec.AdgroupID] {
+			return errors.New("update_datetime_spec中adgroup_id不允许重复：" + itoa(int(spec.AdgroupID)))
+		}
+		seen[spec.AdgroupID] = true
+	}
+	return p.GlobalReq.Validate()
+}
+
+// AdgroupsUpdateDatetimeResp 批量修改广告投放起止时间响应
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_datetime
+type AdgroupsUpdateDatetimeResp struct {
+	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
+	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
+}
