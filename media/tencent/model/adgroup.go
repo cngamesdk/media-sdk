@@ -1558,3 +1558,74 @@ type AdgroupsUpdateConfiguredStatusResp struct {
 	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
 	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
 }
+
+// ========== 批量修改广告出价 ==========
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_bid_amount
+
+// 字段限制常量
+const (
+	MaxUpdateBidAmountSpecCount = 100 // update_bid_amount_spec 最大长度
+)
+
+// UpdateBidAmountSpec 更新广告出价条件
+type UpdateBidAmountSpec struct {
+	AdgroupID int64 `json:"adgroup_id"` // 广告 id (必填)
+	BidAmount int64 `json:"bid_amount"` // 广告出价，单位为分 (必填)，ADX 程序化广告默认填写 200
+}
+
+// Validate 验证单个出价条件
+func (s *UpdateBidAmountSpec) Validate() error {
+	if s.AdgroupID == 0 {
+		return errors.New("adgroup_id为必填")
+	}
+	if s.BidAmount <= 0 {
+		return errors.New("bid_amount必须大于0")
+	}
+	return nil
+}
+
+// AdgroupsUpdateBidAmountReq 批量修改广告出价请求
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_bid_amount
+type AdgroupsUpdateBidAmountReq struct {
+	GlobalReq
+	AccountID           int64                  `json:"account_id"`             // 广告主帐号 id (必填)
+	UpdateBidAmountSpec []*UpdateBidAmountSpec `json:"update_bid_amount_spec"` // 更新出价条件列表 (必填)，最大100
+}
+
+func (p *AdgroupsUpdateBidAmountReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证批量修改广告出价请求参数
+func (p *AdgroupsUpdateBidAmountReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.UpdateBidAmountSpec) == 0 {
+		return errors.New("update_bid_amount_spec为必填，至少包含1个条件")
+	}
+	if len(p.UpdateBidAmountSpec) > MaxUpdateBidAmountSpecCount {
+		return errors.New("update_bid_amount_spec数组长度不能超过100")
+	}
+	seen := make(map[int64]bool)
+	for i, spec := range p.UpdateBidAmountSpec {
+		if spec == nil {
+			return errors.New("update_bid_amount_spec[" + itoa(i) + "]不能为空")
+		}
+		if err := spec.Validate(); err != nil {
+			return errors.New("update_bid_amount_spec[" + itoa(i) + "]: " + err.Error())
+		}
+		if seen[spec.AdgroupID] {
+			return errors.New("update_bid_amount_spec中adgroup_id不允许重复：" + itoa(int(spec.AdgroupID)))
+		}
+		seen[spec.AdgroupID] = true
+	}
+	return p.GlobalReq.Validate()
+}
+
+// AdgroupsUpdateBidAmountResp 批量修改广告出价响应
+// https://developers.e.qq.com/v3.0/docs/api/adgroups/update_bid_amount
+type AdgroupsUpdateBidAmountResp struct {
+	List       []*UpdateDailyBudgetResultItem `json:"list"`         // 返回信息列表，顺序与请求一致
+	FailIDList []int64                        `json:"fail_id_list"` // 失败的 id 集合
+}
