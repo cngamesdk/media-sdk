@@ -241,3 +241,40 @@ type VideoAddResp struct {
 	VideoID      int64 `json:"video_id"`       // 视频 id
 	CoverImageID int64 `json:"cover_image_id"` // 视频封面图 id
 }
+
+// ========== 修改视频信息 ==========
+// https://developers.e.qq.com/v3.0/docs/api/videos/update
+
+// VideoUpdateReq 修改视频信息请求
+// https://developers.e.qq.com/v3.0/docs/api/videos/update
+type VideoUpdateReq struct {
+	GlobalReq
+	AccountID      int64  `json:"account_id,omitempty"`      // 广告主账户 id，与 organization_id 必填其一
+	OrganizationID int64  `json:"organization_id,omitempty"` // 业务单元 id，与 account_id 必填其一
+	VideoID        int64  `json:"video_id"`                  // 视频 id (必填)
+	Description    string `json:"description"`               // 视频文件描述 (必填)，0-255字节
+}
+
+func (p *VideoUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证修改视频信息请求参数
+func (p *VideoUpdateReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if p.VideoID == 0 {
+		return errors.New("video_id为必填")
+	}
+	if len(p.Description) > MaxVideoDescriptionBytes {
+		return errors.New("description长度不能超过255字节")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// VideoUpdateResp 修改视频信息响应
+// https://developers.e.qq.com/v3.0/docs/api/videos/update
+type VideoUpdateResp struct {
+	VideoID int64 `json:"video_id"` // 视频 id
+}

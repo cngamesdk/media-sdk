@@ -454,3 +454,100 @@ func TestVideoAddValidateDescriptionTooLongSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 修改视频信息测试用例 ==========
+
+// TestVideoUpdateByAccountIDSelf 测试通过 account_id 修改视频描述
+func TestVideoUpdateByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoID = 10001
+	req.Description = "修改后的视频描述"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.VideoUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestVideoUpdateByOrganizationIDSelf 测试通过 organization_id 修改视频描述
+func TestVideoUpdateByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.VideoID = 10002
+	req.Description = "通过业务单元修改的视频描述"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.VideoUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestVideoUpdateEmptyDescriptionSelf 测试将描述置为空字符串（合法，0字节）
+func TestVideoUpdateEmptyDescriptionSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoID = 10001
+	req.Description = ""
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.VideoUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 修改视频信息验证测试用例 ==========
+
+// TestVideoUpdateValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestVideoUpdateValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.VideoID = 10001
+	req.Description = "test"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoUpdateValidateMissingVideoIDSelf 测试缺少 video_id
+func TestVideoUpdateValidateMissingVideoIDSelf(t *testing.T) {
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Description = "test"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：video_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoUpdateValidateDescriptionTooLongSelf 测试 description 超过255字节
+func TestVideoUpdateValidateDescriptionTooLongSelf(t *testing.T) {
+	req := &model.VideoUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoID = 10001
+	req.Description = "这是一段超长的视频描述，用于测试字段长度校验是否正确生效。" +
+		"描述内容需要超过255个字节，所以需要写足够多的文字来触发校验错误。" +
+		"继续添加更多内容以确保超过255字节的限制。abcdefghijklmnopqrstuvwxyz0123456789"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：description超过255字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
