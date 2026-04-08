@@ -551,3 +551,63 @@ func TestVideoUpdateValidateDescriptionTooLongSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 删除视频测试用例 ==========
+
+// TestVideoDeleteByAccountIDSelf 测试通过 account_id 删除视频
+func TestVideoDeleteByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.VideoDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoID = 10001
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.VideoDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestVideoDeleteByOrganizationIDSelf 测试通过 organization_id 删除视频
+func TestVideoDeleteByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.VideoDeleteReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.VideoID = 10002
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.VideoDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 删除视频验证测试用例 ==========
+
+// TestVideoDeleteValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestVideoDeleteValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.VideoDeleteReq{}
+	req.AccessToken = "123"
+	req.VideoID = 10001
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoDeleteValidateMissingVideoIDSelf 测试缺少 video_id
+func TestVideoDeleteValidateMissingVideoIDSelf(t *testing.T) {
+	req := &model.VideoDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：video_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}

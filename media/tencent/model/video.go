@@ -278,3 +278,36 @@ func (p *VideoUpdateReq) Validate() error {
 type VideoUpdateResp struct {
 	VideoID int64 `json:"video_id"` // 视频 id
 }
+
+// ========== 删除视频 ==========
+// https://developers.e.qq.com/v3.0/docs/api/videos/delete
+
+// VideoDeleteReq 删除视频请求
+// https://developers.e.qq.com/v3.0/docs/api/videos/delete
+type VideoDeleteReq struct {
+	GlobalReq
+	AccountID      int64 `json:"account_id,omitempty"`      // 广告主账户 id，与 organization_id 必填其一
+	OrganizationID int64 `json:"organization_id,omitempty"` // 业务单元 id，与 account_id 必填其一
+	VideoID        int64 `json:"video_id"`                  // 视频 id (必填)
+}
+
+func (p *VideoDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除视频请求参数
+func (p *VideoDeleteReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if p.VideoID == 0 {
+		return errors.New("video_id为必填")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// VideoDeleteResp 删除视频响应
+// https://developers.e.qq.com/v3.0/docs/api/videos/delete
+type VideoDeleteResp struct {
+	VideoID int64 `json:"video_id"` // 视频 id
+}
