@@ -75,7 +75,32 @@ func (a *TencentAdapter) VideoAddSelf(ctx context.Context, req *model.VideoAddRe
 	return
 }
 
-// VideoUpdateSelf 修改视频信息
+// VideoDeleteSelf 删除视频
+// https://developers.e.qq.com/v3.0/docs/api/videos/delete
+func (a *TencentAdapter) VideoDeleteSelf(ctx context.Context, req *model.VideoDeleteReq) (
+	resp *model.VideoDeleteResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.VideoDeleteResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/videos/delete?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
 // https://developers.e.qq.com/v3.0/docs/api/videos/update
 func (a *TencentAdapter) VideoUpdateSelf(ctx context.Context, req *model.VideoUpdateReq) (
 	resp *model.VideoUpdateResp, err error) {
