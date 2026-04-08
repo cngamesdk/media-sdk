@@ -185,3 +185,59 @@ type VideoGetResp struct {
 	List     []*VideoListItem `json:"list"`      // 返回信息列表
 	PageInfo *PageInfo        `json:"page_info"` // 分页配置信息
 }
+
+// ========== 添加视频文件 ==========
+// https://developers.e.qq.com/v3.0/docs/api/videos/add
+
+// 字段限制常量
+const (
+	VideoSignatureBytes      = 32  // signature 固定长度（字节）
+	MaxVideoDescriptionBytes = 255 // description 最大字节数
+)
+
+// VideoAddReq 添加视频文件请求（multipart/form-data）
+// https://developers.e.qq.com/v3.0/docs/api/videos/add
+type VideoAddReq struct {
+	GlobalReq
+	AccountID            int64  // 广告主账户 id，与 organization_id 必填其一
+	OrganizationID       int64  // 业务单元 id，与 account_id 必填其一
+	VideoFile            []byte // 被上传的视频文件二进制流 (必填)，支持 mp4/mov/avi，最大100M
+	VideoFileName        string // 视频文件名（含扩展名，如 video.mp4），用于 multipart 表单
+	Signature            string // 视频文件签名 (必填)，固定32字节
+	Description          string // 视频文件描述，0-255字节
+	AdcreativeTemplateID int64  // 创意形式 id，仅可上传微信规格
+}
+
+func (p *VideoAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证添加视频文件请求参数
+func (p *VideoAddReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if len(p.VideoFile) == 0 {
+		return errors.New("video_file为必填")
+	}
+	if p.VideoFileName == "" {
+		return errors.New("video_file_name为必填，需包含文件扩展名如 video.mp4")
+	}
+	if p.Signature == "" {
+		return errors.New("signature为必填")
+	}
+	if len(p.Signature) != VideoSignatureBytes {
+		return errors.New("signature长度必须为32字节")
+	}
+	if len(p.Description) > MaxVideoDescriptionBytes {
+		return errors.New("description长度不能超过255字节")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// VideoAddResp 添加视频文件响应
+// https://developers.e.qq.com/v3.0/docs/api/videos/add
+type VideoAddResp struct {
+	VideoID      int64 `json:"video_id"`       // 视频 id
+	CoverImageID int64 `json:"cover_image_id"` // 视频封面图 id
+}

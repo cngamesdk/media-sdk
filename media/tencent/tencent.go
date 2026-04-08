@@ -1,6 +1,7 @@
 package tencent
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	model3 "github.com/cngamesdk/media-sdk/media/tencent/model"
 	"github.com/cngamesdk/media-sdk/model"
 	"github.com/cngamesdk/media-sdk/utils"
+	"mime/multipart"
+	"net/http"
 )
 
 func init() {
@@ -102,6 +105,36 @@ func (a *TencentAdapter) RequestGet(ctx context.Context, headers map[string]stri
 	}
 	err = a.dealResponse(response, result)
 	return
+}
+
+func (a *TencentAdapter) RequestPostMultipart(ctx context.Context, url string, fields map[string]string, fileField, fileName string, fileData []byte, result interface{}) (err error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	for k, v := range fields {
+		if writeErr := w.WriteField(k, v); writeErr != nil {
+			return writeErr
+		}
+	}
+	fw, createErr := w.CreateFormFile(fileField, fileName)
+	if createErr != nil {
+		return createErr
+	}
+	if _, writeErr := fw.Write(fileData); writeErr != nil {
+		return writeErr
+	}
+	if closeErr := w.Close(); closeErr != nil {
+		return closeErr
+	}
+	headers := map[string]string{"Content-Type": w.FormDataContentType()}
+	resp, reqErr := a.Client.Request(ctx, http.MethodPost, url, &buf, headers)
+	if reqErr != nil {
+		return reqErr
+	}
+	var response model3.BaseResp
+	if unmarshalErr := json.Unmarshal(resp, &response); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	return a.dealResponse(response, result)
 }
 
 func (a *TencentAdapter) RequestPostJson(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
