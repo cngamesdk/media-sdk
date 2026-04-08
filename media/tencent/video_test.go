@@ -3,6 +3,7 @@ package tencent
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/cngamesdk/media-sdk/config"
@@ -284,6 +285,172 @@ func TestVideoGetValidatePageSizeTooLargeSelf(t *testing.T) {
 	err := req.Validate()
 	if err == nil {
 		t.Fatal("期望返回错误：page_size超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// ========== 添加视频文件测试用例 ==========
+
+// TestVideoAddByAccountIDSelf 测试通过 account_id 上传视频
+func TestVideoAddByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	videoData, err := os.ReadFile("/tmp/test_video.mp4")
+	if err != nil {
+		t.Skip("跳过：测试视频文件 /tmp/test_video.mp4 不存在")
+	}
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = videoData
+	req.VideoFileName = "test_video.mp4"
+	req.Signature = "19efcaeda3c30e1cf28170d86ec00000" // 32字节MD5
+	req.Description = "测试视频上传"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, uploadErr := adapter.VideoAddSelf(ctx, req)
+	if uploadErr != nil {
+		t.Fatal(uploadErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestVideoAddByOrganizationIDSelf 测试通过 organization_id 上传视频
+func TestVideoAddByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	videoData, err := os.ReadFile("/tmp/test_video.mp4")
+	if err != nil {
+		t.Skip("跳过：测试视频文件 /tmp/test_video.mp4 不存在")
+	}
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.VideoFile = videoData
+	req.VideoFileName = "test_video.mp4"
+	req.Signature = "19efcaeda3c30e1cf28170d86ec00000"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, uploadErr := adapter.VideoAddSelf(ctx, req)
+	if uploadErr != nil {
+		t.Fatal(uploadErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestVideoAddWithAdcreativeTemplateIDSelf 测试携带 adcreative_template_id（微信规格）上传
+func TestVideoAddWithAdcreativeTemplateIDSelf(t *testing.T) {
+	ctx := context.Background()
+	videoData, err := os.ReadFile("/tmp/test_video.mp4")
+	if err != nil {
+		t.Skip("跳过：测试视频文件 /tmp/test_video.mp4 不存在")
+	}
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = videoData
+	req.VideoFileName = "test_video.mp4"
+	req.Signature = "19efcaeda3c30e1cf28170d86ec00000"
+	req.Description = "微信规格视频"
+	req.AdcreativeTemplateID = 721
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, uploadErr := adapter.VideoAddSelf(ctx, req)
+	if uploadErr != nil {
+		t.Fatal(uploadErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 添加视频文件验证测试用例 ==========
+
+// TestVideoAddValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestVideoAddValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.VideoFile = []byte("fake video data")
+	req.VideoFileName = "test.mp4"
+	req.Signature = "12345678901234567890123456789012"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoAddValidateMissingVideoFileSelf 测试缺少 video_file
+func TestVideoAddValidateMissingVideoFileSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFileName = "test.mp4"
+	req.Signature = "12345678901234567890123456789012"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：video_file为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoAddValidateMissingVideoFileNameSelf 测试缺少 video_file_name
+func TestVideoAddValidateMissingVideoFileNameSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = []byte("fake video data")
+	req.Signature = "12345678901234567890123456789012"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：video_file_name为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoAddValidateMissingSignatureSelf 测试缺少 signature
+func TestVideoAddValidateMissingSignatureSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = []byte("fake video data")
+	req.VideoFileName = "test.mp4"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：signature为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoAddValidateSignatureWrongLengthSelf 测试 signature 长度不是32字节
+func TestVideoAddValidateSignatureWrongLengthSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = []byte("fake video data")
+	req.VideoFileName = "test.mp4"
+	req.Signature = "short_signature" // 不足32字节
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：signature长度必须为32字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestVideoAddValidateDescriptionTooLongSelf 测试 description 超过255字节
+func TestVideoAddValidateDescriptionTooLongSelf(t *testing.T) {
+	req := &model.VideoAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.VideoFile = []byte("fake video data")
+	req.VideoFileName = "test.mp4"
+	req.Signature = "12345678901234567890123456789012"
+	// 构造超过255字节的描述
+	req.Description = "这是一段超长的视频描述，用于测试字段长度校验是否正确生效。" +
+		"描述内容需要超过255个字节，所以需要写足够多的文字来触发校验错误。" +
+		"继续添加更多内容以确保超过255字节的限制。abcdefghijklmnopqrstuvwxyz0123456789"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：description超过255字节")
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
