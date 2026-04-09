@@ -654,3 +654,115 @@ func TestImageAddValidateResizeHeightOutOfRangeSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 修改图片信息测试用例 ==========
+
+// TestImageUpdateByAccountIDSelf 测试通过 account_id 修改图片描述
+func TestImageUpdateByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "img_abc123"
+	req.Description = "修改后的图片描述"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ImageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageUpdateByOrganizationIDSelf 测试通过 organization_id 修改图片描述
+func TestImageUpdateByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.ImageID = "img_xyz456"
+	req.Description = "通过业务单元修改的图片描述"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ImageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageUpdateEmptyDescriptionSelf 测试将描述置为空字符串（合法，0字节）
+func TestImageUpdateEmptyDescriptionSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "img_abc123"
+	req.Description = ""
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ImageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 修改图片信息验证测试用例 ==========
+
+// TestImageUpdateValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestImageUpdateValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.ImageID = "img_abc123"
+	req.Description = "test"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageUpdateValidateMissingImageIDSelf 测试缺少 image_id
+func TestImageUpdateValidateMissingImageIDSelf(t *testing.T) {
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Description = "test"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：image_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageUpdateValidateImageIDTooLongSelf 测试 image_id 超过 64 字节
+func TestImageUpdateValidateImageIDTooLongSelf(t *testing.T) {
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "this_image_id_is_way_too_long_and_exceeds_the_maximum_64_bytes_limit_xyz"
+	req.Description = "test"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：image_id超过64字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageUpdateValidateDescriptionTooLongSelf 测试 description 超过 255 字节
+func TestImageUpdateValidateDescriptionTooLongSelf(t *testing.T) {
+	req := &model.ImageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "img_abc123"
+	req.Description = "这是一段超长的图片描述，用于测试字段长度校验是否正确生效。" +
+		"描述内容需要超过255个字节，所以需要写足够多的文字来触发校验错误。" +
+		"继续添加更多内容以确保超过255字节的限制。abcdefghijklmnopqrstuvwxyz0123456789"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：description超过255字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
