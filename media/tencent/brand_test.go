@@ -169,3 +169,121 @@ func TestBrandAddValidateMissingImageFileNameSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 获取品牌形象列表测试用例 ==========
+
+// TestBrandGetByAccountIDSelf 测试按 account_id 获取品牌形象列表
+func TestBrandGetByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BrandGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBrandGetWithPaginationSelf 测试自定义分页参数
+func TestBrandGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Page = 2
+	req.PageSize = 20
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BrandGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBrandGetWithMaxPageSizeSelf 测试 page_size 最大值 100
+func TestBrandGetWithMaxPageSizeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Page = 1
+	req.PageSize = 100
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BrandGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestBrandGetDefaultPaginationSelf 测试默认分页（不传 page/page_size）
+func TestBrandGetDefaultPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.BrandGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 获取品牌形象列表验证测试用例 ==========
+
+// TestBrandGetValidateMissingAccountIDSelf 测试缺少 account_id
+func TestBrandGetValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBrandGetValidatePageTooLargeSelf 测试 page 超过最大值 99999
+func TestBrandGetValidatePageTooLargeSelf(t *testing.T) {
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	req.Page = 100000
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page超过99999")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBrandGetValidatePageSizeTooLargeSelf 测试 page_size 超过最大值 100
+func TestBrandGetValidatePageSizeTooLargeSelf(t *testing.T) {
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	req.PageSize = 101
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_size超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestBrandGetValidatePageTooSmallSelf 测试 page 小于最小值 1
+func TestBrandGetValidatePageTooSmallSelf(t *testing.T) {
+	req := &model.BrandGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	req.Page = 0
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page小于1")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}

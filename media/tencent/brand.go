@@ -45,3 +45,21 @@ func (a *TencentAdapter) BrandAddSelf(ctx context.Context, req *model.BrandAddRe
 	resp = &result
 	return
 }
+
+// BrandGetSelf 获取品牌形象列表
+// https://developers.e.qq.com/v3.0/docs/api/brand/get
+func (a *TencentAdapter) BrandGetSelf(ctx context.Context, req *model.BrandGetReq) (
+	resp *model.BrandGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.BrandGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/brand/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
