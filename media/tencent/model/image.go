@@ -284,3 +284,49 @@ type ImageAddResp struct {
 	PreviewURL     string `json:"preview_url"`     // 预览地址
 	Description    string `json:"description"`     // 图片文件描述
 }
+
+// ========== 修改图片信息 ==========
+// https://developers.e.qq.com/v3.0/docs/api/images/update
+
+// 字段限制常量
+const (
+	MinImageIDBytes = 1  // image_id 最小长度（字节）
+	MaxImageIDBytes = 64 // image_id 最大长度（字节）
+)
+
+// ImageUpdateReq 修改图片信息请求
+// https://developers.e.qq.com/v3.0/docs/api/images/update
+type ImageUpdateReq struct {
+	GlobalReq
+	AccountID      int64  `json:"account_id,omitempty"`      // 推广账户 id，与 organization_id 必填其一
+	OrganizationID int64  `json:"organization_id,omitempty"` // 业务单元 id，与 account_id 必填其一
+	ImageID        string `json:"image_id"`                  // 图片 id (必填)，1-64 字节
+	Description    string `json:"description"`               // 图片文件描述 (必填)，0-255 字节，不支持@等特殊符号
+}
+
+func (p *ImageUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证修改图片信息请求参数
+func (p *ImageUpdateReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if p.ImageID == "" {
+		return errors.New("image_id为必填")
+	}
+	if len(p.ImageID) < MinImageIDBytes || len(p.ImageID) > MaxImageIDBytes {
+		return errors.New("image_id长度须在1-64字节之间")
+	}
+	if len(p.Description) > MaxImageDescriptionBytes {
+		return errors.New("description长度不能超过255字节")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ImageUpdateResp 修改图片信息响应
+// https://developers.e.qq.com/v3.0/docs/api/images/update
+type ImageUpdateResp struct {
+	ImageID string `json:"image_id"` // 图片 id
+}

@@ -26,7 +26,32 @@ func (a *TencentAdapter) ImageGetSelf(ctx context.Context, req *model.ImageGetRe
 	return
 }
 
-// ImageAddSelf 添加图片文件
+// ImageUpdateSelf 修改图片信息
+// https://developers.e.qq.com/v3.0/docs/api/images/update
+func (a *TencentAdapter) ImageUpdateSelf(ctx context.Context, req *model.ImageUpdateReq) (
+	resp *model.ImageUpdateResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.ImageUpdateResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/images/update?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
+
 // https://developers.e.qq.com/v3.0/docs/api/images/add
 func (a *TencentAdapter) ImageAddSelf(ctx context.Context, req *model.ImageAddReq) (
 	resp *model.ImageAddResp, err error) {
