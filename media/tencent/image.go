@@ -2,8 +2,10 @@ package tencent
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/cngamesdk/media-sdk/media/tencent/model"
+	"github.com/cngamesdk/media-sdk/utils"
 )
 
 // ImageGetSelf 获取图片信息
@@ -19,6 +21,74 @@ func (a *TencentAdapter) ImageGetSelf(ctx context.Context, req *model.ImageGetRe
 	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/images/get", req, &result); requestErr != nil {
 		err = requestErr
 		return
+	}
+	resp = &result
+	return
+}
+
+// ImageAddSelf 添加图片文件
+// https://developers.e.qq.com/v3.0/docs/api/images/add
+func (a *TencentAdapter) ImageAddSelf(ctx context.Context, req *model.ImageAddReq) (
+	resp *model.ImageAddResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+
+	fields := make(map[string]string)
+	if req.AccountID != 0 {
+		fields["account_id"] = strconv.FormatInt(req.AccountID, 10)
+	}
+	if req.OrganizationID != 0 {
+		fields["organization_id"] = strconv.FormatInt(req.OrganizationID, 10)
+	}
+	fields["upload_type"] = req.UploadType
+	fields["signature"] = req.Signature
+	if req.ImageUsage != "" {
+		fields["image_usage"] = req.ImageUsage
+	}
+	if req.Description != "" {
+		fields["description"] = req.Description
+	}
+	if req.ResizeWidth != 0 {
+		fields["resize_width"] = strconv.Itoa(req.ResizeWidth)
+	}
+	if req.ResizeHeight != 0 {
+		fields["resize_height"] = strconv.Itoa(req.ResizeHeight)
+	}
+	if req.ResizeFileSize != 0 {
+		fields["resize_file_size"] = strconv.Itoa(req.ResizeFileSize)
+	}
+
+	apiURL := model.ApiUrl3 + "/images/add?" + globalQuery
+	var result model.ImageAddResp
+
+	if req.UploadType == model.ImageUploadTypeFile {
+		if requestErr := a.RequestPostMultipart(
+			ctx,
+			apiURL,
+			fields,
+			"file",
+			req.ImageFileName,
+			req.ImageFile,
+			&result,
+		); requestErr != nil {
+			err = requestErr
+			return
+		}
+	} else {
+		fields["bytes"] = req.Bytes
+		if requestErr := a.RequestPostMultipartFields(ctx, apiURL, fields, &result); requestErr != nil {
+			err = requestErr
+			return
+		}
 	}
 	resp = &result
 	return

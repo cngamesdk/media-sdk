@@ -137,6 +137,30 @@ func (a *TencentAdapter) RequestPostMultipart(ctx context.Context, url string, f
 	return a.dealResponse(response, result)
 }
 
+// RequestPostMultipartFields 以 multipart/form-data 方式 POST，仅发送表单字段（无文件），适用于 UPLOAD_TYPE_BYTES 场景
+func (a *TencentAdapter) RequestPostMultipartFields(ctx context.Context, url string, fields map[string]string, result interface{}) (err error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	for k, v := range fields {
+		if writeErr := w.WriteField(k, v); writeErr != nil {
+			return writeErr
+		}
+	}
+	if closeErr := w.Close(); closeErr != nil {
+		return closeErr
+	}
+	headers := map[string]string{"Content-Type": w.FormDataContentType()}
+	resp, reqErr := a.Client.Request(ctx, http.MethodPost, url, &buf, headers)
+	if reqErr != nil {
+		return reqErr
+	}
+	var response model3.BaseResp
+	if unmarshalErr := json.Unmarshal(resp, &response); unmarshalErr != nil {
+		return unmarshalErr
+	}
+	return a.dealResponse(response, result)
+}
+
 func (a *TencentAdapter) RequestPostJson(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
 	var response model3.BaseResp
 	if err = a.Media.RequestPostJson(ctx, headers, url, data, &response); err != nil {

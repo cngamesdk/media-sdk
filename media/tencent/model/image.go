@@ -176,3 +176,111 @@ type ImageGetResp struct {
 	List     []*ImageAssetItem `json:"list"`      // 返回信息列表
 	PageInfo *PageInfo         `json:"page_info"` // 分页配置信息
 }
+
+// ========== 添加图片文件 ==========
+// https://developers.e.qq.com/v3.0/docs/api/images/add
+
+// 上传方式枚举
+const (
+	ImageUploadTypeFile  = "UPLOAD_TYPE_FILE"  // 文件二进制流上传
+	ImageUploadTypeBytes = "UPLOAD_TYPE_BYTES" // base64 编码上传
+)
+
+// 图片用途枚举
+const (
+	ImageUsageDefault          = "IMAGE_USAGE_DEFAULT"           // 默认
+	ImageUsageMarketingPendant = "IMAGE_USAGE_MARKETING_PENDANT" // 营销挂件
+	ImageUsageShopImg          = "IMAGE_USAGE_SHOP_IMG"          // 卖点图片
+)
+
+// 字段限制常量
+const (
+	ImageSignatureBytes      = 32       // signature 固定长度（字节）
+	MaxImageDescriptionBytes = 255      // description 最大字节数
+	MaxImageBytesSize        = 10485760 // bytes 字段最大长度（10M）
+	MinImageResizeWidth      = 1        // resize_width 最小值
+	MaxImageResizeWidth      = 4000     // resize_width 最大值
+	MinImageResizeHeight     = 1        // resize_height 最小值
+	MaxImageResizeHeight     = 4000     // resize_height 最大值
+)
+
+// ImageAddReq 添加图片文件请求（multipart/form-data）
+// https://developers.e.qq.com/v3.0/docs/api/images/add
+type ImageAddReq struct {
+	GlobalReq
+	AccountID      int64  // 推广账户 id，与 organization_id 必填其一
+	OrganizationID int64  // 业务单元 id，与 account_id 必填其一
+	UploadType     string // 上传方式 (必填)：UPLOAD_TYPE_FILE 或 UPLOAD_TYPE_BYTES
+	Signature      string // 图片文件签名，md5 值 (必填)，固定 32 字节
+	ImageFile      []byte // 图片二进制流，upload_type=UPLOAD_TYPE_FILE 时必填，支持 jpg/png/gif，≤10M
+	ImageFileName  string // 图片文件名（含扩展名），用于 multipart 表单
+	Bytes          string // 图片 base64 编码，upload_type=UPLOAD_TYPE_BYTES 时必填，1~10485760 字节
+	ImageUsage     string // 图片用途，可选值见枚举
+	Description    string // 图片文件描述，0-255 字节，不支持@等特殊符号
+	ResizeWidth    int    // 图片宽度，单位 px，1-4000
+	ResizeHeight   int    // 图片高度，单位 px，1-4000
+	ResizeFileSize int    // 图片大小，单位 B(byte)
+}
+
+func (p *ImageAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证添加图片文件请求参数
+func (p *ImageAddReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if p.UploadType == "" {
+		return errors.New("upload_type为必填")
+	}
+	if p.UploadType != ImageUploadTypeFile && p.UploadType != ImageUploadTypeBytes {
+		return errors.New("upload_type可选值：UPLOAD_TYPE_FILE 或 UPLOAD_TYPE_BYTES")
+	}
+	if p.Signature == "" {
+		return errors.New("signature为必填")
+	}
+	if len(p.Signature) != ImageSignatureBytes {
+		return errors.New("signature长度必须为32字节")
+	}
+	if p.UploadType == ImageUploadTypeFile {
+		if len(p.ImageFile) == 0 {
+			return errors.New("upload_type=UPLOAD_TYPE_FILE 时，file为必填")
+		}
+		if p.ImageFileName == "" {
+			return errors.New("upload_type=UPLOAD_TYPE_FILE 时，image_file_name为必填，需包含文件扩展名")
+		}
+	}
+	if p.UploadType == ImageUploadTypeBytes {
+		if p.Bytes == "" {
+			return errors.New("upload_type=UPLOAD_TYPE_BYTES 时，bytes为必填")
+		}
+		if len(p.Bytes) > MaxImageBytesSize {
+			return errors.New("bytes长度不能超过10485760字节")
+		}
+	}
+	if len(p.Description) > MaxImageDescriptionBytes {
+		return errors.New("description长度不能超过255字节")
+	}
+	if p.ResizeWidth != 0 && (p.ResizeWidth < MinImageResizeWidth || p.ResizeWidth > MaxImageResizeWidth) {
+		return errors.New("resize_width须在1-4000之间")
+	}
+	if p.ResizeHeight != 0 && (p.ResizeHeight < MinImageResizeHeight || p.ResizeHeight > MaxImageResizeHeight) {
+		return errors.New("resize_height须在1-4000之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ImageAddResp 添加图片文件响应
+// https://developers.e.qq.com/v3.0/docs/api/images/add
+type ImageAddResp struct {
+	ImageID        string `json:"image_id"`        // 图片 id
+	ImageWidth     int    `json:"image_width"`     // 图片宽度，单位 px
+	ImageHeight    int    `json:"image_height"`    // 图片高度，单位 px
+	ImageFileSize  int64  `json:"image_file_size"` // 图片大小，单位 B(byte)
+	ImageType      string `json:"image_type"`      // 图片类型
+	ImageSignature string `json:"image_signature"` // 图片文件签名（md5值）
+	OuterImageID   string `json:"outer_image_id"`  // 调用方图片 id
+	PreviewURL     string `json:"preview_url"`     // 预览地址
+	Description    string `json:"description"`     // 图片文件描述
+}

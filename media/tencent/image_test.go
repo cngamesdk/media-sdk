@@ -3,6 +3,7 @@ package tencent
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/cngamesdk/media-sdk/config"
@@ -333,6 +334,323 @@ func TestImageGetValidatePageSizeTooLargeSelf(t *testing.T) {
 	err := req.Validate()
 	if err == nil {
 		t.Fatal("期望返回错误：page_size超过100")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// ========== 添加图片文件测试用例（文件上传） ==========
+
+// TestImageAddByFileWithAccountIDSelf 测试通过 account_id 上传图片文件
+func TestImageAddByFileWithAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	imageData, err := os.ReadFile("/tmp/test_image.jpg")
+	if err != nil {
+		t.Skip("跳过：测试图片文件 /tmp/test_image.jpg 不存在")
+	}
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c" // 32字节 md5
+	req.ImageFile = imageData
+	req.ImageFileName = "test_image.jpg"
+	req.Description = "测试图片上传"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageAddByFileWithOrganizationIDSelf 测试通过 organization_id 上传图片文件
+func TestImageAddByFileWithOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	imageData, err := os.ReadFile("/tmp/test_image.jpg")
+	if err != nil {
+		t.Skip("跳过：测试图片文件 /tmp/test_image.jpg 不存在")
+	}
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = imageData
+	req.ImageFileName = "test_image.jpg"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageAddByFileWithImageUsageSelf 测试上传图片并指定图片用途
+func TestImageAddByFileWithImageUsageSelf(t *testing.T) {
+	ctx := context.Background()
+	imageData, err := os.ReadFile("/tmp/test_image.jpg")
+	if err != nil {
+		t.Skip("跳过：测试图片文件 /tmp/test_image.jpg 不存在")
+	}
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = imageData
+	req.ImageFileName = "test_image.jpg"
+	req.ImageUsage = model.ImageUsageMarketingPendant
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageAddByFileWithResizeSelf 测试上传图片并指定裁剪尺寸
+func TestImageAddByFileWithResizeSelf(t *testing.T) {
+	ctx := context.Background()
+	imageData, err := os.ReadFile("/tmp/test_image.jpg")
+	if err != nil {
+		t.Skip("跳过：测试图片文件 /tmp/test_image.jpg 不存在")
+	}
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = imageData
+	req.ImageFileName = "test_image.jpg"
+	req.ResizeWidth = 640
+	req.ResizeHeight = 480
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 添加图片文件测试用例（base64 上传） ==========
+
+// TestImageAddByBytesSelf 测试通过 base64 编码上传图片
+func TestImageAddByBytesSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeBytes
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.Bytes = "/9j/4AAQSkZJRgABAQAAAQABAAD/fake_base64_image_data"
+	req.Description = "base64图片上传"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageAddByBytesWithOrganizationIDSelf 测试通过 organization_id 和 base64 编码上传图片
+func TestImageAddByBytesWithOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.UploadType = model.ImageUploadTypeBytes
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.Bytes = "/9j/4AAQSkZJRgABAQAAAQABAAD/fake_base64_image_data"
+	req.ImageUsage = model.ImageUsageShopImg
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, addErr := adapter.ImageAddSelf(ctx, req)
+	if addErr != nil {
+		t.Fatal(addErr)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 添加图片文件验证测试用例 ==========
+
+// TestImageAddValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestImageAddValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateMissingUploadTypeSelf 测试缺少 upload_type
+func TestImageAddValidateMissingUploadTypeSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：upload_type为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateInvalidUploadTypeSelf 测试 upload_type 取值非法
+func TestImageAddValidateInvalidUploadTypeSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = "UPLOAD_TYPE_INVALID"
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：upload_type取值非法")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateMissingSignatureSelf 测试缺少 signature
+func TestImageAddValidateMissingSignatureSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：signature为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateSignatureWrongLengthSelf 测试 signature 长度不是 32 字节
+func TestImageAddValidateSignatureWrongLengthSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "short_sig" // 不足32字节
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：signature长度必须为32字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateMissingFileSelf 测试 upload_type=FILE 时缺少 file
+func TestImageAddValidateMissingFileSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFileName = "test.jpg"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：UPLOAD_TYPE_FILE时file为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateMissingFileNameSelf 测试 upload_type=FILE 时缺少 image_file_name
+func TestImageAddValidateMissingFileNameSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：UPLOAD_TYPE_FILE时image_file_name为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateMissingBytesSelf 测试 upload_type=BYTES 时缺少 bytes
+func TestImageAddValidateMissingBytesSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeBytes
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：UPLOAD_TYPE_BYTES时bytes为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateDescriptionTooLongSelf 测试 description 超过 255 字节
+func TestImageAddValidateDescriptionTooLongSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.Description = "这是一段超长的图片描述，用于测试字段长度校验是否正确生效。" +
+		"描述内容需要超过255个字节，所以需要写足够多的文字来触发校验错误。" +
+		"继续添加更多内容以确保超过255字节的限制。abcdefghijklmnopqrstuvwxyz0123456789"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：description超过255字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateResizeWidthOutOfRangeSelf 测试 resize_width 超出范围
+func TestImageAddValidateResizeWidthOutOfRangeSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.ResizeWidth = 5000 // 超过最大值4000
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：resize_width超过4000")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageAddValidateResizeHeightOutOfRangeSelf 测试 resize_height 超出范围
+func TestImageAddValidateResizeHeightOutOfRangeSelf(t *testing.T) {
+	req := &model.ImageAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.UploadType = model.ImageUploadTypeFile
+	req.Signature = "f4c8a3bc4deb305fb74cb08ed395b98c"
+	req.ImageFile = []byte("fake image data")
+	req.ImageFileName = "test.jpg"
+	req.ResizeHeight = 5000 // 超过最大值4000
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：resize_height超过4000")
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
