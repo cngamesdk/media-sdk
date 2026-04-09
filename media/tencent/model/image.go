@@ -330,3 +330,39 @@ func (p *ImageUpdateReq) Validate() error {
 type ImageUpdateResp struct {
 	ImageID string `json:"image_id"` // 图片 id
 }
+
+// ========== 删除图片 ==========
+// https://developers.e.qq.com/v3.0/docs/api/images/delete
+
+// ImageDeleteReq 删除图片请求
+// https://developers.e.qq.com/v3.0/docs/api/images/delete
+type ImageDeleteReq struct {
+	GlobalReq
+	AccountID      int64  `json:"account_id,omitempty"`      // 推广账户 id，与 organization_id 必填其一
+	OrganizationID int64  `json:"organization_id,omitempty"` // 业务单元 id，与 account_id 必填其一
+	ImageID        string `json:"image_id"`                  // 图片 id (必填)，1-64 字节
+}
+
+func (p *ImageDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除图片请求参数
+func (p *ImageDeleteReq) Validate() error {
+	if p.AccountID == 0 && p.OrganizationID == 0 {
+		return errors.New("account_id 和 organization_id 需必填其一")
+	}
+	if p.ImageID == "" {
+		return errors.New("image_id为必填")
+	}
+	if len(p.ImageID) < MinImageIDBytes || len(p.ImageID) > MaxImageIDBytes {
+		return errors.New("image_id长度须在1-64字节之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ImageDeleteResp 删除图片响应
+// https://developers.e.qq.com/v3.0/docs/api/images/delete
+type ImageDeleteResp struct {
+	ImageID string `json:"image_id"` // 图片 id
+}

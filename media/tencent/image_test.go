@@ -766,3 +766,77 @@ func TestImageUpdateValidateDescriptionTooLongSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 删除图片测试用例 ==========
+
+// TestImageDeleteByAccountIDSelf 测试通过 account_id 删除图片
+func TestImageDeleteByAccountIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "img_abc123"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ImageDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestImageDeleteByOrganizationIDSelf 测试通过 organization_id 删除图片
+func TestImageDeleteByOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ImageDeleteReq{}
+	req.AccessToken = "123"
+	req.OrganizationID = 222222
+	req.ImageID = "img_xyz456"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ImageDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 删除图片验证测试用例 ==========
+
+// TestImageDeleteValidateMissingAccountAndOrgSelf 测试 account_id 和 organization_id 均未填写
+func TestImageDeleteValidateMissingAccountAndOrgSelf(t *testing.T) {
+	req := &model.ImageDeleteReq{}
+	req.AccessToken = "123"
+	req.ImageID = "img_abc123"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id 和 organization_id 需必填其一")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageDeleteValidateMissingImageIDSelf 测试缺少 image_id
+func TestImageDeleteValidateMissingImageIDSelf(t *testing.T) {
+	req := &model.ImageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：image_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestImageDeleteValidateImageIDTooLongSelf 测试 image_id 超过 64 字节
+func TestImageDeleteValidateImageIDTooLongSelf(t *testing.T) {
+	req := &model.ImageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ImageID = "this_image_id_is_way_too_long_and_exceeds_the_maximum_64_bytes_limit_xyz"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：image_id超过64字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
