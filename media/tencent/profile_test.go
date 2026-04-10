@@ -273,3 +273,79 @@ func TestProfileGetDefaultPaginationSelf(t *testing.T) {
 	}
 	fmt.Printf("默认分页: page=%d, page_size=%d\n", req.Page, req.PageSize)
 }
+
+// ========== 删除朋友圈头像昵称跳转页测试用例 ==========
+
+// TestProfileDeleteByProfileIDSelf 测试按 profile_id 删除跳转页
+func TestProfileDeleteByProfileIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ProfileDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileID = 11111
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ProfileDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestProfileDeleteWithOrganizationIDSelf 测试携带 organization_id 删除跳转页
+func TestProfileDeleteWithOrganizationIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ProfileDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileID = 11111
+	req.OrganizationID = 12345
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ProfileDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 删除朋友圈头像昵称跳转页验证测试用例 ==========
+
+// TestProfileDeleteValidateMissingProfileIDSelf 测试缺少 profile_id
+func TestProfileDeleteValidateMissingProfileIDSelf(t *testing.T) {
+	req := &model.ProfileDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：profile_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileDeleteValidateOrganizationIDTooLargeSelf 测试 organization_id 超过最大值
+func TestProfileDeleteValidateOrganizationIDTooLargeSelf(t *testing.T) {
+	req := &model.ProfileDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileID = 11111
+	req.OrganizationID = 10000000000 // 超过9999999999
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：organization_id超过9999999999")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileDeleteValidateMissingAccessTokenSelf 测试缺少 access_token
+func TestProfileDeleteValidateMissingAccessTokenSelf(t *testing.T) {
+	req := &model.ProfileDeleteReq{}
+	req.AccountID = 111111
+	req.ProfileID = 11111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：access_token为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}

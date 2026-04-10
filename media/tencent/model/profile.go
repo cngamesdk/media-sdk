@@ -127,3 +127,37 @@ type ProfileGetResp struct {
 	List     []*ProfileItem `json:"list"`      // 返回信息列表
 	PageInfo *PageInfo      `json:"page_info"` // 分页配置信息
 }
+
+// ========== 删除朋友圈头像昵称跳转页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/profiles/delete
+
+// ProfileDeleteReq 删除朋友圈头像昵称跳转页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/profiles/delete
+// 注意：只能删除 profile_type 为 PROFILE_TYPE_DEFINITION 的跳转页
+type ProfileDeleteReq struct {
+	GlobalReq
+	AccountID      int64 `json:"account_id,omitempty"`      // 广告主帐号 id
+	ProfileID      int64 `json:"profile_id"`                // 朋友圈头像及昵称跳转页 id (必填)
+	OrganizationID int64 `json:"organization_id,omitempty"` // 业务单元 id，0-9999999999
+}
+
+func (p *ProfileDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除朋友圈头像昵称跳转页请求参数
+func (p *ProfileDeleteReq) Validate() error {
+	if p.ProfileID == 0 {
+		return errors.New("profile_id为必填")
+	}
+	if p.OrganizationID < 0 || p.OrganizationID > 9999999999 {
+		return errors.New("organization_id须在0-9999999999之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ProfileDeleteResp 删除朋友圈头像昵称跳转页响应
+// https://developers.e.qq.com/v3.0/docs/api/profiles/delete
+type ProfileDeleteResp struct {
+	ProfileID int64 `json:"profile_id"` // 朋友圈头像及昵称跳转页 id
+}
