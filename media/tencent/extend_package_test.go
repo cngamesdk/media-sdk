@@ -561,3 +561,273 @@ func TestExtendPackageUpdateValidateChannelIDValidCharsSelf(t *testing.T) {
 	}
 	fmt.Println("合法channel_id验证通过")
 }
+
+// ========== 查询应用分包列表接口调用测试用例 ==========
+
+// TestExtendPackageGetBasicSelf 测试基本查询（不带过滤条件）
+func TestExtendPackageGetBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ExtendPackageGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestExtendPackageGetWithPaginationSelf 测试带分页参数查询
+func TestExtendPackageGetWithPaginationSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Page = 1
+	req.PageSize = 20
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ExtendPackageGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestExtendPackageGetFilterByChannelPackageIDSelf 测试按 channel_package_id 精确查询
+func TestExtendPackageGetFilterByChannelPackageIDSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{
+			Field:    model.ExtendPackageGetFilterFieldChannelPackageID,
+			Operator: model.ExtendPackageGetFilterOperatorEquals,
+			Values:   []string{"12345678"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ExtendPackageGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestExtendPackageGetFilterByChannelNameSelf 测试按 channel_name 模糊查询
+func TestExtendPackageGetFilterByChannelNameSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{
+			Field:    model.ExtendPackageGetFilterFieldChannelName,
+			Operator: model.ExtendPackageGetFilterOperatorContains,
+			Values:   []string{"渠道包"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ExtendPackageGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 查询应用分包列表参数验证测试用例 ==========
+
+// TestExtendPackageGetValidateMissingAccountIDSelf 测试缺少 account_id
+func TestExtendPackageGetValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.PackageID = 2000000336
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateNegativePackageIDSelf 测试 package_id 为负数
+func TestExtendPackageGetValidateNegativePackageIDSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = -1
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：package_id不能为负数")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateFilteringTooLongSelf 测试 filtering 超过2条
+func TestExtendPackageGetValidateFilteringTooLongSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{Field: model.ExtendPackageGetFilterFieldChannelPackageID, Operator: model.ExtendPackageGetFilterOperatorEquals, Values: []string{"1"}},
+		{Field: model.ExtendPackageGetFilterFieldChannelName, Operator: model.ExtendPackageGetFilterOperatorContains, Values: []string{"test"}},
+		{Field: model.ExtendPackageGetFilterFieldChannelPackageID, Operator: model.ExtendPackageGetFilterOperatorEquals, Values: []string{"2"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering超过2条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateNilFilterItemSelf 测试 filtering 中包含 nil 元素
+func TestExtendPackageGetValidateNilFilterItemSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{Field: model.ExtendPackageGetFilterFieldChannelPackageID, Operator: model.ExtendPackageGetFilterOperatorEquals, Values: []string{"1"}},
+		nil,
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering中包含nil元素")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateFilterMissingFieldSelf 测试 filtering.field 为空
+func TestExtendPackageGetValidateFilterMissingFieldSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{Operator: model.ExtendPackageGetFilterOperatorEquals, Values: []string{"1"}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering.field为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateFilterEmptyValuesSelf 测试 filtering.values 为空
+func TestExtendPackageGetValidateFilterEmptyValuesSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{Field: model.ExtendPackageGetFilterFieldChannelPackageID, Operator: model.ExtendPackageGetFilterOperatorEquals, Values: []string{}},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering.values为空")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateFilterValuesTooManySelf 测试 filtering.values 超过1个
+func TestExtendPackageGetValidateFilterValuesTooManySelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{
+			Field:    model.ExtendPackageGetFilterFieldChannelPackageID,
+			Operator: model.ExtendPackageGetFilterOperatorEquals,
+			Values:   []string{"val1", "val2"},
+		},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering.values长度须为1")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateFilterValueTooLongSelf 测试 filtering.values[0] 超过1024字节
+func TestExtendPackageGetValidateFilterValueTooLongSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Filtering = []*model.ExtendPackageGetFilteringItem{
+		{
+			Field:    model.ExtendPackageGetFilterFieldChannelName,
+			Operator: model.ExtendPackageGetFilterOperatorContains,
+			Values:   []string{strings.Repeat("a", 1025)},
+		},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering.values[0]超过1024字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidatePageOutOfRangeSelf 测试 page 超出范围
+func TestExtendPackageGetValidatePageOutOfRangeSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Page = 100000
+	req.PageSize = 10
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page超出范围")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidatePageSizeOutOfRangeSelf 测试 page_size 超出范围
+func TestExtendPackageGetValidatePageSizeOutOfRangeSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Page = 1
+	req.PageSize = 101
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_size超出范围")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestExtendPackageGetValidateDefaultPaginationSelf 测试 Format() 默认填充分页参数
+func TestExtendPackageGetValidateDefaultPaginationSelf(t *testing.T) {
+	req := &model.ExtendPackageGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PackageID = 2000000336
+	req.Format()
+	if req.Page != 1 {
+		t.Fatalf("期望默认page=1，实际=%d", req.Page)
+	}
+	if req.PageSize != 10 {
+		t.Fatalf("期望默认page_size=10，实际=%d", req.PageSize)
+	}
+	err := req.Validate()
+	if err != nil {
+		t.Fatalf("默认分页参数应通过验证，但返回了错误: %v", err)
+	}
+	fmt.Println("默认分页参数验证通过")
+}
