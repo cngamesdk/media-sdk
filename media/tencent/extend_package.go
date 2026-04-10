@@ -58,3 +58,21 @@ func (a *TencentAdapter) ExtendPackageUpdateSelf(ctx context.Context, req *model
 	resp = &result
 	return
 }
+
+// ExtendPackageGetSelf 查询应用分包列表
+// https://developers.e.qq.com/v3.0/docs/api/extend_package/get
+func (a *TencentAdapter) ExtendPackageGetSelf(ctx context.Context, req *model.ExtendPackageGetReq) (
+	resp *model.ExtendPackageGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.ExtendPackageGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/extend_package/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
