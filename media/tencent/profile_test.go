@@ -3,6 +3,7 @@ package tencent
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/cngamesdk/media-sdk/config"
@@ -348,4 +349,236 @@ func TestProfileDeleteValidateMissingAccessTokenSelf(t *testing.T) {
 		t.Fatal("期望返回错误：access_token为必填")
 	}
 	fmt.Printf("验证错误: %v\n", err)
+}
+
+// ========== 创建朋友圈头像昵称跳转页测试用例 ==========
+
+// TestProfileAddDefinitionTypeSelf 测试创建自定义类型跳转页（PROFILE_TYPE_DEFINITION）
+func TestProfileAddDefinitionTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.ProfileName = "测试昵称"
+	req.Description = "这是一段朋友圈头像昵称跳转页简介"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ProfileAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestProfileAddAutoGenerateTypeSelf 测试创建自动填充类型跳转页（PROFILE_TYPE_AUTO_GENERATE）
+func TestProfileAddAutoGenerateTypeSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeAutoGenerate
+	req.MarketingCarrierType = model.ProfileMarketingCarrierTypeAppAndroid
+	req.MarketingCarrierID = "com.example.testapp"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ProfileAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestProfileAddWithAllFieldsSelf 测试携带全部可选字段创建跳转页
+func TestProfileAddWithAllFieldsSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.ProfileName = "全字段测试昵称"
+	req.Description = "全字段测试简介内容"
+	req.MarketingGoal = model.ProfileMarketingGoalUserGrowth
+	req.MarketingTargetType = "MARKETING_TARGET_TYPE_APP_ANDROID"
+	req.OrganizationID = 12345
+	req.MdmID = 67890
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.ProfileAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 创建朋友圈头像昵称跳转页验证测试用例 ==========
+
+// TestProfileAddValidateMissingProfileTypeSelf 测试缺少 profile_type
+func TestProfileAddValidateMissingProfileTypeSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：profile_type为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateInvalidProfileTypeSelf 测试 profile_type 非法值
+func TestProfileAddValidateInvalidProfileTypeSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = "INVALID_TYPE"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：profile_type非法值")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateMissingHeadImageIDSelf 测试 DEFINITION 类型缺少 head_image_id
+func TestProfileAddValidateMissingHeadImageIDSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.ProfileName = "测试昵称"
+	req.Description = "测试简介"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：DEFINITION类型head_image_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateMissingProfileNameSelf 测试 DEFINITION 类型缺少 profile_name
+func TestProfileAddValidateMissingProfileNameSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.Description = "测试简介"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：DEFINITION类型profile_name为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateMissingDescriptionSelf 测试 DEFINITION 类型缺少 description
+func TestProfileAddValidateMissingDescriptionSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.ProfileName = "测试昵称"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：DEFINITION类型description为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateHeadImageIDTooLongSelf 测试 head_image_id 超过64字节
+func TestProfileAddValidateHeadImageIDTooLongSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = strings.Repeat("a", 65) // 超过64字节
+	req.ProfileName = "测试昵称"
+	req.Description = "测试简介"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：head_image_id超过64字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateProfileNameTooLongSelf 测试 profile_name 超过30字节
+func TestProfileAddValidateProfileNameTooLongSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.ProfileName = strings.Repeat("a", 31) // 超过30字节
+	req.Description = "测试简介"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：profile_name超过30字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateDescriptionTooLongSelf 测试 description 超过240字节
+func TestProfileAddValidateDescriptionTooLongSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeDefinition
+	req.HeadImageID = "abc123headimageid"
+	req.ProfileName = "测试昵称"
+	req.Description = strings.Repeat("a", 241) // 超过240字节
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：description超过240字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateMarketingCarrierIDTooLongSelf 测试 marketing_carrier_id 超过2048字节
+func TestProfileAddValidateMarketingCarrierIDTooLongSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeAutoGenerate
+	req.MarketingCarrierID = strings.Repeat("a", 2049) // 超过2048字节
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：marketing_carrier_id超过2048字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateOrganizationIDTooLargeSelf 测试 organization_id 超过最大值
+func TestProfileAddValidateOrganizationIDTooLargeSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeAutoGenerate
+	req.OrganizationID = 10000000000 // 超过9999999999
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：organization_id超过9999999999")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestProfileAddValidateAutoGenerateNoExtraFieldsSelf 测试 AUTO_GENERATE 类型不需要 DEFINITION 三要素
+func TestProfileAddValidateAutoGenerateNoExtraFieldsSelf(t *testing.T) {
+	req := &model.ProfileAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.ProfileType = model.ProfileTypeAutoGenerate
+	req.Format()
+	err := req.Validate()
+	// AUTO_GENERATE 不需要 head_image_id/profile_name/description，验证应通过
+	if err != nil {
+		t.Fatalf("AUTO_GENERATE类型不应要求DEFINITION三要素，但返回了错误: %v", err)
+	}
+	fmt.Println("AUTO_GENERATE类型验证通过")
 }
