@@ -10,14 +10,15 @@ import (
 
 // 字段限制常量
 const (
-	MinExtendPackageChannelListLen           = 1   // channel_list 最小长度
-	MaxExtendPackageChannelListLen           = 200 // channel_list 最大长度
-	MinExtendPackageChannelIDBytes           = 1   // channel_id 最小长度
-	MaxExtendPackageChannelIDBytes           = 200 // channel_id 最大长度
-	MinExtendPackageChannelNameBytes         = 1   // channel_name 最小长度
-	MaxExtendPackageChannelNameBytes         = 255 // channel_name 最大长度
-	MinExtendPackageCustomizedChannelIDBytes = 1   // customized_channel_id 最小长度
-	MaxExtendPackageCustomizedChannelIDBytes = 256 // customized_channel_id 最大长度
+	MinExtendPackageChannelListLen           = 1    // channel_list 最小长度
+	MaxExtendPackageChannelListLen           = 200  // channel_list 最大长度
+	MinExtendPackageChannelIDBytes           = 1    // channel_id 最小长度
+	MaxExtendPackageChannelIDBytes           = 200  // channel_id 最大长度
+	MinExtendPackageChannelNameBytes         = 1    // channel_name 最小长度（创建）
+	MaxExtendPackageChannelNameBytes         = 255  // channel_name 最大长度（创建）
+	MaxExtendPackageUpdateChannelNameBytes   = 1024 // channel_name 最大长度（更新）
+	MinExtendPackageCustomizedChannelIDBytes = 1    // customized_channel_id 最小长度
+	MaxExtendPackageCustomizedChannelIDBytes = 256  // customized_channel_id 最大长度
 )
 
 // channelIDRegex channel_id 合法字符正则：仅允许英文字母、数字和 _ . -
@@ -99,6 +100,78 @@ type ExtendPackageResultItem struct {
 // ExtendPackageAddResp 创建应用分包响应
 // https://developers.e.qq.com/v3.0/docs/api/extend_package/add
 type ExtendPackageAddResp struct {
+	PackageID      int64                      `json:"package_id"`      // Android 应用 id
+	SuccessResults []*ExtendPackageResultItem `json:"success_results"` // 渠道包操作成功信息列表
+	FailedResults  []*ExtendPackageResultItem `json:"failed_results"`  // 应用分包操作失败列表
+}
+
+// ========== 更新应用子包版本 ==========
+// https://developers.e.qq.com/v3.0/docs/api/extend_package/update
+
+// ExtendPackageUpdateChannelItem 更新渠道号信息
+// 与创建的差异：channel_name 最大长度 1024 字节，无 customized_channel_id 字段
+type ExtendPackageUpdateChannelItem struct {
+	ChannelID   string `json:"channel_id"`             // 渠道标识 (必填)，仅英文/数字/_.-，1-200 字节
+	ChannelName string `json:"channel_name,omitempty"` // 安卓应用渠道包名称，1-1024 字节
+}
+
+// Validate 验证单条更新渠道号信息
+func (c *ExtendPackageUpdateChannelItem) Validate() error {
+	if c.ChannelID == "" {
+		return errors.New("channel_id为必填")
+	}
+	if len(c.ChannelID) < MinExtendPackageChannelIDBytes || len(c.ChannelID) > MaxExtendPackageChannelIDBytes {
+		return errors.New("channel_id长度须在1-200字节之间")
+	}
+	if !channelIDRegex.MatchString(c.ChannelID) {
+		return errors.New("channel_id只能由英文字母、数字和_.-组成")
+	}
+	if c.ChannelName != "" {
+		if len(c.ChannelName) < MinExtendPackageChannelNameBytes || len(c.ChannelName) > MaxExtendPackageUpdateChannelNameBytes {
+			return errors.New("channel_name长度须在1-1024字节之间")
+		}
+	}
+	return nil
+}
+
+// ExtendPackageUpdateReq 更新应用子包版本请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/extend_package/update
+type ExtendPackageUpdateReq struct {
+	GlobalReq
+	AccountID   int64                             `json:"account_id"`   // 广告主帐号 id (必填)
+	PackageID   int64                             `json:"package_id"`   // Android 应用 id (必填)，≥0 且 <2^63
+	ChannelList []*ExtendPackageUpdateChannelItem `json:"channel_list"` // 渠道号信息 (必填)，1-200 条
+}
+
+func (p *ExtendPackageUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证更新应用子包版本请求参数
+func (p *ExtendPackageUpdateReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.PackageID < 0 {
+		return errors.New("package_id须大于等于0")
+	}
+	if len(p.ChannelList) < MinExtendPackageChannelListLen || len(p.ChannelList) > MaxExtendPackageChannelListLen {
+		return errors.New("channel_list数组长度须在1-200之间")
+	}
+	for i, ch := range p.ChannelList {
+		if ch == nil {
+			return errors.New("channel_list[" + itoa(i) + "]不能为空")
+		}
+		if err := ch.Validate(); err != nil {
+			return errors.New("channel_list[" + itoa(i) + "]: " + err.Error())
+		}
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ExtendPackageUpdateResp 更新应用子包版本响应
+// https://developers.e.qq.com/v3.0/docs/api/extend_package/update
+type ExtendPackageUpdateResp struct {
 	PackageID      int64                      `json:"package_id"`      // Android 应用 id
 	SuccessResults []*ExtendPackageResultItem `json:"success_results"` // 渠道包操作成功信息列表
 	FailedResults  []*ExtendPackageResultItem `json:"failed_results"`  // 应用分包操作失败列表
