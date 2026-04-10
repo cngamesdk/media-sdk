@@ -51,3 +51,32 @@ func (a *TencentAdapter) ProfileDeleteSelf(ctx context.Context, req *model.Profi
 	resp = &result
 	return
 }
+
+// ProfileAddSelf 创建朋友圈头像昵称跳转页
+// https://developers.e.qq.com/v3.0/docs/api/profiles/add
+// 使用说明：
+//   - profile_type 为 PROFILE_TYPE_DEFINITION 时，必须传入 head_image_id、profile_name、description
+//   - 每个账户最多创建 5 个自定义类型跳转页
+func (a *TencentAdapter) ProfileAddSelf(ctx context.Context, req *model.ProfileAddReq) (
+	resp *model.ProfileAddResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.ProfileAddResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/profiles/add?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}

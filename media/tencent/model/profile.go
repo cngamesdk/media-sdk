@@ -161,3 +161,102 @@ func (p *ProfileDeleteReq) Validate() error {
 type ProfileDeleteResp struct {
 	ProfileID int64 `json:"profile_id"` // 朋友圈头像及昵称跳转页 id
 }
+
+// ========== 创建朋友圈头像昵称跳转页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/profiles/add
+
+// 营销目的类型枚举
+const (
+	ProfileMarketingGoalUnknown                 = "MARKETING_GOAL_UNKNOWN"
+	ProfileMarketingGoalUserGrowth              = "MARKETING_GOAL_USER_GROWTH"
+	ProfileMarketingGoalProductSales            = "MARKETING_GOAL_PRODUCT_SALES"
+	ProfileMarketingGoalLeadRetention           = "MARKETING_GOAL_LEAD_RETENTION"
+	ProfileMarketingGoalBrandPromotion          = "MARKETING_GOAL_BRAND_PROMOTION"
+	ProfileMarketingGoalIncreaseFansInteraction = "MARKETING_GOAL_INCREASE_FANS_INTERACTION"
+)
+
+// 营销载体类型枚举（仅 PROFILE_TYPE_AUTO_GENERATE 时有效）
+const (
+	ProfileMarketingCarrierTypeAppAndroid = "MARKETING_CARRIER_TYPE_APP_ANDROID"
+	ProfileMarketingCarrierTypeAppIOS     = "MARKETING_CARRIER_TYPE_APP_IOS"
+)
+
+// 字段长度常量
+const (
+	MinProfileHeadImageIDBytes        = 1    // head_image_id 最小长度
+	MaxProfileHeadImageIDBytes        = 64   // head_image_id 最大长度
+	MinProfileNameBytes               = 1    // profile_name 最小长度
+	MaxProfileNameBytes               = 30   // profile_name 最大长度（字节）
+	MinProfileDescriptionBytes        = 1    // description 最小长度
+	MaxProfileDescriptionBytes        = 240  // description 最大长度（字节）
+	MaxProfileMarketingCarrierIDBytes = 2048 // marketing_carrier_id 最大长度
+)
+
+// ProfileAddReq 创建朋友圈头像昵称跳转页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/profiles/add
+// 使用说明：
+//   - profile_type 为 PROFILE_TYPE_DEFINITION 时，必须传入 head_image_id、profile_name、description
+//   - profile_type 为 PROFILE_TYPE_AUTO_GENERATE 时，marketing_carrier_type 仅支持 APP_ANDROID / APP_IOS
+//   - 每个账户最多创建 5 个自定义类型跳转页
+type ProfileAddReq struct {
+	GlobalReq
+	AccountID            int64  `json:"account_id,omitempty"`             // 广告主帐号 id
+	MarketingGoal        string `json:"marketing_goal,omitempty"`         // 营销目的类型
+	MarketingSubGoal     string `json:"marketing_sub_goal,omitempty"`     // 二级营销目的类型
+	MarketingCarrierType string `json:"marketing_carrier_type,omitempty"` // 营销载体类型（仅 AUTO_GENERATE 时有效）
+	MarketingTargetType  string `json:"marketing_target_type,omitempty"`  // 推广产品类型
+	MarketingCarrierID   string `json:"marketing_carrier_id,omitempty"`   // 营销载体 id，0-2048 字节
+	ProfileType          string `json:"profile_type"`                     // 朋友圈头像及昵称跳转页类型 (必填)
+	HeadImageID          string `json:"head_image_id,omitempty"`          // 头像图片 id，DEFINITION 时必填，1-64 字节
+	ProfileName          string `json:"profile_name,omitempty"`           // 昵称，DEFINITION 时必填，1-30 字节
+	Description          string `json:"description,omitempty"`            // 简介，DEFINITION 时必填，1-240 字节
+	OrganizationID       int64  `json:"organization_id,omitempty"`        // 业务单元 id，0-9999999999
+	MdmID                int64  `json:"mdm_id,omitempty"`                 // 主体 id
+}
+
+func (p *ProfileAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证创建朋友圈头像昵称跳转页请求参数
+func (p *ProfileAddReq) Validate() error {
+	if p.ProfileType == "" {
+		return errors.New("profile_type为必填")
+	}
+	if p.ProfileType != ProfileTypeDefinition && p.ProfileType != ProfileTypeAutoGenerate {
+		return errors.New("profile_type只能为PROFILE_TYPE_DEFINITION或PROFILE_TYPE_AUTO_GENERATE")
+	}
+	if p.ProfileType == ProfileTypeDefinition {
+		if p.HeadImageID == "" {
+			return errors.New("profile_type为PROFILE_TYPE_DEFINITION时，head_image_id为必填")
+		}
+		if len(p.HeadImageID) < MinProfileHeadImageIDBytes || len(p.HeadImageID) > MaxProfileHeadImageIDBytes {
+			return errors.New("head_image_id长度须在1-64字节之间")
+		}
+		if p.ProfileName == "" {
+			return errors.New("profile_type为PROFILE_TYPE_DEFINITION时，profile_name为必填")
+		}
+		if len(p.ProfileName) < MinProfileNameBytes || len(p.ProfileName) > MaxProfileNameBytes {
+			return errors.New("profile_name长度须在1-30字节之间")
+		}
+		if p.Description == "" {
+			return errors.New("profile_type为PROFILE_TYPE_DEFINITION时，description为必填")
+		}
+		if len(p.Description) < MinProfileDescriptionBytes || len(p.Description) > MaxProfileDescriptionBytes {
+			return errors.New("description长度须在1-240字节之间")
+		}
+	}
+	if len(p.MarketingCarrierID) > MaxProfileMarketingCarrierIDBytes {
+		return errors.New("marketing_carrier_id长度不能超过2048字节")
+	}
+	if p.OrganizationID < 0 || p.OrganizationID > 9999999999 {
+		return errors.New("organization_id须在0-9999999999之间")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// ProfileAddResp 创建朋友圈头像昵称跳转页响应
+// https://developers.e.qq.com/v3.0/docs/api/profiles/add
+type ProfileAddResp struct {
+	ProfileID int64 `json:"profile_id"` // 朋友圈头像及昵称跳转页 id
+}
