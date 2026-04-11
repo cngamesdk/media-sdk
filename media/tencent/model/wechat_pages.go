@@ -380,7 +380,7 @@ type WechatPageElementSpec struct {
 	TextSpec            *WechatPageTextSpec            `json:"text_spec,omitempty"`             // 文字组件元素
 	ButtonSpec          *WechatPageButtonSpec          `json:"button_spec,omitempty"`           // 按钮组件元素
 	FormSpec            *WechatPageFormSpec            `json:"form_spec,omitempty"`             // 表单组件
-	ElementShelf        interface{}                    `json:"element_shelf,omitempty"`         // 图文复合组件
+	ElementShelf        *WechatPageElementShelf        `json:"element_shelf,omitempty"`         // 图文复合组件
 	ElementFloat        *WechatPageElementFloat        `json:"element_float,omitempty"`         // 浮层组件
 	ElementGoods        *WechatPageElementGoods        `json:"element_goods,omitempty"`         // 商品组件
 	ElementSwipe        *WechatPageElementSwipe        `json:"element_swipe,omitempty"`         // 滑动组件元素
@@ -417,4 +417,126 @@ type WechatPagesGetItem struct {
 type WechatPagesGetResp struct {
 	List     []*WechatPagesGetItem `json:"list"`      // 返回信息列表
 	PageInfo *PageInfo             `json:"page_info"` // 分页配置信息
+}
+
+// ========== 基于模板创建微信原生页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/add
+
+// 创建接口字段长度常量
+const (
+	MinWechatPagesAddPageNameBytes         = 1     // page_name 最小长度
+	MaxWechatPagesAddPageNameBytes         = 120   // page_name 最大长度
+	MaxWechatPagesAddElementsCount         = 40    // page_elements_spec_list 最大长度
+	MaxWechatPagesAddImageIDListCount      = 6     // image_id_list 最大数量
+	MaxWechatPagesAddImageIDBytes          = 64    // 单个 image_id 最大长度
+	MaxWechatPagesAddTextBytes             = 30720 // text_spec.text 最大长度
+	MaxWechatPagesAddButtonTitleBytes      = 120   // button title 最大长度
+	MaxWechatPagesAddButtonURLBytes        = 1023  // button url 最大长度
+	MaxWechatPagesAddDeepLinkURLBytes      = 2048  // deep_link_url 最大长度
+	MaxWechatPagesAddAppIDBytes            = 128   // app_android_id / app_ios_id 最大长度
+	MaxWechatPagesAddChannelPackageIDBytes = 128   // app_android_channel_package_id 最大长度
+	MaxWechatPagesAddAppMarketPackageBytes = 512   // app_market_package 最大长度
+	MaxWechatPagesAddMiniProgramIDBytes    = 384   // mini_program_id 最大长度
+	MaxWechatPagesAddMiniProgramPathBytes  = 2048  // mini_program_path 最大长度
+	MaxWechatPagesAddMiniProgramPathsCount = 255   // mini_program_paths 最大数量
+	MaxWechatPagesAddMiniGameIDBytes       = 384   // mini_game_program_id 最大长度
+	MaxWechatPagesAddMiniGamePathBytes     = 750   // mini_game_program_path 最大长度
+	MaxWechatPagesAddFengyeIDBytes         = 384   // fengye_id 最大长度
+	MaxWechatPagesAddCardIDBytes           = 384   // card_id 最大长度
+	MaxWechatPagesAddWecomTitleBytes       = 64    // wecom_spec.title 最大长度
+	MaxWechatPagesAddWecomGroupID          = int64(9999999999)
+	MaxWechatPagesAddTelTitleBytes         = 64   // tel_spec.title 最大长度
+	MaxWechatPagesAddPhoneNumBytes         = 64   // tel_spec.phone_num 最大长度
+	MaxWechatPagesAddFinderNicknameBytes   = 120  // finder_nickname 最大长度
+	MaxWechatPagesAddFormTitleBytes        = 30   // form_spec.title 最大长度
+	MaxWechatPagesAddShelfSpecCount        = 32   // shelf_spec 最大长度
+	MaxWechatPagesAddSwipeURLBytes         = 1023 // element_swipe.jump_url 最大长度
+	MaxWechatPagesAddSwipeTextBytes        = 30   // element_swipe.swipe_text 最大长度
+	MaxWechatPagesAddWebviewURLBytes       = 1023 // element_webview.url 最大长度
+)
+
+// WechatPageAppDownloadSpec 应用下载信息（用于图文复合组件按钮）
+type WechatPageAppDownloadSpec struct {
+	Title           string                     `json:"title"`                       // 按钮文案 (必填)，须含"安装"或"下载"，1-120字节
+	AppIosSpec      *WechatPageAppIosSpec      `json:"app_ios_spec,omitempty"`      // iOS App 信息元素
+	AppAndroidSpec  *WechatPageAppAndroidSpec  `json:"app_android_spec,omitempty"`  // Android App 信息元素
+	MiniProgramSpec *WechatPageMiniProgramSpec `json:"mini_program_spec,omitempty"` // 小程序信息
+	WecomSpec       *WechatPageWecomSpec       `json:"wecom_spec,omitempty"`        // 企业微信组件信息
+}
+
+// WechatPageShelfButtonSpec 图文复合组件按钮信息
+type WechatPageShelfButtonSpec struct {
+	LinkSpec        *WechatPageLinkSpec        `json:"link_spec,omitempty"`         // 外链信息
+	AppDownloadSpec *WechatPageAppDownloadSpec `json:"app_download_spec,omitempty"` // 应用下载信息
+	ImageIDList     string                     `json:"image_id_list,omitempty"`     // 图片 id，1-64字节
+	Title           string                     `json:"title,omitempty"`             // 图文复合标题文案，1-120字节
+	Desc            string                     `json:"desc,omitempty"`              // 图文复合描述文案，1-120字节
+}
+
+// WechatPageShelfSpec 图文复合组件行
+type WechatPageShelfSpec struct {
+	ShelfButtonSpec *WechatPageShelfButtonSpec `json:"shelf_button_spec,omitempty"` // 图文复合按钮信息 (必填)
+}
+
+// WechatPageElementShelf 图文复合组件
+type WechatPageElementShelf struct {
+	ShelfSpec []*WechatPageShelfSpec `json:"shelf_spec"` // 按钮信息列表 (必填)，最大32条
+}
+
+// WechatPagesAddReq 基于模板创建微信原生页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/add
+type WechatPagesAddReq struct {
+	GlobalReq
+	AccountID            int64                       `json:"account_id"`              // 广告主帐号 id (必填)
+	PageName             string                      `json:"page_name"`               // 落地页名称 (必填)，1-120字节
+	PageTemplateID       int64                       `json:"page_template_id"`        // 落地页模板 id (必填)
+	PageElementsSpecList []*WechatPageElementSpec    `json:"page_elements_spec_list"` // 组件素材内容列表 (必填)，最大40条
+	ShareContentSpec     *WechatPageShareContentSpec `json:"share_content_spec"`      // 微信原生页分享信息 (必填)
+}
+
+func (p *WechatPagesAddReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证基于模板创建微信原生页请求参数
+func (p *WechatPagesAddReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if len(p.PageName) < MinWechatPagesAddPageNameBytes || len(p.PageName) > MaxWechatPagesAddPageNameBytes {
+		return errors.New("page_name长度须在1-120字节之间")
+	}
+	if p.PageTemplateID == 0 {
+		return errors.New("page_template_id为必填")
+	}
+	if len(p.PageElementsSpecList) == 0 {
+		return errors.New("page_elements_spec_list为必填，至少包含1个组件")
+	}
+	if len(p.PageElementsSpecList) > MaxWechatPagesAddElementsCount {
+		return errors.New("page_elements_spec_list数组长度不能超过40")
+	}
+	for i, el := range p.PageElementsSpecList {
+		if el == nil {
+			return errors.New("page_elements_spec_list[" + itoa(i) + "]不能为空")
+		}
+		if el.ElementType == "" {
+			return errors.New("page_elements_spec_list[" + itoa(i) + "].element_type为必填")
+		}
+	}
+	if p.ShareContentSpec == nil {
+		return errors.New("share_content_spec为必填")
+	}
+	if p.ShareContentSpec.ShareTitle == "" {
+		return errors.New("share_content_spec.share_title为必填")
+	}
+	if p.ShareContentSpec.ShareDescription == "" {
+		return errors.New("share_content_spec.share_description为必填")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// WechatPagesAddResp 基于模板创建微信原生页响应
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/add
+type WechatPagesAddResp struct {
+	PageID int64 `json:"page_id"` // 落地页 id
 }

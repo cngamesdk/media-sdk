@@ -394,3 +394,425 @@ func TestWechatPagesGetValidateMultipleFiltersSelf(t *testing.T) {
 	}
 	fmt.Println("多过滤条件验证通过")
 }
+
+// ========== 基于模板创建微信原生页接口调用测试用例 ==========
+
+// TestWechatPagesAddImageButtonSelf 测试创建含图片+按钮的原生页
+func TestWechatPagesAddImageButtonSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试原生页-图片+按钮"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{
+			ElementType: "IMAGE",
+			ImageSpec: &model.WechatPageImageSpec{
+				ImageIDList: []string{"4152626:583dfc8e7f53a58db8293622b78a3c7f"},
+			},
+		},
+		{
+			ElementType: "BUTTON",
+			ButtonSpec: &model.WechatPageButtonSpec{
+				Title: "立即下载",
+				URL:   "https://example.com",
+				AppAndroidSpec: &model.WechatPageAppAndroidSpec{
+					AppAndroidID: "1104790111",
+					DeepLinkURL:  "example://open",
+				},
+			},
+		},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle:       "分享标题",
+		ShareDescription: "分享描述信息",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.WechatPagesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestWechatPagesAddVideoButtonSelf 测试创建含视频+按钮的原生页
+func TestWechatPagesAddVideoButtonSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试原生页-视频+按钮"
+	req.PageTemplateID = 10002
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{
+			ElementType: "VIDEO",
+			VideoSpec:   &model.WechatPageVideoSpec{VideoID: 99887766},
+		},
+		{
+			ElementType: "BUTTON",
+			ButtonSpec: &model.WechatPageButtonSpec{
+				Title: "立即安装",
+				AppIosSpec: &model.WechatPageAppIosSpec{
+					AppIosID:    "1044283059",
+					DeepLinkURL: "pinduoduo://open",
+				},
+			},
+		},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle:       "视频页分享",
+		ShareDescription: "精彩内容等你来",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.WechatPagesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestWechatPagesAddMiniProgramButtonSelf 测试创建含小程序跳转按钮的原生页
+func TestWechatPagesAddMiniProgramButtonSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试原生页-小程序按钮"
+	req.PageTemplateID = 10003
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{
+			ElementType: "IMAGE",
+			ImageSpec: &model.WechatPageImageSpec{
+				ImageIDList: []string{"img001"},
+			},
+		},
+		{
+			ElementType: "BUTTON",
+			ButtonSpec: &model.WechatPageButtonSpec{
+				MiniProgramSpec: &model.WechatPageMiniProgramSpec{
+					Title:           "进入小程序",
+					MiniProgramID:   "gh_abcdefg12345",
+					MiniProgramPath: "pages/index/index",
+				},
+			},
+		},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle:       "小程序好玩",
+		ShareDescription: "点击进入体验",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.WechatPagesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestWechatPagesAddWithShelfSelf 测试创建含图文复合组件的原生页
+func TestWechatPagesAddWithShelfSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试原生页-图文复合"
+	req.PageTemplateID = 10004
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{
+			ElementType: "SHELF",
+			ElementShelf: &model.WechatPageElementShelf{
+				ShelfSpec: []*model.WechatPageShelfSpec{
+					{
+						ShelfButtonSpec: &model.WechatPageShelfButtonSpec{
+							ImageIDList: "img_shelf_001",
+							Title:       "商品标题",
+							Desc:        "商品描述",
+							LinkSpec: &model.WechatPageLinkSpec{
+								Title: "立即购买",
+								URL:   "https://example.com/product",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle:       "好物推荐",
+		ShareDescription: "限时特惠",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.WechatPagesAddSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 基于模板创建微信原生页参数验证测试用例 ==========
+
+// TestWechatPagesAddValidateMissingAccountIDSelf 测试缺少 account_id
+func TestWechatPagesAddValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateEmptyPageNameSelf 测试 page_name 为空
+func TestWechatPagesAddValidateEmptyPageNameSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = ""
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_name为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidatePageNameTooLongSelf 测试 page_name 超过120字节
+func TestWechatPagesAddValidatePageNameTooLongSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = strings.Repeat("a", 121)
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_name超过120字节")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateMissingPageTemplateIDSelf 测试缺少 page_template_id
+func TestWechatPagesAddValidateMissingPageTemplateIDSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_template_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateEmptyElementsListSelf 测试 page_elements_spec_list 为空
+func TestWechatPagesAddValidateEmptyElementsListSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_elements_spec_list为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateElementsListTooLongSelf 测试 page_elements_spec_list 超过40条
+func TestWechatPagesAddValidateElementsListTooLongSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	list := make([]*model.WechatPageElementSpec, 41)
+	for i := range list {
+		list[i] = &model.WechatPageElementSpec{ElementType: "IMAGE"}
+	}
+	req.PageElementsSpecList = list
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_elements_spec_list超过40条")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateNilElementSelf 测试 page_elements_spec_list 含 nil 元素
+func TestWechatPagesAddValidateNilElementSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+		nil,
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：element不能为nil")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateMissingElementTypeSelf 测试 element_type 为空
+func TestWechatPagesAddValidateMissingElementTypeSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "标题", ShareDescription: "描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：element_type为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateMissingShareContentSpecSelf 测试缺少 share_content_spec
+func TestWechatPagesAddValidateMissingShareContentSpecSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：share_content_spec为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateMissingShareTitleSelf 测试 share_title 为空
+func TestWechatPagesAddValidateMissingShareTitleSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareDescription: "分享描述",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：share_title为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateMissingShareDescriptionSelf 测试 share_description 为空
+func TestWechatPagesAddValidateMissingShareDescriptionSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{ElementType: "IMAGE"},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle: "分享标题",
+	}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：share_description为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesAddValidateFullParamsSelf 测试完整合法参数通过验证
+func TestWechatPagesAddValidateFullParamsSelf(t *testing.T) {
+	req := &model.WechatPagesAddReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageName = "合法测试页面"
+	req.PageTemplateID = 10001
+	req.PageElementsSpecList = []*model.WechatPageElementSpec{
+		{
+			ElementType: "IMAGE",
+			ImageSpec: &model.WechatPageImageSpec{
+				ImageIDList: []string{"img001", "img002"},
+			},
+		},
+		{
+			ElementType: "TEXT",
+			TextSpec:    &model.WechatPageTextSpec{Text: "这是一段测试文案"},
+		},
+		{
+			ElementType: "BUTTON",
+			ButtonSpec: &model.WechatPageButtonSpec{
+				Title: "立即下载",
+				URL:   "https://example.com",
+			},
+		},
+	}
+	req.ShareContentSpec = &model.WechatPageShareContentSpec{
+		ShareTitle:       "分享标题",
+		ShareDescription: "分享描述信息",
+	}
+	req.Format()
+	err := req.Validate()
+	if err != nil {
+		t.Fatalf("完整合法参数应通过验证，但返回了错误: %v", err)
+	}
+	fmt.Println("完整合法参数验证通过")
+}
