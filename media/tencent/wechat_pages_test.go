@@ -816,3 +816,62 @@ func TestWechatPagesAddValidateFullParamsSelf(t *testing.T) {
 	}
 	fmt.Println("完整合法参数验证通过")
 }
+
+// ========== 删除微信落地页接口调用测试用例 ==========
+
+// TestWechatPagesDeleteBasicSelf 测试基本删除接口调用
+func TestWechatPagesDeleteBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.WechatPagesDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageID = 12345678
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.WechatPagesDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 删除微信落地页参数验证测试用例 ==========
+
+// TestWechatPagesDeleteValidateMissingAccountIDSelf 测试缺少 account_id
+func TestWechatPagesDeleteValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.WechatPagesDeleteReq{}
+	req.AccessToken = "123"
+	req.PageID = 12345678
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesDeleteValidateMissingPageIDSelf 测试缺少 page_id
+func TestWechatPagesDeleteValidateMissingPageIDSelf(t *testing.T) {
+	req := &model.WechatPagesDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestWechatPagesDeleteValidateFullParamsSelf 测试完整合法参数通过验证
+func TestWechatPagesDeleteValidateFullParamsSelf(t *testing.T) {
+	req := &model.WechatPagesDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageID = 12345678
+	req.Format()
+	err := req.Validate()
+	if err != nil {
+		t.Fatalf("完整合法参数应通过验证，但返回了错误: %v", err)
+	}
+	fmt.Println("完整合法参数验证通过")
+}

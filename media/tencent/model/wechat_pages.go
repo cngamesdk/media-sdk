@@ -540,3 +540,35 @@ func (p *WechatPagesAddReq) Validate() error {
 type WechatPagesAddResp struct {
 	PageID int64 `json:"page_id"` // 落地页 id
 }
+
+// ========== 删除微信落地页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/delete
+
+// WechatPagesDeleteReq 删除微信落地页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/delete
+type WechatPagesDeleteReq struct {
+	GlobalReq
+	AccountID int64 `json:"account_id"` // 广告主帐号 id (必填)
+	PageID    int64 `json:"page_id"`    // 落地页 id (必填)
+}
+
+func (p *WechatPagesDeleteReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证删除微信落地页请求参数
+func (p *WechatPagesDeleteReq) Validate() error {
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if p.PageID == 0 {
+		return errors.New("page_id为必填")
+	}
+	return p.GlobalReq.Validate()
+}
+
+// WechatPagesDeleteResp 删除微信落地页响应
+// https://developers.e.qq.com/v3.0/docs/api/wechat_pages/delete
+type WechatPagesDeleteResp struct {
+	PageID int64 `json:"page_id"` // 落地页 id
+}
