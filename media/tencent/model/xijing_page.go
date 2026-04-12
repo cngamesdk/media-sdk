@@ -129,3 +129,51 @@ type XijingPageAddResultItem struct {
 type XijingPageAddResp struct {
 	List []*XijingPageAddResultItem `json:"list"` // 创建结果列表
 }
+
+// ========== 蹊径送审落地页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/update
+
+// 字段长度常量
+const (
+	MaxXijingPageUpdatePageIDListCount = 999 // page_id_list 最大数量
+)
+
+// XijingPageUpdateReq 蹊径送审落地页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/update
+type XijingPageUpdateReq struct {
+	GlobalReq
+	AccountID            int64    `json:"account_id"`              // 广告主帐号 id (必填)
+	IsSubmittedForReview bool     `json:"is_submitted_for_review"` // 是否送审 (必填)，true=送审
+	PageIDList           []string `json:"page_id_list"`            // 落地页 id 列表 (必填)，最多999个
+}
+
+func (r *XijingPageUpdateReq) Format() {
+	r.GlobalReq.Format()
+}
+
+// Validate 验证蹊径送审落地页请求参数
+func (r *XijingPageUpdateReq) Validate() error {
+	if r.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if r.PageIDList == nil {
+		return errors.New("page_id_list为必填")
+	}
+	if len(r.PageIDList) > MaxXijingPageUpdatePageIDListCount {
+		return errors.New("page_id_list数组长度不能超过999")
+	}
+	return r.GlobalReq.Validate()
+}
+
+// XijingPageUpdateResultItem 单个落地页送审结果
+type XijingPageUpdateResultItem struct {
+	PageServiceID string `json:"page_service_id"` // 落地页服务 id
+	Code          int    `json:"code"`            // 返回码（0=成功）
+	Message       string `json:"message"`         // 英文返回信息
+}
+
+// XijingPageUpdateResp 蹊径送审落地页响应
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/update
+type XijingPageUpdateResp struct {
+	List []*XijingPageUpdateResultItem `json:"list"` // 送审结果列表
+}

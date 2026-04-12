@@ -356,3 +356,135 @@ func TestXijingPageAddValidateFullParamsSelf(t *testing.T) {
 	}
 	fmt.Println("完整合法参数验证通过")
 }
+
+// ========== 蹊径送审落地页接口调用测试用例 ==========
+
+// TestXijingPageUpdateBasicSelf 测试送审单个落地页
+func TestXijingPageUpdateBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = []string{"576460752303438398"}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestXijingPageUpdateMultiplePagesSelf 测试批量送审多个落地页
+func TestXijingPageUpdateMultiplePagesSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = []string{
+		"576460752303438398",
+		"576460752303438399",
+		"576460752303438400",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestXijingPageUpdateNotSubmitSelf 测试 is_submitted_for_review=false
+func TestXijingPageUpdateNotSubmitSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = false
+	req.PageIDList = []string{"576460752303438398"}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestXijingPageUpdateEmptyListSelf 测试空落地页列表（合法，最小长度为0）
+func TestXijingPageUpdateEmptyListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = []string{}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 蹊径送审落地页参数验证测试用例 ==========
+
+// TestXijingPageUpdateValidateMissingAccountIDSelf 测试缺少 account_id
+func TestXijingPageUpdateValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 0
+	req.IsSubmittedForReview = true
+	req.PageIDList = []string{"576460752303438398"}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageUpdateValidateNilPageIDListSelf 测试 page_id_list 为 nil
+func TestXijingPageUpdateValidateNilPageIDListSelf(t *testing.T) {
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = nil
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_id_list为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageUpdateValidatePageIDListTooManySelf 测试 page_id_list 超过999个
+func TestXijingPageUpdateValidatePageIDListTooManySelf(t *testing.T) {
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = make([]string, model.MaxXijingPageUpdatePageIDListCount+1)
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_id_list超过999个")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageUpdateValidateFullParamsSelf 测试完整合法参数通过验证
+func TestXijingPageUpdateValidateFullParamsSelf(t *testing.T) {
+	req := &model.XijingPageUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.IsSubmittedForReview = true
+	req.PageIDList = []string{"576460752303438398"}
+	req.Format()
+	err := req.Validate()
+	if err != nil {
+		t.Fatalf("完整合法参数应通过验证，但返回了错误: %v", err)
+	}
+	fmt.Println("完整合法参数验证通过")
+}
