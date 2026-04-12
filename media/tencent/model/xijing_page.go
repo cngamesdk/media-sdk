@@ -177,3 +177,42 @@ type XijingPageUpdateResultItem struct {
 type XijingPageUpdateResp struct {
 	List []*XijingPageUpdateResultItem `json:"list"` // 送审结果列表
 }
+
+// ========== 蹊径删除落地页 ==========
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/delete
+
+// 字段长度常量
+const (
+	MaxXijingPageDeletePageIDListCount = 999 // page_id_list 最大数量
+)
+
+// XijingPageDeleteReq 蹊径删除落地页请求（POST JSON）
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/delete
+type XijingPageDeleteReq struct {
+	GlobalReq
+	AccountID  int64    `json:"account_id"`   // 广告主帐号 id (必填)
+	PageIDList []string `json:"page_id_list"` // 落地页 id 列表 (必填)，最多999个
+}
+
+func (r *XijingPageDeleteReq) Format() {
+	r.GlobalReq.Format()
+}
+
+// Validate 验证蹊径删除落地页请求参数
+func (r *XijingPageDeleteReq) Validate() error {
+	if r.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+	if r.PageIDList == nil {
+		return errors.New("page_id_list为必填")
+	}
+	if len(r.PageIDList) > MaxXijingPageDeletePageIDListCount {
+		return errors.New("page_id_list数组长度不能超过999")
+	}
+	return r.GlobalReq.Validate()
+}
+
+// XijingPageDeleteResp 蹊径删除落地页响应
+// 响应结构与 XijingPageUpdateResp 相同，复用 update 中的定义
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/delete
+type XijingPageDeleteResp = XijingPageUpdateResp

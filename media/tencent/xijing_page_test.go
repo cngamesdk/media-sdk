@@ -488,3 +488,112 @@ func TestXijingPageUpdateValidateFullParamsSelf(t *testing.T) {
 	}
 	fmt.Println("完整合法参数验证通过")
 }
+
+// ========== 蹊径删除落地页接口调用测试用例 ==========
+
+// TestXijingPageDeleteBasicSelf 测试删除单个落地页
+func TestXijingPageDeleteBasicSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = []string{"576460752303438398"}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestXijingPageDeleteMultiplePagesSelf 测试批量删除多个落地页
+func TestXijingPageDeleteMultiplePagesSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = []string{
+		"576460752303438398",
+		"576460752303438399",
+		"576460752303438400",
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestXijingPageDeleteEmptyListSelf 测试空落地页列表（合法，最小长度为0）
+func TestXijingPageDeleteEmptyListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = []string{}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.XijingPageDeleteSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 蹊径删除落地页参数验证测试用例 ==========
+
+// TestXijingPageDeleteValidateMissingAccountIDSelf 测试缺少 account_id
+func TestXijingPageDeleteValidateMissingAccountIDSelf(t *testing.T) {
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 0
+	req.PageIDList = []string{"576460752303438398"}
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageDeleteValidateNilPageIDListSelf 测试 page_id_list 为 nil
+func TestXijingPageDeleteValidateNilPageIDListSelf(t *testing.T) {
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = nil
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_id_list为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageDeleteValidatePageIDListTooManySelf 测试 page_id_list 超过999个
+func TestXijingPageDeleteValidatePageIDListTooManySelf(t *testing.T) {
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = make([]string, model.MaxXijingPageDeletePageIDListCount+1)
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_id_list超过999个")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestXijingPageDeleteValidateFullParamsSelf 测试完整合法参数通过验证
+func TestXijingPageDeleteValidateFullParamsSelf(t *testing.T) {
+	req := &model.XijingPageDeleteReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111
+	req.PageIDList = []string{"576460752303438398"}
+	req.Format()
+	err := req.Validate()
+	if err != nil {
+		t.Fatalf("完整合法参数应通过验证，但返回了错误: %v", err)
+	}
+	fmt.Println("完整合法参数验证通过")
+}
