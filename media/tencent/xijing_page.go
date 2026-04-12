@@ -1,0 +1,34 @@
+package tencent
+
+import (
+	"context"
+
+	"github.com/cngamesdk/media-sdk/media/tencent/model"
+	"github.com/cngamesdk/media-sdk/utils"
+)
+
+// XijingPageAddSelf 蹊径基于模板创建落地页
+// https://developers.e.qq.com/v3.0/docs/api/xijing_page/add
+func (a *TencentAdapter) XijingPageAddSelf(ctx context.Context, req *model.XijingPageAddReq) (
+	resp *model.XijingPageAddResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	globalQuery, globalQueryErr := utils.ConvertStructToQueryString(req.GlobalReq)
+	if globalQueryErr != nil {
+		err = globalQueryErr
+		return
+	}
+	req.GlobalReq.Clear()
+	headers := make(model.Headers)
+	headers.Json()
+	var result model.XijingPageAddResp
+	if requestErr := a.RequestPostJson(ctx, headers, model.ApiUrl3+"/xijing_page/add?"+globalQuery, req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
