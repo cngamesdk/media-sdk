@@ -431,16 +431,8 @@ func (r *OfficialLandingPageCompAddReq) Validate() error {
 	return r.GlobalReq.Validate()
 }
 
-// OfficialLandingPageCompAddRespData 官方落地页基于组件创建响应数据
-type OfficialLandingPageCompAddRespData struct {
-	PageId        int64 `json:"page_id"`         // 落地页服务 id，用于广告投放端搭建广告创意选择落地页时使用
-	LandingPageId int   `json:"landing_page_id"` // 官方落地页 id，仅用于官方落地页模块时使用
-}
-
 // OfficialLandingPageCompAddResp 官方落地页基于组件创建响应
 type OfficialLandingPageCompAddResp struct {
-	Code      int                                 `json:"code"`
-	Message   string                              `json:"message"`
-	MessageCn string                              `json:"message_cn"`
-	Data      *OfficialLandingPageCompAddRespData `json:"data"`
+	PageId        int64 `json:"page_id"`         // 落地页服务 id，用于广告投放端搭建广告创意选择落地页时使用
+	LandingPageId int   `json:"landing_page_id"` // 官方落地页 id，仅用于官方落地页模块时使用
 }

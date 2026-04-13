@@ -27,17 +27,9 @@ func (r *OfficialLandingPageDeleteReq) Validate() error {
 	return r.GlobalReq.Validate()
 }
 
-// OfficialLandingPageDeleteRespData 删除落地页响应数据
-type OfficialLandingPageDeleteRespData struct {
+// OfficialLandingPageDeleteResp 删除落地页响应
+type OfficialLandingPageDeleteResp struct {
 	AccountId     int64 `json:"account_id"`      // 广告主帐号 id
 	PageId        int64 `json:"page_id"`         // 落地页服务 id
 	LandingPageId int   `json:"landing_page_id"` // 官方落地页 id
-}
-
-// OfficialLandingPageDeleteResp 删除落地页响应
-type OfficialLandingPageDeleteResp struct {
-	Code      int                                `json:"code"`
-	Message   string                             `json:"message"`
-	MessageCn string                             `json:"message_cn"`
-	Data      *OfficialLandingPageDeleteRespData `json:"data"`
 }
