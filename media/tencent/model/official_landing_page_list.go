@@ -100,16 +100,8 @@ type OfficialLandingPageListItem struct {
 	PageStatus    string `json:"page_status"`     // 官方落地页状态（枚举）
 }
 
-// OfficialLandingPageListRespData 获取落地页列表响应数据
-type OfficialLandingPageListRespData struct {
-	List     []*OfficialLandingPageListItem `json:"list"`      // 官方落地页列表数据
-	PageInfo *PageInfo                      `json:"page_info"` // 分页信息
-}
-
 // OfficialLandingPageListGetResp 获取落地页列表响应
 type OfficialLandingPageListGetResp struct {
-	Code      int                              `json:"code"`
-	Message   string                           `json:"message"`
-	MessageCn string                           `json:"message_cn"`
-	Data      *OfficialLandingPageListRespData `json:"data"`
+	List     []*OfficialLandingPageListItem `json:"list"`      // 官方落地页列表数据
+	PageInfo *PageInfo                      `json:"page_info"` // 分页信息
 }

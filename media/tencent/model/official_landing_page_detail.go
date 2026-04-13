@@ -46,18 +46,10 @@ type OfficialLandingPageDetailConfig struct {
 	BgColor             string `json:"bg_color"`              // 页面背景颜色
 }
 
-// OfficialLandingPageDetailRespData 获取落地页详情响应数据
-type OfficialLandingPageDetailRespData struct {
+// OfficialLandingPageDetailGetResp 获取落地页详情响应
+type OfficialLandingPageDetailGetResp struct {
 	PageId        int64                            `json:"page_id"`         // 落地页 id
 	LandingPageId int                              `json:"landing_page_id"` // 落地页 id（旧字段，与 page_id 对应）
 	PageConfig    *OfficialLandingPageDetailConfig `json:"page_config"`     // 落地页配置
 	PageElements  []*OfficialLandingPageElement    `json:"page_elements"`   // 落地页组件列表，复用创建接口的组件结构
-}
-
-// OfficialLandingPageDetailGetResp 获取落地页详情响应
-type OfficialLandingPageDetailGetResp struct {
-	Code      int                                `json:"code"`
-	Message   string                             `json:"message"`
-	MessageCn string                             `json:"message_cn"`
-	Data      *OfficialLandingPageDetailRespData `json:"data"`
 }
