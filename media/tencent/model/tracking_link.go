@@ -89,6 +89,9 @@ const (
 	// 兼容新旧版本广告 - 广告版位
 	SiteSetName = "SITE_SET_NAME"
 
+	// 仅旧版本广告 - 计划名称
+	CampaignName = "CAMPAIGN_NAME"
+
 	// 仅旧版本广告 - 创意名称
 	AdName = "AD_NAME"
 
@@ -126,8 +129,8 @@ const (
 	CaidRaw = "CAID"
 )
 
-// 所有宏参数
-var AllMacros = map[string]string{
+// 所有展示宏参数
+var AllShowMacros = map[string]string{
 	ImpressionId:           ImpressionId,
 	ImpressionTime:         ImpressionTime,
 	CampaignId:             CampaignId,
@@ -181,16 +184,72 @@ var AllMacros = map[string]string{
 	CaidRaw:                CaidRaw,
 }
 
+// 所有点击宏参数
+var AllClickMacros = map[string]string{
+	ImpressionId:           ImpressionId,
+	ImpressionTime:         ImpressionTime,
+	CampaignId:             CampaignId,
+	AdgroupId:              AdgroupId,
+	AdId:                   AdId,
+	DynamicCreativeId:      DynamicCreativeId,
+	DynamicCreativeName:    DynamicCreativeName,
+	CreativeComponentsInfo: CreativeComponentsInfo,
+	ElementInfo:            ElementInfo,
+	MarketingGoal:          MarketingGoal,
+	MarketingSubGoal:       MarketingSubGoal,
+	MarketingTargetId:      MarketingTargetId,
+	MarketingCarrierId:     MarketingCarrierId,
+	MarketingSubCarrierId:  MarketingSubCarrierId,
+	MarketingAssetId:       MarketingAssetId,
+	MaterialPackageId:      MaterialPackageId,
+	AdPlatformType:         AdPlatformType,
+	AdType:                 AdType,
+	AccountId:              AccountId,
+	AgencyId:               AgencyId,
+	ImpressionSkuId:        ImpressionSkuId,
+	BillingEvent:           BillingEvent,
+	DeeplinkURL:            DeeplinkURL,
+	UniversalLink:          UniversalLink,
+	PageURL:                PageURL,
+	DeviceOSType:           DeviceOSType,
+	ProcessTime:            ProcessTime,
+	PromotedObjectID:       PromotedObjectID,
+	PromotedObjectType:     PromotedObjectType,
+	RequestID:              RequestID,
+	MUID:                   MUID,
+	HashAndroidID:          HashAndroidID,
+	IP:                     IP,
+	UserAgent:              UserAgent,
+	Callback:               Callback,
+	EncryptedPositionID:    EncryptedPositionID,
+	IPv6:                   IPv6,
+	HashOaid:               HashOaid,
+	Caid:                   Caid,
+	AdgroupName:            AdgroupName,
+	SiteSetName:            SiteSetName,
+	CampaignName:           CampaignName,
+	AdName:                 AdName,
+	Model:                  Model,
+	BoostExpInfo:           BoostExpInfo,
+	BoostModelID:           BoostModelID,
+	WechatOpenID:           WechatOpenID,
+	KeywordID:              KeywordID,
+	KeywordText:            KeywordText,
+	IPMd5:                  IPMd5,
+	IPv6Md5:                IPv6Md5,
+	CaidRaw:                CaidRaw,
+}
+
 var ShowMacrosAppAndroid media.CustomMacros
 
-var ShowMacrosAppAndroidExclude = []string{
+var MacrosAppAndroidExclude = []string{
 	UniversalLink,
 	Caid,
 }
 
 var ShowMacrosAppIos media.CustomMacros
 
-var ShowMacrosAppIosExclude = []string{
+var MacrosAppIosExclude = []string{
 	DeeplinkURL,
 	HashAndroidID,
 	HashOaid,
@@ -205,26 +264,102 @@ var ShowMacrosWebExclude = []string{
 	UniversalLink,
 }
 
+// 点击监测 - 网页不可使用字段
+var ClickMacrosWebExclude = []string{
+	AdName,
+	CampaignName,
+	DeeplinkURL,
+	Model,
+	PromotedObjectID,
+	UniversalLink,
+}
+
+// 点击监测 - 小程序不可使用字段
+var ClickMacrosMiniProgramExclude = []string{
+	AdName,
+	CampaignName,
+	DeeplinkURL,
+	Model,
+	PromotedObjectID,
+	UniversalLink,
+}
+
+// 点击监测 - 公众号不可使用字段
+var ClickMacrosOfficialAccountExclude = []string{
+	HashAndroidID,
+	HashOaid,
+	MUID,
+	Caid,
+	WechatOpenID,
+}
+
+// 点击监测 - 企业微信不可使用字段
+var ClickMacrosWeComExclude = []string{
+	HashAndroidID,
+	HashOaid,
+	MUID,
+	Caid,
+	WechatOpenID,
+}
+
+var ClickMacrosAppAndroid media.CustomMacros
+var ClickMacrosAppIos media.CustomMacros
+var ClickMacrosWeb media.CustomMacros
+var ClickMacrosMiniProgram media.CustomMacros
+var ClickMacrosOfficialAccount media.CustomMacros
+var ClickMacrosWeCom media.CustomMacros
+
 func init() {
 	ShowMacrosAppAndroid = make(map[string]string)
 	ShowMacrosAppIos = make(map[string]string)
 	ShowMacrosWeb = make(map[string]string)
 
-	for key, value := range AllMacros {
-		if !slices.Contains(ShowMacrosAppAndroidExclude, key) {
+	ClickMacrosAppAndroid = make(map[string]string)
+	ClickMacrosAppIos = make(map[string]string)
+	ClickMacrosWeb = make(map[string]string)
+	ClickMacrosMiniProgram = make(map[string]string)
+	ClickMacrosOfficialAccount = make(map[string]string)
+	ClickMacrosWeCom = make(map[string]string)
+
+	for key, value := range AllShowMacros {
+
+		if !slices.Contains(MacrosAppAndroidExclude, key) {
 			ShowMacrosAppAndroid[key] = Fix + value + Fix
 		}
-	}
 
-	for key, value := range AllMacros {
-		if !slices.Contains(ShowMacrosAppIosExclude, key) {
+		if !slices.Contains(MacrosAppIosExclude, key) {
 			ShowMacrosAppIos[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(ShowMacrosWebExclude, key) {
+			ShowMacrosWeb[key] = Fix + value + Fix
 		}
 	}
 
-	for key, value := range AllMacros {
-		if !slices.Contains(ShowMacrosWebExclude, key) {
-			ShowMacrosWeb[key] = Fix + value + Fix
+	for key, value := range AllClickMacros {
+
+		if !slices.Contains(MacrosAppAndroidExclude, key) {
+			ClickMacrosAppAndroid[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(MacrosAppIosExclude, key) {
+			ClickMacrosAppIos[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(ClickMacrosWebExclude, key) {
+			ClickMacrosWeb[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(ClickMacrosMiniProgramExclude, key) {
+			ClickMacrosMiniProgram[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(ClickMacrosOfficialAccountExclude, key) {
+			ClickMacrosOfficialAccount[key] = Fix + value + Fix
+		}
+
+		if !slices.Contains(ClickMacrosWeComExclude, key) {
+			ClickMacrosWeCom[key] = Fix + value + Fix
 		}
 	}
 }
