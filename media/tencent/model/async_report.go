@@ -360,3 +360,58 @@ type AsyncReportFileInfo struct {
 	FileID int64  `json:"file_id,omitempty"` // 文件id
 	Md5    string `json:"md5,omitempty"`     // 文件md5值
 }
+
+// ========== 获取文件接口 ==========
+// https://developers.e.qq.com/v3.0/docs/api/async_report_files/get
+
+const (
+	DlUrl  = "https://dl.e.qq.com"
+	DlUrl3 = DlUrl + "/v3.0"
+)
+
+// AsyncReportFilesGetReq 获取文件请求
+type AsyncReportFilesGetReq struct {
+	GlobalReq
+	AccountID      int64 `json:"account_id,omitempty"`      // 广告主帐号id
+	TaskID         int64 `json:"task_id"`                   // 任务id (必填)
+	FileID         int64 `json:"file_id"`                   // 文件id (必填)
+	OrganizationID int64 `json:"organization_id,omitempty"` // 业务单元id
+}
+
+// 获取文件限制常量
+const (
+	AsyncReportFilesGetMaxOrganizationID = 9999999999
+)
+
+func (p *AsyncReportFilesGetReq) Format() {
+	p.GlobalReq.Format()
+}
+
+func (p *AsyncReportFilesGetReq) Validate() error {
+	// 验证全局参数
+	if validateErr := p.GlobalReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	// 验证task_id (必填)
+	if p.TaskID <= 0 {
+		return errors.New("task_id为必填")
+	}
+
+	// 验证file_id (必填)
+	if p.FileID <= 0 {
+		return errors.New("file_id为必填")
+	}
+
+	// 验证organization_id
+	if p.OrganizationID < 0 || p.OrganizationID > AsyncReportFilesGetMaxOrganizationID {
+		return errors.New("organization_id必须在0-9999999999之间")
+	}
+
+	return nil
+}
+
+// AsyncReportFilesGetResp 获取文件响应
+type AsyncReportFilesGetResp struct {
+	FileData []byte `json:"-"` // 文件内容（二进制数据）
+}

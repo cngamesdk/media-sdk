@@ -400,3 +400,68 @@ func TestAsyncReportsGetValidateFilteringExceedSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 获取文件接口测试用例 ==========
+
+// TestAsyncReportFilesGetSelf 测试获取文件
+func TestAsyncReportFilesGetSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AsyncReportFilesGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.TaskID = 53181057839
+	req.FileID = 831530232
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AsyncReportFilesGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("file data length: %d\n", len(result.FileData))
+}
+
+// TestAsyncReportFilesGetWithOrgIdSelf 测试获取文件-带业务单元id
+func TestAsyncReportFilesGetWithOrgIdSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AsyncReportFilesGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.TaskID = 25610
+	req.FileID = 831530232
+	req.OrganizationID = 100
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AsyncReportFilesGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("file data length: %d\n", len(result.FileData))
+}
+
+// ========== 获取文件接口验证测试用例 ==========
+
+// TestAsyncReportFilesGetValidateTaskIdEmptySelf 测试task_id为空
+func TestAsyncReportFilesGetValidateTaskIdEmptySelf(t *testing.T) {
+	req := &model.AsyncReportFilesGetReq{}
+	req.AccessToken = "123"
+	req.FileID = 831530232
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：task_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAsyncReportFilesGetValidateFileIdEmptySelf 测试file_id为空
+func TestAsyncReportFilesGetValidateFileIdEmptySelf(t *testing.T) {
+	req := &model.AsyncReportFilesGetReq{}
+	req.AccessToken = "123"
+	req.TaskID = 53181057839
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：file_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
