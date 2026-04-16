@@ -31,3 +31,21 @@ func (a *TencentAdapter) AsyncReportsAddSelf(ctx context.Context, req *model.Asy
 	resp = &result
 	return
 }
+
+// AsyncReportsGetSelf 获取异步报表任务
+// https://developers.e.qq.com/v3.0/docs/api/async_reports/get
+func (a *TencentAdapter) AsyncReportsGetSelf(ctx context.Context, req *model.AsyncReportsGetReq) (
+	resp *model.AsyncReportsGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model.AsyncReportsGetResp
+	if requestErr := a.RequestGet(ctx, nil, model.ApiUrl3+"/async_reports/get", req, &result); requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &result
+	return
+}
