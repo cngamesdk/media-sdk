@@ -49,3 +49,30 @@ func (a *TencentAdapter) AsyncReportsGetSelf(ctx context.Context, req *model.Asy
 	resp = &result
 	return
 }
+
+// AsyncReportFilesGetSelf 获取文件接口（异步报表文件下载）
+// https://developers.e.qq.com/v3.0/docs/api/async_report_files/get
+// 注意：该接口返回重定向到文件下载地址，响应为文件二进制内容，非JSON
+func (a *TencentAdapter) AsyncReportFilesGetSelf(ctx context.Context, req *model.AsyncReportFilesGetReq) (
+	resp *model.AsyncReportFilesGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	query, queryErr := utils.ConvertStructToQueryString(req)
+	if queryErr != nil {
+		err = queryErr
+		return
+	}
+	url := model.DlUrl3 + "/async_report_files/get?" + query
+	data, requestErr := a.Client.Get(ctx, url, nil)
+	if requestErr != nil {
+		err = requestErr
+		return
+	}
+	resp = &model.AsyncReportFilesGetResp{
+		FileData: data,
+	}
+	return
+}
