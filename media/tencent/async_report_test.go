@@ -265,3 +265,138 @@ func TestAsyncReportsAddValidateInvalidTimeLineSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 获取异步报表任务测试用例 ==========
+
+// TestAsyncReportsGetSelf 测试获取异步报表任务-按task_id查询
+func TestAsyncReportsGetSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.AsyncReportsGetFilter{
+		{
+			Field:    model.AsyncReportsGetFilterTaskId,
+			Operator: model.AsyncReportOperatorEquals,
+			Values:   []string{"53181057839"},
+		},
+	}
+	req.Page = 1
+	req.PageSize = 10
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AsyncReportsGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAsyncReportsGetByTaskNameSelf 测试获取异步报表任务-按task_name查询
+func TestAsyncReportsGetByTaskNameSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.AsyncReportsGetFilter{
+		{
+			Field:    model.AsyncReportsGetFilterTaskName,
+			Operator: model.AsyncReportOperatorContains,
+			Values:   []string{"daily_report"},
+		},
+	}
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AsyncReportsGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// TestAsyncReportsGetNoFilterSelf 测试获取异步报表任务-无过滤条件
+func TestAsyncReportsGetNoFilterSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Page = 1
+	req.PageSize = 20
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.AsyncReportsGetSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// ========== 获取异步报表任务验证测试用例 ==========
+
+// TestAsyncReportsGetValidateAccountIdEmptySelf 测试account_id为空
+func TestAsyncReportsGetValidateAccountIdEmptySelf(t *testing.T) {
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAsyncReportsGetValidateInvalidFilterFieldSelf 测试无效的过滤字段
+func TestAsyncReportsGetValidateInvalidFilterFieldSelf(t *testing.T) {
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.AsyncReportsGetFilter{
+		{
+			Field:    "invalid_field",
+			Operator: model.AsyncReportOperatorEquals,
+			Values:   []string{"123"},
+		},
+	}
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering.field值无效")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAsyncReportsGetValidatePageSizeExceedSelf 测试page_size超过100
+func TestAsyncReportsGetValidatePageSizeExceedSelf(t *testing.T) {
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.PageSize = 101
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：page_size必须在1-100之间")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// TestAsyncReportsGetValidateFilteringExceedSelf 测试filtering超过5个
+func TestAsyncReportsGetValidateFilteringExceedSelf(t *testing.T) {
+	req := &model.AsyncReportsGetReq{}
+	req.AccessToken = "123"
+	req.AccountID = 123
+	req.Filtering = []*model.AsyncReportsGetFilter{
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"1"}},
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"2"}},
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"3"}},
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"4"}},
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"5"}},
+		{Field: model.AsyncReportsGetFilterTaskId, Operator: model.AsyncReportOperatorEquals, Values: []string{"6"}},
+	}
+
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：filtering数组长度必须在1-5之间")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}

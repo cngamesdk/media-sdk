@@ -219,3 +219,144 @@ func isValidAsyncReportLevel(level string) bool {
 type AsyncReportsAddResp struct {
 	TaskID int64 `json:"task_id,omitempty"` // 任务id
 }
+
+// ========== 获取异步报表任务 ==========
+// https://developers.e.qq.com/v3.0/docs/api/async_reports/get
+
+// AsyncReportsGetReq 获取异步报表任务请求
+type AsyncReportsGetReq struct {
+	GlobalReq
+	AccountID      int64                    `json:"account_id"`                // 广告主帐号id (必填)
+	Filtering      []*AsyncReportsGetFilter `json:"filtering,omitempty"`       // 过滤条件
+	Page           int                      `json:"page,omitempty"`            // 搜索页码，默认值：1
+	PageSize       int                      `json:"page_size,omitempty"`       // 一页显示的数据条数，默认值：10
+	OrganizationID int64                    `json:"organization_id,omitempty"` // 业务单元id
+}
+
+// AsyncReportsGetFilter 获取异步报表任务过滤条件
+type AsyncReportsGetFilter struct {
+	Field    string   `json:"field"`    // 过滤字段 (必填)，可选值：task_id、task_name
+	Operator string   `json:"operator"` // 操作符 (必填)
+	Values   []string `json:"values"`   // 字段取值 (必填)
+}
+
+// 获取异步报表任务过滤字段常量
+const (
+	AsyncReportsGetFilterTaskId   = "task_id"
+	AsyncReportsGetFilterTaskName = "task_name"
+)
+
+// 获取异步报表任务限制常量
+const (
+	AsyncReportsGetMinFilteringCount = 1
+	AsyncReportsGetMaxFilteringCount = 5
+	AsyncReportsGetMinValuesCount    = 1
+	AsyncReportsGetMaxValuesCount    = 100
+	AsyncReportsGetMinValuesLength   = 1
+	AsyncReportsGetMaxValuesLength   = 64
+	AsyncReportsGetMinPage           = 1
+	AsyncReportsGetMaxPage           = 99999
+	AsyncReportsGetMinPageSize       = 1
+	AsyncReportsGetMaxPageSize       = 100
+	AsyncReportsGetDefaultPage       = 1
+	AsyncReportsGetDefaultPageSize   = 10
+	AsyncReportsGetMaxOrganizationID = 9999999999
+)
+
+func (p *AsyncReportsGetReq) Format() {
+	p.GlobalReq.Format()
+	if p.Page <= 0 {
+		p.Page = AsyncReportsGetDefaultPage
+	}
+	if p.PageSize <= 0 {
+		p.PageSize = AsyncReportsGetDefaultPageSize
+	}
+}
+
+func (p *AsyncReportsGetReq) Validate() error {
+	// 验证全局参数
+	if validateErr := p.GlobalReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	// 验证account_id (必填)
+	if p.AccountID <= 0 {
+		return errors.New("account_id为必填")
+	}
+
+	// 验证filtering
+	if len(p.Filtering) > 0 {
+		if len(p.Filtering) < AsyncReportsGetMinFilteringCount || len(p.Filtering) > AsyncReportsGetMaxFilteringCount {
+			return errors.New("filtering数组长度必须在1-5之间")
+		}
+		for _, f := range p.Filtering {
+			if f.Field == "" {
+				return errors.New("filtering.field为必填")
+			}
+			if f.Field != AsyncReportsGetFilterTaskId && f.Field != AsyncReportsGetFilterTaskName {
+				return errors.New("filtering.field值无效，允许值：task_id、task_name")
+			}
+			if f.Operator == "" {
+				return errors.New("filtering.operator为必填")
+			}
+			if len(f.Values) < AsyncReportsGetMinValuesCount || len(f.Values) > AsyncReportsGetMaxValuesCount {
+				return errors.New("filtering.values数组长度必须在1-100之间")
+			}
+			for _, v := range f.Values {
+				if len(v) < AsyncReportsGetMinValuesLength || len(v) > AsyncReportsGetMaxValuesLength {
+					return errors.New("filtering.values字段长度必须在1-64字节之间")
+				}
+			}
+		}
+	}
+
+	// 验证page
+	if p.Page < AsyncReportsGetMinPage || p.Page > AsyncReportsGetMaxPage {
+		return errors.New("page必须在1-99999之间")
+	}
+
+	// 验证page_size
+	if p.PageSize < AsyncReportsGetMinPageSize || p.PageSize > AsyncReportsGetMaxPageSize {
+		return errors.New("page_size必须在1-100之间")
+	}
+
+	// 验证organization_id
+	if p.OrganizationID < 0 || p.OrganizationID > AsyncReportsGetMaxOrganizationID {
+		return errors.New("organization_id必须在0-9999999999之间")
+	}
+
+	return nil
+}
+
+// AsyncReportsGetResp 获取异步报表任务响应
+type AsyncReportsGetResp struct {
+	List     []*AsyncReportTaskItem `json:"list,omitempty"`
+	PageInfo *PageInfo              `json:"page_info,omitempty"`
+}
+
+// AsyncReportTaskItem 异步报表任务项
+type AsyncReportTaskItem struct {
+	TaskID      int64              `json:"task_id,omitempty"`      // 任务id
+	TaskName    string             `json:"task_name,omitempty"`    // 任务名称
+	Status      string             `json:"status,omitempty"`       // 任务状态
+	CreatedTime int64              `json:"created_time,omitempty"` // 任务创建时间戳（秒）
+	Result      *AsyncReportResult `json:"result,omitempty"`       // 任务结果
+}
+
+// AsyncReportResult 异步报表任务结果
+type AsyncReportResult struct {
+	Code    int                    `json:"code,omitempty"`    // 结果码，0为成功
+	Message string                 `json:"message,omitempty"` // 结果信息
+	Data    *AsyncReportResultData `json:"data,omitempty"`    // 结果数据
+}
+
+// AsyncReportResultData 异步报表任务结果数据
+type AsyncReportResultData struct {
+	FileInfoList []*AsyncReportFileInfo `json:"file_info_list,omitempty"` // 文件结果信息列表
+}
+
+// AsyncReportFileInfo 异步报表文件信息
+type AsyncReportFileInfo struct {
+	FileID int64  `json:"file_id,omitempty"` // 文件id
+	Md5    string `json:"md5,omitempty"`     // 文件md5值
+}
