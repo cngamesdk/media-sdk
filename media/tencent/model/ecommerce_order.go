@@ -150,6 +150,99 @@ func (p *EcommerceOrderGetReq) Validate() error {
 	return nil
 }
 
+// ========== 更新订单状态 ==========
+// https://developers.e.qq.com/v3.0/docs/api/ecommerce_order/update
+
+// 快递公司枚举
+const (
+	ExpressCompanyUnknown          = "UNKNOWN"            // 未知
+	ExpressCompanySfExpress        = "SF_EXPRESS"         // 顺丰速运
+	ExpressCompanySto              = "STO"                // 申通快递
+	ExpressCompanyYto              = "YTO"                // 圆通速递
+	ExpressCompanyZto              = "ZTO"                // 中通快递
+	ExpressCompanyBestExpress      = "BEST_EXPRESS"       // 百世快递
+	ExpressCompanyYundaExpress     = "YUNDA_EXPRESS"      // 韵达快递
+	ExpressCompanyTtkExpress       = "TTK_EXPRESS"        // 天天快递
+	ExpressCompanyEms              = "EMS"                // EMS
+	ExpressCompanyChinaPostExpress = "CHINA_POST_EXPRESS" // 中国邮政快递包裹
+	ExpressCompanyJustInTime       = "JUST_IN_TIME"       // 急先达
+	ExpressCompanyJdExpress        = "JD_EXPRESS"         // 京东快递
+	ExpressCompanyDepponExpress    = "DEPPON_EXPRESS"     // 德邦快递
+)
+
+// 订单id长度限制
+const (
+	EcommerceOrderIdMinLength               = 1
+	EcommerceOrderIdMaxLength               = 20
+	EcommerceOrderDeliveryTrackingNumberMin = 1
+	EcommerceOrderDeliveryTrackingNumberMax = 200
+)
+
+// EcommerceOrderUpdateReq 更新订单状态请求
+type EcommerceOrderUpdateReq struct {
+	GlobalReq
+	AccountID              int64  `json:"account_id"`                         // 广告主帐号id (必填)
+	EcommerceOrderId       string `json:"ecommerce_order_id"`                 // 订单id (必填)，1-20字节
+	DeliveryTrackingNumber string `json:"delivery_tracking_number,omitempty"` // 快递单号，1-200字节
+	ExpressCompany         string `json:"express_company,omitempty"`          // 快递公司
+}
+
+func (p *EcommerceOrderUpdateReq) Format() {
+	p.GlobalReq.Format()
+}
+
+// Validate 验证更新订单状态请求参数
+func (p *EcommerceOrderUpdateReq) Validate() error {
+	if validateErr := p.GlobalReq.Validate(); validateErr != nil {
+		return validateErr
+	}
+
+	// 验证account_id
+	if p.AccountID == 0 {
+		return errors.New("account_id为必填")
+	}
+
+	// 验证ecommerce_order_id
+	if p.EcommerceOrderId == "" {
+		return errors.New("ecommerce_order_id为必填")
+	}
+	if len(p.EcommerceOrderId) < EcommerceOrderIdMinLength || len(p.EcommerceOrderId) > EcommerceOrderIdMaxLength {
+		return errors.New("ecommerce_order_id长度必须在1-20字节之间")
+	}
+
+	// 验证快递单号和快递公司必须同时存在
+	if (p.DeliveryTrackingNumber != "" && p.ExpressCompany == "") || (p.DeliveryTrackingNumber == "" && p.ExpressCompany != "") {
+		return errors.New("delivery_tracking_number和express_company必须同时存在")
+	}
+
+	// 验证快递单号长度
+	if p.DeliveryTrackingNumber != "" {
+		if len(p.DeliveryTrackingNumber) < EcommerceOrderDeliveryTrackingNumberMin || len(p.DeliveryTrackingNumber) > EcommerceOrderDeliveryTrackingNumberMax {
+			return errors.New("delivery_tracking_number长度必须在1-200字节之间")
+		}
+	}
+
+	// 验证快递公司枚举值
+	if p.ExpressCompany != "" {
+		validCompanies := map[string]bool{
+			ExpressCompanyUnknown: true, ExpressCompanySfExpress: true, ExpressCompanySto: true,
+			ExpressCompanyYto: true, ExpressCompanyZto: true, ExpressCompanyBestExpress: true,
+			ExpressCompanyYundaExpress: true, ExpressCompanyTtkExpress: true, ExpressCompanyEms: true,
+			ExpressCompanyChinaPostExpress: true, ExpressCompanyJustInTime: true,
+			ExpressCompanyJdExpress: true, ExpressCompanyDepponExpress: true,
+		}
+		if !validCompanies[p.ExpressCompany] {
+			return errors.New("express_company值无效，可选值：UNKNOWN、SF_EXPRESS、STO、YTO、ZTO、BEST_EXPRESS、YUNDA_EXPRESS、TTK_EXPRESS、EMS、CHINA_POST_EXPRESS、JUST_IN_TIME、JD_EXPRESS、DEPPON_EXPRESS")
+		}
+	}
+
+	return nil
+}
+
+// EcommerceOrderUpdateResp 更新订单状态响应
+type EcommerceOrderUpdateResp struct {
+}
+
 // EcommerceOrderGetResp 获取订单数据响应
 type EcommerceOrderGetResp struct {
 	List     []*EcommerceOrderItem `json:"list,omitempty"`      // 订单列表
