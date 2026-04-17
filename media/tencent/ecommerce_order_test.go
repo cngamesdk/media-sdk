@@ -167,3 +167,109 @@ func TestEcommerceOrderGetValidateFilteringCountExceedSelf(t *testing.T) {
 	}
 	fmt.Printf("验证错误: %v\n", err)
 }
+
+// ========== 更新订单状态测试 ==========
+
+// 更新订单状态
+func TestEcommerceOrderUpdateSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.EcommerceOrderId = "B326518663301826"
+	req.DeliveryTrackingNumber = "VB40977313484"
+	req.ExpressCompany = model.ExpressCompanyZto
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.EcommerceOrderUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// 更新订单状态-不带物流信息
+func TestEcommerceOrderUpdateWithoutDeliverySelf(t *testing.T) {
+	ctx := context.Background()
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.EcommerceOrderId = "B326518663301826"
+	adapter := NewTencentAdapter(config.DefaultConfig())
+	result, err := adapter.EcommerceOrderUpdateSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("result: %+v\n", result)
+}
+
+// 验证测试-更新订单缺少account_id
+func TestEcommerceOrderUpdateValidateAccountIdEmptySelf(t *testing.T) {
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.EcommerceOrderId = "B326518663301826"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：account_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// 验证测试-缺少ecommerce_order_id
+func TestEcommerceOrderUpdateValidateOrderIdEmptySelf(t *testing.T) {
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：ecommerce_order_id为必填")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// 验证测试-ecommerce_order_id超出长度
+func TestEcommerceOrderUpdateValidateOrderIdTooLongSelf(t *testing.T) {
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.EcommerceOrderId = "123456789012345678901" // 21 bytes
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：ecommerce_order_id长度必须在1-20字节之间")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// 验证测试-快递单号和快递公司不同时存在
+func TestEcommerceOrderUpdateValidateDeliveryMismatchSelf(t *testing.T) {
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.EcommerceOrderId = "B326518663301826"
+	req.DeliveryTrackingNumber = "VB40977313484"
+	// express_company未设置
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：delivery_tracking_number和express_company必须同时存在")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
+
+// 验证测试-快递公司枚举值无效
+func TestEcommerceOrderUpdateValidateExpressCompanyInvalidSelf(t *testing.T) {
+	req := &model.EcommerceOrderUpdateReq{}
+	req.AccessToken = "123"
+	req.AccountID = 111111111
+	req.EcommerceOrderId = "B326518663301826"
+	req.DeliveryTrackingNumber = "VB40977313484"
+	req.ExpressCompany = "INVALID_COMPANY"
+	req.Format()
+	err := req.Validate()
+	if err == nil {
+		t.Fatal("期望返回错误：express_company值无效")
+	}
+	fmt.Printf("验证错误: %v\n", err)
+}
