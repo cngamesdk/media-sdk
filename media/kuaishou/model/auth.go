@@ -106,3 +106,54 @@ func (receiver *AccessTokenResp) Convert() (*genericModel.AccessTokenResp, error
 	resp.RefreshTokenExpireIn = receiver.RefreshTokenExpiresIn
 	return resp, nil
 }
+
+// RefreshTokenReq 刷新token请求
+type RefreshTokenReq struct {
+	AppId        int64  `json:"app_id,omitempty"`
+	Secret       string `json:"secret,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+}
+
+func (receiver *RefreshTokenReq) Format() {
+	receiver.Secret = strings.TrimSpace(receiver.Secret)
+	receiver.RefreshToken = strings.TrimSpace(receiver.RefreshToken)
+}
+
+func (receiver *RefreshTokenReq) Validate() (err error) {
+	if receiver.AppId <= 0 {
+		err = errors.New("app_id is empty")
+		return
+	}
+	if len(receiver.Secret) <= 0 {
+		err = errors.New("secret is empty")
+		return
+	}
+	if len(receiver.RefreshToken) <= 0 {
+		err = errors.New("refresh_token is empty")
+		return
+	}
+	return
+}
+
+func (receiver *RefreshTokenReq) Convert(req *genericModel.RefreshTokenReq) {
+	receiver.AppId = req.AppId
+	receiver.Secret = req.Secret
+	receiver.RefreshToken = req.RefreshToken
+}
+
+// RefreshTokenResp 刷新token响应数据（仅data部分）
+type RefreshTokenResp struct {
+	AccessToken           string `json:"access_token"`
+	AccessTokenExpiresIn  int64  `json:"access_token_expires_in"`
+	RefreshToken          string `json:"refresh_token"`
+	RefreshTokenExpiresIn int64  `json:"refresh_token_expires_in"`
+}
+
+func (receiver *RefreshTokenResp) Convert() (*genericModel.RefreshTokenResp, error) {
+	resp := &genericModel.RefreshTokenResp{}
+	resp.AccessToken = receiver.AccessToken
+	resp.RefreshToken = receiver.RefreshToken
+	resp.ExpiresIn = receiver.AccessTokenExpiresIn
+	resp.RefreshTokenExpireIn = receiver.RefreshTokenExpiresIn
+	return resp, nil
+}

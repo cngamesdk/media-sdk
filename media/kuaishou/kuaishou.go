@@ -70,6 +70,14 @@ func (a *KuaishouAdapter) AccessToken(ctx context.Context, req *genericModel.Acc
 
 // RefreshToken 刷新Token
 func (a *KuaishouAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
+	myReq := &model3.RefreshTokenReq{}
+	myReq.Convert(req)
+	result, resultErr := a.RefreshTokenSelf(ctx, myReq)
+	if resultErr != nil {
+		err = resultErr
+		return
+	}
+	resp, err = result.Convert()
 	return
 }
 

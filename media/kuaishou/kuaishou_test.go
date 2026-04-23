@@ -51,3 +51,31 @@ func TestAccessTokenSelf(t *testing.T) {
 	}
 	fmt.Printf("%+v\n", resp)
 }
+
+func TestRefreshTokenSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &kuaishouModel.RefreshTokenReq{}
+	req.AppId = 123
+	req.Secret = "your_secret"
+	req.RefreshToken = "your_refresh_token"
+	adapter := NewKuaishouAdapter(config.DefaultConfig())
+	resp, err := adapter.RefreshTokenSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v\n", resp)
+}
+
+func TestRefreshToken(t *testing.T) {
+	ctx := context.Background()
+	req := &model.RefreshTokenReq{}
+	req.AppId = 123
+	req.Secret = "your_secret"
+	req.RefreshToken = "your_refresh_token"
+	adapter := NewKuaishouAdapter(config.DefaultConfig())
+	resp, err := adapter.RefreshToken(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v\n", resp)
+}
