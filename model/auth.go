@@ -7,9 +7,9 @@ import (
 
 type AuthReq struct {
 	AppId        int64  `json:"app_id,omitempty"`
-	State        string `json:"state,omitempty"`
 	Scope        []int  `json:"scope,omitempty"`
 	RedirectUri  string `json:"redirect_uri,omitempty"`
+	State        string `json:"state,omitempty"`
 	MaterialAuth int    `json:"material_auth,omitempty"`
 	AuthType     string `json:"auth_type,omitempty"`
 }

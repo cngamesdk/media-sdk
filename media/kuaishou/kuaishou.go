@@ -51,60 +51,16 @@ func (a *KuaishouAdapter) Name() string {
 
 // Auth 授权
 func (a *KuaishouAdapter) Auth(ctx context.Context, req *model.AuthReq) (resp interface{}, err error) {
-	_ = ctx
-	myReq := &model3.AuthReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	convertResult, convertErr := utils.ConvertStructToQueryString(myReq)
-	if convertErr != nil {
-		err = convertErr
-		return
-	}
-	authResp := model3.AuthResp(model3.DevelopersUrl + "/tools/authorize?" + convertResult)
-	resp = authResp
 	return
 }
 
 // Auth 授权
 func (a *KuaishouAdapter) AccessToken(ctx context.Context, req *model.AccessTokenReq) (resp *model.AccessTokenResp, err error) {
-	myReq := model3.AccessTokenReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model3.AccessTokenResp
-	errRequest := a.RequestPostJson(ctx, nil, model3.AdUrl+"/oauth/token", myReq, &result)
-	if errRequest != nil {
-		err = errRequest
-		return
-	}
-	resp, err = result.Convert()
 	return
 }
 
 // RefreshToken 刷新Token
 func (a *KuaishouAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (resp *model.RefreshTokenResp, err error) {
-	myReq := &model3.RefreshTokenReq{}
-	myReq.Convert(req)
-	myReq.Format()
-	if validateErr := myReq.Validate(); validateErr != nil {
-		err = validateErr
-		return
-	}
-	var result model3.RefreshTokenResp
-
-	requestErr := a.RequestPostJson(ctx, nil, model3.AdUrl+"/oauth/refresh_token", myReq, &result)
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	resp, err = result.Convert()
 	return
 }
 
