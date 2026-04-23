@@ -9,6 +9,7 @@ import (
 	"github.com/cngamesdk/media-sdk/media"
 	model3 "github.com/cngamesdk/media-sdk/media/kuaishou/model"
 	"github.com/cngamesdk/media-sdk/model"
+	genericModel "github.com/cngamesdk/media-sdk/model"
 	"github.com/cngamesdk/media-sdk/utils"
 )
 
@@ -54,8 +55,16 @@ func (a *KuaishouAdapter) Auth(ctx context.Context, req *model.AuthReq) (resp in
 	return
 }
 
-// Auth 授权
-func (a *KuaishouAdapter) AccessToken(ctx context.Context, req *model.AccessTokenReq) (resp *model.AccessTokenResp, err error) {
+// AccessToken 获取access_token
+func (a *KuaishouAdapter) AccessToken(ctx context.Context, req *genericModel.AccessTokenReq) (resp *genericModel.AccessTokenResp, err error) {
+	myReq := &model3.AccessTokenReq{}
+	myReq.Convert(req)
+	result, resultErr := a.AccessTokenSelf(ctx, myReq)
+	if resultErr != nil {
+		err = resultErr
+		return
+	}
+	resp, err = result.Convert()
 	return
 }
 
@@ -89,7 +98,7 @@ func (a *KuaishouAdapter) RequestPostJson(ctx context.Context, headers map[strin
 
 func (a *KuaishouAdapter) dealResponse(req model3.BaseResp, result interface{}) (err error) {
 	if req.Code != 0 {
-		err = fmt.Errorf("toutiao api error: code=%d, message:%s, request_id:%s", req.Code, req.Message, req.RequestId)
+		err = fmt.Errorf("kuaishou api error: code=%d, message:%s", req.Code, req.Message)
 		return
 	}
 	dataJson, dataJsonErr := json.Marshal(req.Data)

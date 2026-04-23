@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/url"
 	"strings"
+
+	genericModel "github.com/cngamesdk/media-sdk/model"
 )
 
 const (
@@ -53,3 +55,54 @@ func (receiver *AuthReq) Validate() (err error) {
 }
 
 type AuthResp string
+
+// AccessTokenReq 获取token请求
+type AccessTokenReq struct {
+	AppId    int64  `json:"app_id,omitempty"`
+	Secret   string `json:"secret,omitempty"`
+	AuthCode string `json:"auth_code,omitempty"`
+}
+
+func (receiver *AccessTokenReq) Format() {
+	receiver.AuthCode = strings.TrimSpace(receiver.AuthCode)
+	receiver.Secret = strings.TrimSpace(receiver.Secret)
+}
+
+func (receiver *AccessTokenReq) Convert(req *genericModel.AccessTokenReq) {
+	receiver.AppId = req.AppId
+	receiver.Secret = req.Secret
+	receiver.AuthCode = req.AuthCode
+}
+
+func (receiver *AccessTokenReq) Validate() (err error) {
+	if receiver.AppId <= 0 {
+		err = errors.New("app_id is empty")
+		return
+	}
+	if len(receiver.Secret) <= 0 {
+		err = errors.New("secret is empty")
+		return
+	}
+	if len(receiver.AuthCode) <= 0 {
+		err = errors.New("auth_code is empty")
+		return
+	}
+	return
+}
+
+// AccessTokenResp 获取token响应数据（仅data部分）
+type AccessTokenResp struct {
+	AccessToken           string `json:"access_token"`
+	AccessTokenExpiresIn  int64  `json:"access_token_expires_in"`
+	RefreshToken          string `json:"refresh_token"`
+	RefreshTokenExpiresIn int64  `json:"refresh_token_expires_in"`
+}
+
+func (receiver *AccessTokenResp) Convert() (*genericModel.AccessTokenResp, error) {
+	resp := &genericModel.AccessTokenResp{}
+	resp.AccessToken = receiver.AccessToken
+	resp.RefreshToken = receiver.RefreshToken
+	resp.ExpiresIn = receiver.AccessTokenExpiresIn
+	resp.RefreshTokenExpireIn = receiver.RefreshTokenExpiresIn
+	return resp, nil
+}
