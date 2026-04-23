@@ -56,3 +56,19 @@ func (a *KuaishouAdapter) RefreshTokenSelf(ctx context.Context, req *kuaishouMod
 	resp = &result
 	return
 }
+
+// ApprovalListSelf 拉取token下授权广告账户
+func (a *KuaishouAdapter) ApprovalListSelf(ctx context.Context, req *kuaishouModel.ApprovalListReq) (resp *kuaishouModel.ApprovalListResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result kuaishouModel.ApprovalListResp
+	if errRequest := a.RequestPostJson(ctx, nil, kuaishouModel.AdUrl+"/rest/openapi/oauth2/authorize/approval/list", req, &result); errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}

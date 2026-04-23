@@ -79,3 +79,19 @@ func TestRefreshToken(t *testing.T) {
 	}
 	fmt.Printf("%+v\n", resp)
 }
+
+func TestApprovalListSelf(t *testing.T) {
+	ctx := context.Background()
+	req := &kuaishouModel.ApprovalListReq{}
+	req.AppId = 123
+	req.Secret = "your_secret"
+	req.AccessToken = "your_access_token"
+	req.PageNo = 1
+	req.PageSize = 100
+	adapter := NewKuaishouAdapter(config.DefaultConfig())
+	resp, err := adapter.ApprovalListSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v\n", resp)
+}
