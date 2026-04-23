@@ -44,3 +44,7 @@ type headersMap map[string]string
 func (receiver headersMap) AccessToken(token string) {
 	receiver["Access-Token"] = token
 }
+
+func (receiver headersMap) Json() {
+	receiver["Content-Type"] = "application/json"
+}
