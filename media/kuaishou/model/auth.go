@@ -157,3 +157,47 @@ func (receiver *RefreshTokenResp) Convert() (*genericModel.RefreshTokenResp, err
 	resp.RefreshTokenExpireIn = receiver.RefreshTokenExpiresIn
 	return resp, nil
 }
+
+// ApprovalListReq 拉取token下授权广告账户请求
+type ApprovalListReq struct {
+	AppId       int64  `json:"app_id"`
+	Secret      string `json:"secret"`
+	AccessToken string `json:"access_token"`
+	PageNo      int    `json:"page_no"`
+	PageSize    int    `json:"page_size"`
+}
+
+func (receiver *ApprovalListReq) Format() {
+	receiver.Secret = strings.TrimSpace(receiver.Secret)
+	receiver.AccessToken = strings.TrimSpace(receiver.AccessToken)
+}
+
+func (receiver *ApprovalListReq) Validate() (err error) {
+	if receiver.AppId <= 0 {
+		err = errors.New("app_id is empty")
+		return
+	}
+	if len(receiver.Secret) <= 0 {
+		err = errors.New("secret is empty")
+		return
+	}
+	if len(receiver.AccessToken) <= 0 {
+		err = errors.New("access_token is empty")
+		return
+	}
+	if receiver.PageNo <= 0 {
+		err = errors.New("page_no must be greater than 0")
+		return
+	}
+	if receiver.PageSize <= 0 || receiver.PageSize > 200 {
+		err = errors.New("page_size must be between 1 and 200")
+		return
+	}
+	return
+}
+
+// ApprovalListResp 拉取token下授权广告账户响应数据（仅data部分）
+type ApprovalListResp struct {
+	Details []int64 `json:"details"`
+	IsEnd   bool    `json:"isEnd"`
+}
