@@ -6,8 +6,7 @@ const (
 )
 
 type BaseResp struct {
-	Code      int         `json:"code"`
-	Message   string      `json:"message"`
-	Data      interface{} `json:"data"`
-	RequestId string      `json:"request_id"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
