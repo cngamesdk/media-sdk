@@ -40,3 +40,19 @@ func (a *KuaishouAdapter) AccessTokenSelf(ctx context.Context, req *kuaishouMode
 	resp = &result
 	return
 }
+
+// RefreshTokenSelf 刷新access_token
+func (a *KuaishouAdapter) RefreshTokenSelf(ctx context.Context, req *kuaishouModel.RefreshTokenReq) (resp *kuaishouModel.RefreshTokenResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result kuaishouModel.RefreshTokenResp
+	if errRequest := a.RequestPostJson(ctx, nil, kuaishouModel.AdUrl+"/rest/openapi/oauth2/authorize/refresh_token", req, &result); errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
