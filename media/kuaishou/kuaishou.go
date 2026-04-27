@@ -95,6 +95,15 @@ func (a *KuaishouAdapter) RequestGet(ctx context.Context, headers map[string]str
 	return
 }
 
+func (a *KuaishouAdapter) RequestPostForm(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
+	var response model3.BaseResp
+	if err = a.Media.RequestPostForm(ctx, headers, url, data, &response); err != nil {
+		return
+	}
+	err = a.dealResponse(response, result)
+	return
+}
+
 func (a *KuaishouAdapter) RequestPostJson(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
 	var response model3.BaseResp
 	if err = a.Media.RequestPostJson(ctx, headers, url, data, &response); err != nil {
