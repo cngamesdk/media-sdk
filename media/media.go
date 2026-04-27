@@ -46,6 +46,29 @@ func (a *Media) RequestPostJson(ctx context.Context, headers map[string]string, 
 	return json.Unmarshal(resp, result)
 }
 
+// RequestPostForm 发送POST表单请求
+func (a *Media) RequestPostForm(ctx context.Context, headers map[string]string, url string, body interface{}, result interface{}) error {
+	var ioReader io.Reader
+	if body != nil {
+		formData, errConvert := utils.ConvertStructToQueryString(body)
+		if errConvert != nil {
+			return errConvert
+		}
+		ioReader = strings.NewReader(formData)
+	}
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	if _, ok := headers["Content-Type"]; !ok {
+		headers["Content-Type"] = "application/x-www-form-urlencoded"
+	}
+	resp, err := a.Client.Request(ctx, http.MethodPost, url, ioReader, headers)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(resp, result)
+}
+
 // RequestGet 发送GET请求
 func (a *Media) RequestGet(ctx context.Context, headers map[string]string, url string, data interface{}, result interface{}) (err error) {
 	var query string
