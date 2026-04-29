@@ -1,0 +1,24 @@
+package kuaishou
+
+import (
+	"context"
+
+	kuaishouModel "github.com/cngamesdk/media-sdk/media/kuaishou/model"
+)
+
+// UnitMonitorUrlsGet 批量获取监测链接
+func (a *KuaishouAdapter) UnitMonitorUrlsGet(ctx context.Context, req *kuaishouModel.UnitMonitorUrlsGetReq) (resp *kuaishouModel.UnitMonitorUrlsGetResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	headers := req.GetHeaders()
+	var result kuaishouModel.UnitMonitorUrlsGetResp
+	if errRequest := a.RequestPostJson(ctx, headers, kuaishouModel.AdUrl+"/rest/openapi/gw/dsp/v3/unit/getMonitorUrls", req, &result); errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
