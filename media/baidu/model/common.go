@@ -8,6 +8,9 @@ import (
 const (
 	// BaseUrlOAuth 百度营销授权链接基础URL
 	BaseUrlOAuth = "https://u.baidu.com/oauth/page/index"
+
+	// BaseUrlOAuthAPI 百度营销OAuth API基础URL
+	BaseUrlOAuthAPI = "https://u.baidu.com/oauth"
 )
 
 // accessTokenReq 通用access_token请求体

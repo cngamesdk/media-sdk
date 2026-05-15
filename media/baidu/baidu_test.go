@@ -105,3 +105,167 @@ func TestAuthorizationLinkSelfStateLength(t *testing.T) {
 	}
 	println(fmt.Sprintf("state too long error: %s", err.Error()))
 }
+
+// TestAccessTokenSelf 测试换取授权令牌
+func TestAccessTokenSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AccessTokenReq{
+		AppID:     "test_app_id_123",
+		AuthCode:  "test_auth_code_abc",
+		SecretKey: "test_secret_key_xyz",
+		GrantType: "auth_code",
+		UserID:    123456,
+	}
+	resp, err := factory.AccessTokenSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestAccessTokenSelfDefaultGrantType 测试grantType默认值
+func TestAccessTokenSelfDefaultGrantType(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AccessTokenReq{
+		AppID:     "test_app_id_456",
+		AuthCode:  "test_auth_code_def",
+		SecretKey: "test_secret_key_uvw",
+		UserID:    789012,
+	}
+	resp, err := factory.AccessTokenSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestAccessTokenSelfValidation 测试换取授权令牌参数校验
+func TestAccessTokenSelfValidation(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+
+	// 测试缺少appId
+	req := &model.AccessTokenReq{
+		AuthCode:  "test_auth_code",
+		SecretKey: "test_secret_key",
+		GrantType: "auth_code",
+		UserID:    123456,
+	}
+	_, err := factory.AccessTokenSelf(ctx, req)
+	if err == nil {
+		t.Fatal("expected error for missing appId")
+	}
+	println(fmt.Sprintf("missing appId error: %s", err.Error()))
+
+	// 测试缺少authCode
+	req2 := &model.AccessTokenReq{
+		AppID:     "test_app_id",
+		SecretKey: "test_secret_key",
+		GrantType: "auth_code",
+		UserID:    123456,
+	}
+	_, err = factory.AccessTokenSelf(ctx, req2)
+	if err == nil {
+		t.Fatal("expected error for missing authCode")
+	}
+	println(fmt.Sprintf("missing authCode error: %s", err.Error()))
+
+	// 测试缺少secretKey
+	req3 := &model.AccessTokenReq{
+		AppID:     "test_app_id",
+		AuthCode:  "test_auth_code",
+		GrantType: "auth_code",
+		UserID:    123456,
+	}
+	_, err = factory.AccessTokenSelf(ctx, req3)
+	if err == nil {
+		t.Fatal("expected error for missing secretKey")
+	}
+	println(fmt.Sprintf("missing secretKey error: %s", err.Error()))
+
+	// 测试缺少userId
+	req4 := &model.AccessTokenReq{
+		AppID:     "test_app_id",
+		AuthCode:  "test_auth_code",
+		SecretKey: "test_secret_key",
+		GrantType: "auth_code",
+	}
+	_, err = factory.AccessTokenSelf(ctx, req4)
+	if err == nil {
+		t.Fatal("expected error for missing userId")
+	}
+	println(fmt.Sprintf("missing userId error: %s", err.Error()))
+}
+
+// TestRefreshTokenSelf 测试更新授权令牌
+func TestRefreshTokenSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.RefreshTokenReq{
+		AppID:        "test_app_id_123",
+		RefreshToken: "test_refresh_token_abc",
+		SecretKey:    "test_secret_key_xyz",
+		UserID:       123456,
+	}
+	resp, err := factory.RefreshTokenSelf(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestRefreshTokenSelfValidation 测试更新授权令牌参数校验
+func TestRefreshTokenSelfValidation(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+
+	// 测试缺少appId
+	req := &model.RefreshTokenReq{
+		RefreshToken: "test_refresh_token",
+		SecretKey:    "test_secret_key",
+		UserID:       123456,
+	}
+	_, err := factory.RefreshTokenSelf(ctx, req)
+	if err == nil {
+		t.Fatal("expected error for missing appId")
+	}
+	println(fmt.Sprintf("missing appId error: %s", err.Error()))
+
+	// 测试缺少refreshToken
+	req2 := &model.RefreshTokenReq{
+		AppID:     "test_app_id",
+		SecretKey: "test_secret_key",
+		UserID:    123456,
+	}
+	_, err = factory.RefreshTokenSelf(ctx, req2)
+	if err == nil {
+		t.Fatal("expected error for missing refreshToken")
+	}
+	println(fmt.Sprintf("missing refreshToken error: %s", err.Error()))
+
+	// 测试缺少secretKey
+	req3 := &model.RefreshTokenReq{
+		AppID:        "test_app_id",
+		RefreshToken: "test_refresh_token",
+		UserID:       123456,
+	}
+	_, err = factory.RefreshTokenSelf(ctx, req3)
+	if err == nil {
+		t.Fatal("expected error for missing secretKey")
+	}
+	println(fmt.Sprintf("missing secretKey error: %s", err.Error()))
+
+	// 测试缺少userId
+	req4 := &model.RefreshTokenReq{
+		AppID:        "test_app_id",
+		RefreshToken: "test_refresh_token",
+		SecretKey:    "test_secret_key",
+	}
+	_, err = factory.RefreshTokenSelf(ctx, req4)
+	if err == nil {
+		t.Fatal("expected error for missing userId")
+	}
+	println(fmt.Sprintf("missing userId error: %s", err.Error()))
+}
