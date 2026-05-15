@@ -72,19 +72,55 @@ func (a *BaiduAdapter) AuthorizationLinkSelf(ctx context.Context, req *model2.Au
 	return
 }
 
+// AccessTokenSelf 换取授权令牌
+// POST https://u.baidu.com/oauth/accessToken
+func (a *BaiduAdapter) AccessTokenSelf(ctx context.Context, req *model2.AccessTokenReq) (resp *model2.AccessTokenResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AccessTokenResp
+	errRequest := a.RequestPostJson(ctx, nil, model2.BaseUrlOAuthAPI+"/accessToken", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
+// RefreshTokenSelf 更新授权令牌
+// POST https://u.baidu.com/oauth/refreshToken
+func (a *BaiduAdapter) RefreshTokenSelf(ctx context.Context, req *model2.RefreshTokenReq) (resp *model2.RefreshTokenResp, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.RefreshTokenResp
+	errRequest := a.RequestPostJson(ctx, nil, model2.BaseUrlOAuthAPI+"/refreshToken", req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 // Auth 授权
 func (a *BaiduAdapter) Auth(ctx context.Context, req *model.AuthReq) (resp interface{}, err error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-// AccessToken 获取AccessToken
+// AccessToken 获取AccessToken（统一接口，建议直接使用 AccessTokenSelf）
 func (a *BaiduAdapter) AccessToken(ctx context.Context, req *model.AccessTokenReq) (*model.AccessTokenResp, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented, use AccessTokenSelf instead")
 }
 
-// RefreshToken 刷新Token
+// RefreshToken 刷新Token（统一接口，建议直接使用 RefreshTokenSelf）
 func (a *BaiduAdapter) RefreshToken(ctx context.Context, req *model.RefreshTokenReq) (*model.RefreshTokenResp, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented, use RefreshTokenSelf instead")
 }
 
 // GetAccount 获取账户信息
