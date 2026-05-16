@@ -159,3 +159,86 @@ func TestAddProjectFeedSelfWithAiLift(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// TestUpdateProjectFeedSelf 测试更新项目名称
+func TestUpdateProjectFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedUpdateReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedID:   123121,
+				ProjectFeedName: "销售线索_项目测试_更新",
+			},
+		},
+	}
+	resp, err := factory.UpdateProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestUpdateProjectFeedSelfPause 测试暂停项目
+func TestUpdateProjectFeedSelfPause(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseTrue := true
+	req := &model.ProjectFeedUpdateReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedID: 123121,
+				Pause:         &pauseTrue,
+			},
+		},
+	}
+	resp, err := factory.UpdateProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestUpdateProjectFeedSelfLift 测试更新一键起量
+func TestUpdateProjectFeedSelfLift(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedUpdateReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedID: 123121,
+				UseLiftBudget: model.UseLiftBudgetOn,
+				Lift: &model.LiftBudgetSchedule{
+					ScheduleModel: model.ScheduleModelImmediate,
+					LiftBudget:    50,
+				},
+			},
+		},
+	}
+	resp, err := factory.UpdateProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestUpdateProjectFeedSelfBatch 测试批量更新（计划+智能起量）
+func TestUpdateProjectFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedUpdateReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedID:   123121,
+				CampaignFeedIds: []int64{12341, 12342},
+				AiLift:          model.AiLiftOn,
+				AiLiftModel:     model.AiLiftModelStable,
+			},
+		},
+	}
+	resp, err := factory.UpdateProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

@@ -2,8 +2,9 @@ package model
 
 const (
 	// ProjectFeedServiceURL 查询项目API端点
-	ProjectFeedServiceURL    = "/json/sms/service/ProjectFeedService/getProjectFeed"
-	ProjectFeedAddServiceURL = "/json/sms/service/ProjectFeedService/addProjectFeed"
+	ProjectFeedServiceURL       = "/json/sms/service/ProjectFeedService/getProjectFeed"
+	ProjectFeedAddServiceURL    = "/json/sms/service/ProjectFeedService/addProjectFeed"
+	ProjectFeedUpdateServiceURL = "/json/sms/service/ProjectFeedService/updateProjectFeed"
 )
 
 // 营销目标枚举
@@ -206,19 +207,21 @@ const (
 	SubjectHarmonyOS   = 13 // 应用下载（harmonyos）(小流量)
 )
 
-// ProjectFeedType 新建项目中的项目对象
+// ProjectFeedType 新建/更新项目中的项目对象
 type ProjectFeedType struct {
-	ProjectFeedName string              `json:"projectFeedName"`           // 项目名称（必填）[1, 100]
-	Subject         int                 `json:"subject"`                   // 营销目标（必填）
+	ProjectFeedID   int64               `json:"projectFeedId,omitempty"`   // 项目ID（更新时必填）
+	ProjectFeedName string              `json:"projectFeedName"`           // 项目名称（新建时必填）[1, 100]
+	Subject         int                 `json:"subject"`                   // 营销目标（新建时必填）
 	AppInfo         *AppInfoType        `json:"appInfo,omitempty"`         // 推广app信息（subject=2或3时有效）
-	BidMode         int                 `json:"bidMode"`                   // 出价模式（必填）
-	Ocpc            OcpcModel           `json:"ocpc"`                      // oCPC设置对象（必填）
+	BidMode         int                 `json:"bidMode"`                   // 出价模式（新建时必填）
+	Ocpc            OcpcModel           `json:"ocpc"`                      // oCPC设置对象（新建时必填）
+	Pause           *bool               `json:"pause,omitempty"`           // 项目启停：true-暂停, false-启用
 	BmcUserID       int64               `json:"bmcUserId,omitempty"`       // 商品中心用户ID
 	CatalogID       int64               `json:"catalogId,omitempty"`       // 商品目录ID（关联产品库时必填）
 	CatalogSource   int                 `json:"catalogSource,omitempty"`   // 产品目录来源（关联产品库时必填）
 	AppSubType      int                 `json:"appSubType,omitempty"`      // 推广场景
 	ProductType     int                 `json:"productType,omitempty"`     // 产品库类型（关联产品库时必填）
-	CampaignFeedIds []int64             `json:"campaignFeedIds,omitempty"` // 关联计划ID集合（不传表示不关联）
+	CampaignFeedIds []int64             `json:"campaignFeedIds,omitempty"` // 关联计划ID集合（不传=不修改，空=解绑）
 	ProductIDs      string              `json:"productIds,omitempty"`      // 产品ID（仅销售线索营销目标支持）
 	MiniProgramType int                 `json:"miniProgramType,omitempty"` // 小程序类型（仅小程序营销目标支持）
 	UseLiftBudget   int                 `json:"useLiftBudget,omitempty"`   // 是否开启一键起量
@@ -237,5 +240,18 @@ func (r *ProjectFeedAddReq) Format() {}
 
 // Validate 校验请求参数
 func (r *ProjectFeedAddReq) Validate() error {
+	return nil
+}
+
+// ProjectFeedUpdateReq 更新项目请求（复用ProjectFeedType，projectFeedId必填）
+type ProjectFeedUpdateReq struct {
+	ProjectFeedTypes []ProjectFeedType `json:"projectFeedTypes"` // 项目集合
+}
+
+// Format 格式化请求参数
+func (r *ProjectFeedUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *ProjectFeedUpdateReq) Validate() error {
 	return nil
 }
