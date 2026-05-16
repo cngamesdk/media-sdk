@@ -2,7 +2,8 @@ package model
 
 const (
 	// 账户API端点
-	AccountFeedServiceURL = "/json/feed/v1/AccountFeedService/getAccountFeed"
+	AccountFeedServiceURL       = "/json/feed/v1/AccountFeedService/getAccountFeed"
+	AccountFeedUpdateServiceURL = "/json/feed/v1/AccountFeedService/updateAccountFeed"
 )
 
 // 账户状态枚举
@@ -80,4 +81,33 @@ type AccountFeedData struct {
 // AccountFeedDataList 账户信息数据列表
 type AccountFeedDataList struct {
 	Data []AccountFeedData `json:"data"`
+}
+
+// AccountFeedUpdateType 更新账户信息中的accountFeedType字段
+type AccountFeedUpdateType struct {
+	Budget float64 `json:"budget"` // 账户预算，取值范围：[50, 9999999.99]，默认为0表示不限预算
+}
+
+// AccountFeedUpdateReq 更新信息流账户信息请求
+type AccountFeedUpdateReq struct {
+	AccountFeedType AccountFeedUpdateType `json:"accountFeedType"` // 要更新的账户字段
+}
+
+// Format 格式化请求参数
+func (r *AccountFeedUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AccountFeedUpdateReq) Validate() error {
+	return nil
+}
+
+// AccountFeedUpdateData 更新账户信息响应数据
+type AccountFeedUpdateData struct {
+	UserID int64   `json:"userId"` // 账户ID
+	Budget float64 `json:"budget"` // 账户预算
+}
+
+// AccountFeedUpdateDataList 更新账户信息响应数据列表
+type AccountFeedUpdateDataList struct {
+	Data []AccountFeedUpdateData `json:"data"`
 }
