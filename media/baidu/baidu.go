@@ -214,3 +214,43 @@ func (a *BaiduAdapter) dealResponse(req model2.BaseResp, result interface{}) (er
 	}
 	return
 }
+
+// RequestPostJsonBusiness 发送业务API POST JSON请求
+// 自动将body包装为 {header: {userName, accessToken}, body: {...}} 格式
+// 自动解析外层header并检查status，将body数据填充到result
+func (a *BaiduAdapter) RequestPostJsonBusiness(ctx context.Context, userName string, accessToken string, url string, body interface{}, result interface{}) (err error) {
+	req := &model2.ApiReq{
+		Header: model2.ApiReqHeader{
+			UserName:    userName,
+			AccessToken: accessToken,
+		},
+		Body: body,
+	}
+	var resp model2.ApiResp
+	if err = a.Media.RequestPostJson(ctx, nil, url, req, &resp); err != nil {
+		return
+	}
+	err = a.dealBusinessResponse(resp, result)
+	return
+}
+
+func (a *BaiduAdapter) dealBusinessResponse(resp model2.ApiResp, result interface{}) (err error) {
+	if resp.Header.Status != 0 {
+		var failureMsgs []string
+		for _, f := range resp.Header.Failures {
+			failureMsgs = append(failureMsgs, fmt.Sprintf("code=%d, message=%s, position=%s", f.Code, f.Message, f.Position))
+		}
+		err = fmt.Errorf("baidu api error: status=%d, desc=%s, failures=[%v]", resp.Header.Status, resp.Header.Desc, failureMsgs)
+		return
+	}
+	bodyJson, bodyJsonErr := json.Marshal(resp.Body)
+	if bodyJsonErr != nil {
+		err = fmt.Errorf("baidu response body to json error: %s", bodyJsonErr.Error())
+		return
+	}
+	if unJsonErr := json.Unmarshal(bodyJson, result); unJsonErr != nil {
+		err = fmt.Errorf("baidu json to target error: %s", unJsonErr.Error())
+		return
+	}
+	return
+}
