@@ -123,9 +123,9 @@ func (a *BaiduAdapter) RefreshToken(ctx context.Context, req *model.RefreshToken
 	return nil, fmt.Errorf("not implemented, use RefreshTokenSelf instead")
 }
 
-// GetAccount 获取账户信息
+// GetAccount 获取账户信息（统一接口，建议直接使用 GetAccountFeedSelf）
 func (a *BaiduAdapter) GetAccount(ctx context.Context, req *model.AccountReq) (*model.AccountResp, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("not implemented, use GetAccountFeedSelf instead")
 }
 
 // CreateCampaign 创建广告计划
