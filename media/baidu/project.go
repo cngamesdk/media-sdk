@@ -58,3 +58,21 @@ func (a *BaiduAdapter) UpdateProjectFeedSelf(ctx context.Context, userName strin
 	resp = &result
 	return
 }
+
+// DeleteProjectFeedSelf 删除项目（可批量）
+// POST https://api.baidu.com/json/sms/service/ProjectFeedService/deleteProjectFeed
+func (a *BaiduAdapter) DeleteProjectFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.ProjectFeedDeleteReq) (resp *model2.ProjectFeedDeleteDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.ProjectFeedDeleteDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.ProjectFeedDeleteServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
