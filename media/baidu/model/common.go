@@ -11,6 +11,9 @@ const (
 
 	// BaseUrlOAuthAPI 百度营销OAuth API基础URL
 	BaseUrlOAuthAPI = "https://u.baidu.com/oauth"
+
+	// BaseUrlAPI 百度营销业务API基础URL
+	BaseUrlAPI = "https://api.baidu.com"
 )
 
 // accessTokenReq 通用access_token请求体
