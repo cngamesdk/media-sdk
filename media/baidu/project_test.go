@@ -63,3 +63,99 @@ func TestGetProjectFeedSelfAllFields(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
 }
+
+// TestAddProjectFeedSelf 测试新建项目
+func TestAddProjectFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedAddReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedName: "销售线索_项目测试",
+				Subject:         model.SubjectSalesLeads,
+				BidMode:         model.BidModeTargetCPA,
+				Ocpc: model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromJimuPage,
+					TransType:  model.TransTypeFormSubmit,
+					OcpcBid:    123,
+				},
+				BmcUserID:       32111,
+				CatalogID:       1111,
+				ProductType:     model.ProductTypeNovel,
+				CatalogSource:   model.CatalogSourceBMC,
+				AppSubType:      model.AppSubTypeDownload,
+				CampaignFeedIds: []int64{12341},
+			},
+		},
+	}
+	resp, err := factory.AddProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("created project: %+v", resp.Data[0]))
+	}
+}
+
+// TestAddProjectFeedSelfWithLift 测试新建项目（带一键起量）
+func TestAddProjectFeedSelfWithLift(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedAddReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedName: "一键起量项目测试",
+				Subject:         model.SubjectSalesLeads,
+				BidMode:         model.BidModeTargetCPA,
+				Ocpc: model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromJimuPage,
+					TransType:  model.TransTypeFormSubmit,
+					OcpcBid:    100,
+				},
+				UseLiftBudget: model.UseLiftBudgetOn,
+				Lift: &model.LiftBudgetSchedule{
+					ScheduleModel: model.ScheduleModelWeekly,
+					LiftBudget:    22,
+					EventWeek:     "1,2,3",
+					EventHour:     "00:00",
+				},
+			},
+		},
+	}
+	resp, err := factory.AddProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestAddProjectFeedSelfWithAiLift 测试新建项目（带智能起量）
+func TestAddProjectFeedSelfWithAiLift(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedAddReq{
+		ProjectFeedTypes: []model.ProjectFeedType{
+			{
+				ProjectFeedName: "智能起量项目测试",
+				Subject:         model.SubjectSalesLeads,
+				BidMode:         model.BidModeTargetCPA,
+				Ocpc: model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromJimuPage,
+					TransType:  model.TransTypeFormSubmit,
+					OcpcBid:    150,
+				},
+				AiLift:      model.AiLiftOn,
+				AiLiftModel: model.AiLiftModelExplore,
+			},
+		},
+	}
+	resp, err := factory.AddProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

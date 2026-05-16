@@ -22,3 +22,21 @@ func (a *BaiduAdapter) GetProjectFeedSelf(ctx context.Context, userName string, 
 	resp = &result
 	return
 }
+
+// AddProjectFeedSelf 新建项目
+// POST https://api.baidu.com/json/sms/service/ProjectFeedService/addProjectFeed
+func (a *BaiduAdapter) AddProjectFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.ProjectFeedAddReq) (resp *model2.ProjectFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.ProjectFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.ProjectFeedAddServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}

@@ -2,7 +2,8 @@ package model
 
 const (
 	// ProjectFeedServiceURL 查询项目API端点
-	ProjectFeedServiceURL = "/json/sms/service/ProjectFeedService/getProjectFeed"
+	ProjectFeedServiceURL    = "/json/sms/service/ProjectFeedService/getProjectFeed"
+	ProjectFeedAddServiceURL = "/json/sms/service/ProjectFeedService/addProjectFeed"
 )
 
 // 营销目标枚举
@@ -136,10 +137,15 @@ type AppInfoType struct {
 
 // OcpcModel oCPC设置对象
 type OcpcModel struct {
-	AppTransID int64   `json:"appTransId,omitempty"` // 转化追踪ID
-	TransFrom  int     `json:"transFrom,omitempty"`  // 接入方式
-	OcpcBid    float64 `json:"ocpcBid,omitempty"`    // 目标转化出价 [0.2, 99999.99]
-	TransType  int     `json:"transType,omitempty"`  // 目标转化类型
+	AppTransID        int64   `json:"appTransId,omitempty"`        // 转化追踪ID
+	TransFrom         int     `json:"transFrom,omitempty"`         // 接入方式
+	OcpcBid           float64 `json:"ocpcBid,omitempty"`           // 目标转化出价 [0.2, 99999.99]
+	TransType         int     `json:"transType,omitempty"`         // 目标转化类型
+	OptimizeDeepTrans bool    `json:"optimizeDeepTrans,omitempty"` // 是否开启深度转化优化
+	DeepOcpcBid       float64 `json:"deepOcpcBid,omitempty"`       // 深度转化出价
+	RoiRatio          float64 `json:"roiRatio,omitempty"`          // ROI系数（目标ROI出价时使用）
+	DeepTransType     int     `json:"deepTransType,omitempty"`     // 深度转化类型
+	OcpcLevel         int     `json:"ocpcLevel,omitempty"`         // oCPC层级
 }
 
 // LiftBudgetSchedule 一键起量设置对象
@@ -180,4 +186,56 @@ type ProjectFeedData struct {
 // ProjectFeedDataList 项目信息数据列表
 type ProjectFeedDataList struct {
 	Data []ProjectFeedData `json:"data"`
+}
+
+// 智能起量枚举
+const (
+	AiLiftOff = 0 // 关闭智能起量
+	AiLiftOn  = 1 // 开启智能起量
+)
+
+// 智能起量模式枚举
+const (
+	AiLiftModelExplore = 1 // 积极探索
+	AiLiftModelStable  = 2 // 稳中求进
+)
+
+// 营销目标（补充新建接口特有值）
+const (
+	SubjectMiniProgram = 4  // 小程序（需要开通小流量名单）
+	SubjectHarmonyOS   = 13 // 应用下载（harmonyos）(小流量)
+)
+
+// ProjectFeedType 新建项目中的项目对象
+type ProjectFeedType struct {
+	ProjectFeedName string              `json:"projectFeedName"`           // 项目名称（必填）[1, 100]
+	Subject         int                 `json:"subject"`                   // 营销目标（必填）
+	AppInfo         *AppInfoType        `json:"appInfo,omitempty"`         // 推广app信息（subject=2或3时有效）
+	BidMode         int                 `json:"bidMode"`                   // 出价模式（必填）
+	Ocpc            OcpcModel           `json:"ocpc"`                      // oCPC设置对象（必填）
+	BmcUserID       int64               `json:"bmcUserId,omitempty"`       // 商品中心用户ID
+	CatalogID       int64               `json:"catalogId,omitempty"`       // 商品目录ID（关联产品库时必填）
+	CatalogSource   int                 `json:"catalogSource,omitempty"`   // 产品目录来源（关联产品库时必填）
+	AppSubType      int                 `json:"appSubType,omitempty"`      // 推广场景
+	ProductType     int                 `json:"productType,omitempty"`     // 产品库类型（关联产品库时必填）
+	CampaignFeedIds []int64             `json:"campaignFeedIds,omitempty"` // 关联计划ID集合（不传表示不关联）
+	ProductIDs      string              `json:"productIds,omitempty"`      // 产品ID（仅销售线索营销目标支持）
+	MiniProgramType int                 `json:"miniProgramType,omitempty"` // 小程序类型（仅小程序营销目标支持）
+	UseLiftBudget   int                 `json:"useLiftBudget,omitempty"`   // 是否开启一键起量
+	Lift            *LiftBudgetSchedule `json:"lift,omitempty"`            // 一键起量设置对象（useLiftBudget=1时必填）
+	AiLift          int                 `json:"aiLift,omitempty"`          // 智能起量-自动优选：0-关闭, 1-开启
+	AiLiftModel     int                 `json:"aiLiftModel,omitempty"`     // 智能起量-起量模式：1-积极探索, 2-稳中求进
+}
+
+// ProjectFeedAddReq 新建项目请求
+type ProjectFeedAddReq struct {
+	ProjectFeedTypes []ProjectFeedType `json:"projectFeedTypes"` // 项目集合
+}
+
+// Format 格式化请求参数
+func (r *ProjectFeedAddReq) Format() {}
+
+// Validate 校验请求参数
+func (r *ProjectFeedAddReq) Validate() error {
+	return nil
 }
