@@ -242,3 +242,31 @@ func TestUpdateProjectFeedSelfBatch(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// TestDeleteProjectFeedSelf 测试删除单个项目
+func TestDeleteProjectFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedDeleteReq{
+		ProjectFeedIds: []int64{24317821},
+	}
+	resp, err := factory.DeleteProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestDeleteProjectFeedSelfBatch 测试批量删除项目
+func TestDeleteProjectFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.ProjectFeedDeleteReq{
+		ProjectFeedIds: []int64{24317821, 24317822},
+	}
+	resp, err := factory.DeleteProjectFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

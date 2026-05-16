@@ -5,6 +5,7 @@ const (
 	ProjectFeedServiceURL       = "/json/sms/service/ProjectFeedService/getProjectFeed"
 	ProjectFeedAddServiceURL    = "/json/sms/service/ProjectFeedService/addProjectFeed"
 	ProjectFeedUpdateServiceURL = "/json/sms/service/ProjectFeedService/updateProjectFeed"
+	ProjectFeedDeleteServiceURL = "/json/sms/service/ProjectFeedService/deleteProjectFeed"
 )
 
 // 营销目标枚举
@@ -254,4 +255,27 @@ func (r *ProjectFeedUpdateReq) Format() {}
 // Validate 校验请求参数
 func (r *ProjectFeedUpdateReq) Validate() error {
 	return nil
+}
+
+// ProjectFeedDeleteReq 删除项目请求
+type ProjectFeedDeleteReq struct {
+	ProjectFeedIds []int64 `json:"projectFeedIds"` // 要删除的项目ID集合（传空表示不删除）
+}
+
+// Format 格式化请求参数
+func (r *ProjectFeedDeleteReq) Format() {}
+
+// Validate 校验请求参数
+func (r *ProjectFeedDeleteReq) Validate() error {
+	return nil
+}
+
+// ProjectFeedDeleteData 删除项目响应数据
+type ProjectFeedDeleteData struct {
+	ProjectFeedID int64 `json:"projectFeedId"` // 项目ID
+}
+
+// ProjectFeedDeleteDataList 删除项目响应数据列表
+type ProjectFeedDeleteDataList struct {
+	Data []ProjectFeedDeleteData `json:"data"`
 }
