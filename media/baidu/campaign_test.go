@@ -242,3 +242,31 @@ func TestUpdateCampaignFeedSelfBid(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// TestDeleteCampaignFeedSelf 测试删除单个计划
+func TestDeleteCampaignFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedDeleteReq{
+		CampaignFeedIds: []int64{1},
+	}
+	resp, err := factory.DeleteCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestDeleteCampaignFeedSelfBatch 测试批量删除计划
+func TestDeleteCampaignFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedDeleteReq{
+		CampaignFeedIds: []int64{234112, 234113},
+	}
+	resp, err := factory.DeleteCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

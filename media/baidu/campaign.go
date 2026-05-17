@@ -58,3 +58,21 @@ func (a *BaiduAdapter) UpdateCampaignFeedSelf(ctx context.Context, userName stri
 	resp = &result
 	return
 }
+
+// DeleteCampaignFeedSelf 删除计划（可批量）
+// POST https://api.baidu.com/json/feed/v1/CampaignFeedService/deleteCampaignFeed
+func (a *BaiduAdapter) DeleteCampaignFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.CampaignFeedDeleteReq) (resp *model2.CampaignFeedDeleteDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.CampaignFeedDeleteDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.CampaignFeedDeleteServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
