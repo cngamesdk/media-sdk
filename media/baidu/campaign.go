@@ -1,0 +1,24 @@
+package baidu
+
+import (
+	"context"
+	model2 "github.com/cngamesdk/media-sdk/media/baidu/model"
+)
+
+// GetCampaignFeedSelf 查询计划
+// POST https://api.baidu.com/json/feed/v1/CampaignFeedService/getCampaignFeed
+func (a *BaiduAdapter) GetCampaignFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.CampaignFeedReq) (resp *model2.CampaignFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.CampaignFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.CampaignFeedServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
