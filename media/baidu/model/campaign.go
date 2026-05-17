@@ -2,8 +2,9 @@ package model
 
 const (
 	// CampaignFeedServiceURL 查询计划API端点
-	CampaignFeedServiceURL    = "/json/feed/v1/CampaignFeedService/getCampaignFeed"
-	CampaignFeedAddServiceURL = "/json/feed/v1/CampaignFeedService/addCampaignFeed"
+	CampaignFeedServiceURL       = "/json/feed/v1/CampaignFeedService/getCampaignFeed"
+	CampaignFeedAddServiceURL    = "/json/feed/v1/CampaignFeedService/addCampaignFeed"
+	CampaignFeedUpdateServiceURL = "/json/feed/v1/CampaignFeedService/updateCampaignFeed"
 )
 
 // 计划状态枚举
@@ -145,9 +146,10 @@ const (
 	InheritAscriptionSameCampaign    = 4 // 同客户中心的计划
 )
 
-// CampaignFeedType 新建计划中的计划对象
+// CampaignFeedType 新建/更新计划中的计划对象
 type CampaignFeedType struct {
-	CampaignFeedName      string                `json:"campaignFeedName"`                // 计划名称（必填）[1, 100]
+	CampaignFeedID        int64                 `json:"campaignFeedId,omitempty"`        // 计划ID（更新时必填）
+	CampaignFeedName      string                `json:"campaignFeedName"`                // 计划名称（新建时必填）[1, 100]
 	Subject               int                   `json:"subject"`                         // 营销目标（必填）
 	AppInfo               *AppInfoType          `json:"appinfo,omitempty"`               // 推广app信息（subject=2或3时有效）
 	Budget                float64               `json:"budget,omitempty"`                // 计划预算 [50, 9999999.99]，null=不限
@@ -187,3 +189,11 @@ type CampaignFeedAddReq struct {
 
 func (r *CampaignFeedAddReq) Format()         {}
 func (r *CampaignFeedAddReq) Validate() error { return nil }
+
+// CampaignFeedUpdateReq 更新计划请求（复用CampaignFeedType，campaignFeedId必填）
+type CampaignFeedUpdateReq struct {
+	CampaignFeedTypes []CampaignFeedType `json:"campaignFeedTypes"`
+}
+
+func (r *CampaignFeedUpdateReq) Format()         {}
+func (r *CampaignFeedUpdateReq) Validate() error { return nil }
