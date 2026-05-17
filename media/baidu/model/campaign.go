@@ -2,7 +2,8 @@ package model
 
 const (
 	// CampaignFeedServiceURL 查询计划API端点
-	CampaignFeedServiceURL = "/json/feed/v1/CampaignFeedService/getCampaignFeed"
+	CampaignFeedServiceURL    = "/json/feed/v1/CampaignFeedService/getCampaignFeed"
+	CampaignFeedAddServiceURL = "/json/feed/v1/CampaignFeedService/addCampaignFeed"
 )
 
 // 计划状态枚举
@@ -122,3 +123,67 @@ type InheritCampaignInfo struct {
 type CampaignFeedDataList struct {
 	Data []CampaignFeedData `json:"data"`
 }
+
+// 出价方式枚举（新建计划）
+const (
+	BidTypeCPC  = 1 // 点击（CPC）
+	BidTypeCPM  = 2 // 曝光（CPM）
+	BidTypeOCPC = 3 // 转化（oCPC/oCPM）
+)
+
+// 下载方式枚举
+const (
+	DownloadTypeDirect   = 0 // 直接下载
+	DownloadTypeLandPage = 1 // 落地页下载
+)
+
+// 继承归属类型枚举
+const (
+	InheritAscriptionCurrentAccount  = 1 // 当前账户
+	InheritAscriptionSameCustomer    = 2 // 同客户中心
+	InheritAscriptionCurrentCampaign = 3 // 当前账户内的计划
+	InheritAscriptionSameCampaign    = 4 // 同客户中心的计划
+)
+
+// CampaignFeedType 新建计划中的计划对象
+type CampaignFeedType struct {
+	CampaignFeedName      string                `json:"campaignFeedName"`                // 计划名称（必填）[1, 100]
+	Subject               int                   `json:"subject"`                         // 营销目标（必填）
+	AppInfo               *AppInfoType          `json:"appinfo,omitempty"`               // 推广app信息（subject=2或3时有效）
+	Budget                float64               `json:"budget,omitempty"`                // 计划预算 [50, 9999999.99]，null=不限
+	StartTime             string                `json:"starttime,omitempty"`             // 推广开始时间
+	EndTime               string                `json:"endtime,omitempty"`               // 推广结束时间
+	Schedule              []ScheduleType        `json:"schedule,omitempty"`              // 推广计划暂停时段
+	Pause                 *bool                 `json:"pause,omitempty"`                 // 计划启停
+	BsType                int                   `json:"bstype,omitempty"`                // 物料类型：1-普通(默认), 3-商品, 7-原生RTA
+	CampaignType          int                   `json:"campaignType,omitempty"`          // 计划类型：1-普通, 4-放量, 8-目标ROI
+	EshopType             string                `json:"eshopType,omitempty"`             // 交易所在平台
+	Ftypes                []int                 `json:"ftypes,omitempty"`                // 流量类型
+	BidType               int                   `json:"bidtype,omitempty"`               // 出价方式：1-CPC(默认), 2-CPM, 3-oCPC
+	Bid                   float64               `json:"bid,omitempty"`                   // 出价
+	Ocpc                  *OcpcModel            `json:"ocpc,omitempty"`                  // oCPC设置（bidtype=3时有效）
+	BmcUserID             int64                 `json:"bmcUserId,omitempty"`             // 商品中心用户ID
+	CatalogID             int64                 `json:"catalogId,omitempty"`             // 商品目录ID
+	CatalogSource         int                   `json:"catalogSource,omitempty"`         // 产品目录来源
+	ProductType           int                   `json:"productType,omitempty"`           // 产品库类型
+	ProjectFeedID         int64                 `json:"projectFeedId,omitempty"`         // 项目ID（0或不传=不关联）
+	MiniProgramType       int                   `json:"miniProgramType,omitempty"`       // 小程序子类型
+	AppSubType            int                   `json:"appSubType,omitempty"`            // 应用推广子类型
+	BidMode               int                   `json:"bidMode,omitempty"`               // 出价模式
+	SaleType              int                   `json:"saleType,omitempty"`              // 营销场景
+	InheritAscriptionType int                   `json:"inheritAscriptionType,omitempty"` // 继承归属类型
+	InheritUserids        []int64               `json:"inheritUserids,omitempty"`        // 继承优质计划账户ID集合
+	InheritCampaignInfos  []InheritCampaignInfo `json:"inheritCampaignInfos,omitempty"`  // 继承优质计划信息集合
+	UseLiftBudget         int                   `json:"useLiftBudget,omitempty"`         // 是否开启一键起量
+	LiftBudget            float64               `json:"liftBudget,omitempty"`            // 起量预算
+	DeliveryType          []int                 `json:"deliveryType,omitempty"`          // 投放场景
+	LiftBudgetSchedule    *LiftBudgetSchedule   `json:"liftBudgetSchedule,omitempty"`    // 起量生效时间
+}
+
+// CampaignFeedAddReq 新建计划请求
+type CampaignFeedAddReq struct {
+	CampaignFeedTypes []CampaignFeedType `json:"campaignFeedTypes"` // 计划集合
+}
+
+func (r *CampaignFeedAddReq) Format()         {}
+func (r *CampaignFeedAddReq) Validate() error { return nil }
