@@ -179,3 +179,66 @@ func TestAddCampaignFeedSelfWithLift(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// TestUpdateCampaignFeedSelf 测试更新计划
+func TestUpdateCampaignFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedUpdateReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedID:   12818191,
+				CampaignFeedName: "更新计划名称",
+				Budget:           3000,
+			},
+		},
+	}
+	resp, err := factory.UpdateCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestUpdateCampaignFeedSelfPause 测试暂停/启用计划
+func TestUpdateCampaignFeedSelfPause(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseTrue := true
+	req := &model.CampaignFeedUpdateReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedID: 12818191,
+				Pause:          &pauseTrue,
+			},
+		},
+	}
+	resp, err := factory.UpdateCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestUpdateCampaignFeedSelfBid 测试更新出价
+func TestUpdateCampaignFeedSelfBid(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedUpdateReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedID: 12818191,
+				Bid:            2.5,
+				Ocpc: &model.OcpcModel{
+					OcpcBid:   80,
+					TransType: model.TransTypeFormSubmit,
+				},
+			},
+		},
+	}
+	resp, err := factory.UpdateCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
