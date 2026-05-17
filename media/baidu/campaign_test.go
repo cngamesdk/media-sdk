@@ -84,3 +84,98 @@ func TestGetCampaignFeedSelfAllFields(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
 }
+
+// TestAddCampaignFeedSelf 测试新建计划
+func TestAddCampaignFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedAddReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedName: "销售线索_计划测试",
+				Subject:          model.SubjectSalesLeads,
+				BidType:          model.BidTypeOCPC,
+				Bid:              1.5,
+				Ocpc: &model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromJimuPage,
+					TransType:  model.TransTypeFormSubmit,
+					OcpcBid:    100,
+				},
+			},
+		},
+	}
+	resp, err := factory.AddCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestAddCampaignFeedSelfFull 测试新建计划（完整字段）
+func TestAddCampaignFeedSelfFull(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedAddReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedName: "应用下载_计划_完整",
+				Subject:          model.SubjectAppDownloadAndroid,
+				AppInfo: &model.AppInfoType{
+					AppName:   "测试APP",
+					ApkName:   "com.test.app",
+					ChannelID: 12345,
+				},
+				Budget:    5000,
+				StartTime: "2026-06-01",
+				EndTime:   "2026-12-31",
+				BidType:   model.BidTypeOCPC,
+				Bid:       2.0,
+				Ocpc: &model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromAppSDK,
+					TransType:  model.TransTypeActivate,
+					OcpcBid:    50,
+				},
+				BsType:        model.BsTypeNormal,
+				CampaignType:  model.CampaignTypeNormal,
+				ProjectFeedID: 123123,
+				AppSubType:    model.AppSubTypeDownload,
+			},
+		},
+	}
+	resp, err := factory.AddCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestAddCampaignFeedSelfWithLift 测试新建计划（带一键起量）
+func TestAddCampaignFeedSelfWithLift(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.CampaignFeedAddReq{
+		CampaignFeedTypes: []model.CampaignFeedType{
+			{
+				CampaignFeedName: "一键起量计划",
+				Subject:          model.SubjectSalesLeads,
+				BidType:          model.BidTypeOCPC,
+				Bid:              1.5,
+				Ocpc: &model.OcpcModel{
+					AppTransID: 5431211,
+					TransFrom:  model.TransFromJimuPage,
+					TransType:  model.TransTypeFormSubmit,
+					OcpcBid:    100,
+				},
+				UseLiftBudget: model.UseLiftBudgetOn,
+				LiftBudget:    200,
+			},
+		},
+	}
+	resp, err := factory.AddCampaignFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}

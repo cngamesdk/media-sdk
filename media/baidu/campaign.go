@@ -22,3 +22,21 @@ func (a *BaiduAdapter) GetCampaignFeedSelf(ctx context.Context, userName string,
 	resp = &result
 	return
 }
+
+// AddCampaignFeedSelf 新建计划
+// POST https://api.baidu.com/json/feed/v1/CampaignFeedService/addCampaignFeed
+func (a *BaiduAdapter) AddCampaignFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.CampaignFeedAddReq) (resp *model2.CampaignFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.CampaignFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.CampaignFeedAddServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
