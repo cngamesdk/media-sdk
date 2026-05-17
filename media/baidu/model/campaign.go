@@ -5,6 +5,7 @@ const (
 	CampaignFeedServiceURL       = "/json/feed/v1/CampaignFeedService/getCampaignFeed"
 	CampaignFeedAddServiceURL    = "/json/feed/v1/CampaignFeedService/addCampaignFeed"
 	CampaignFeedUpdateServiceURL = "/json/feed/v1/CampaignFeedService/updateCampaignFeed"
+	CampaignFeedDeleteServiceURL = "/json/feed/v1/CampaignFeedService/deleteCampaignFeed"
 )
 
 // 计划状态枚举
@@ -197,3 +198,21 @@ type CampaignFeedUpdateReq struct {
 
 func (r *CampaignFeedUpdateReq) Format()         {}
 func (r *CampaignFeedUpdateReq) Validate() error { return nil }
+
+// CampaignFeedDeleteReq 删除计划请求
+type CampaignFeedDeleteReq struct {
+	CampaignFeedIds []int64 `json:"campaignFeedIds"` // 要删除的计划ID集合
+}
+
+func (r *CampaignFeedDeleteReq) Format()         {}
+func (r *CampaignFeedDeleteReq) Validate() error { return nil }
+
+// CampaignFeedDeleteData 删除计划响应数据
+type CampaignFeedDeleteData struct {
+	CampaignFeedID int64 `json:"campaignFeedId"` // 信息流计划ID
+}
+
+// CampaignFeedDeleteDataList 删除计划响应数据列表
+type CampaignFeedDeleteDataList struct {
+	Data []CampaignFeedDeleteData `json:"data"`
+}
