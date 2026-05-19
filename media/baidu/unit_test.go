@@ -286,6 +286,108 @@ func TestAddAdgroupFeedSelfWithBidSource(t *testing.T) {
 	println(fmt.Sprintf("add result: %+v", resp))
 }
 
+// TestUpdateAdgroupFeedSelf 测试更新单元名称
+func TestUpdateAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.AdgroupFeedUpdateType{
+			{
+				AdgroupFeedId:   12387113,
+				AdgroupFeedName: "更新后的单元名称",
+			},
+		},
+	}
+	resp, err := factory.UpdateAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateAdgroupFeedSelfPause 测试暂停/启用单元
+func TestUpdateAdgroupFeedSelfPause(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseTrue := true
+	req := &model.AdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.AdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Pause:         &pauseTrue,
+			},
+		},
+	}
+	resp, err := factory.UpdateAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateAdgroupFeedSelfBid 测试更新出价
+func TestUpdateAdgroupFeedSelfBid(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.AdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Bid:           2.5,
+			},
+		},
+	}
+	resp, err := factory.UpdateAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateAdgroupFeedSelfOcpc 测试更新oCPC设置
+func TestUpdateAdgroupFeedSelfOcpc(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.AdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Ocpc: &model.AdgroupFeedOcpcType{
+					AppTransID: 23415,
+					TransFrom:  model.TransFromLeadsAPI,
+					OcpcBid:    180.0,
+					LpUrl:      "http://www.baidu.com",
+					TransType:  model.TransTypeLeaveLeads,
+				},
+			},
+		},
+	}
+	resp, err := factory.UpdateAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateAdgroupFeedSelfUrl 测试更新落地页
+func TestUpdateAdgroupFeedSelfUrl(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.AdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Url:           "http://www.newlandingpage.com",
+			},
+		},
+	}
+	resp, err := factory.UpdateAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
 // TestGetAdgroupFeedSelfWithAudience 测试查询包含定向设置的单元
 func TestGetAdgroupFeedSelfWithAudience(t *testing.T) {
 	ctx := context.Background()

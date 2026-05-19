@@ -5,6 +5,8 @@ const (
 	AdgroupFeedServiceURL = "/json/feed/v1/AdgroupFeedService/getAdgroupFeed"
 	// AdgroupFeedAddServiceURL 新建单元API端点
 	AdgroupFeedAddServiceURL = "/json/feed/v1/AdgroupFeedService/addAdgroupFeed"
+	// AdgroupFeedUpdateServiceURL 更新单元API端点
+	AdgroupFeedUpdateServiceURL = "/json/feed/v1/AdgroupFeedService/updateAdgroupFeed"
 )
 
 // ID类型枚举
@@ -238,5 +240,35 @@ func (r *AdgroupFeedAddReq) Format() {}
 
 // Validate 校验请求参数
 func (r *AdgroupFeedAddReq) Validate() error {
+	return nil
+}
+
+// AdgroupFeedUpdateType 更新单元对象
+type AdgroupFeedUpdateType struct {
+	AdgroupFeedId   int64                `json:"adgroupFeedId"`             // 推广单元ID（必填）
+	AdgroupFeedName string               `json:"adgroupFeedName,omitempty"` // 推广单元名称 [1, 100]
+	Pause           *bool                `json:"pause,omitempty"`           // 暂停/启用推广单元
+	Audience        map[string]string    `json:"audience,omitempty"`        // 定向设置
+	Bid             float64              `json:"bid,omitempty"`             // 出价
+	Ocpc            *AdgroupFeedOcpcType `json:"ocpc,omitempty"`            // oCPC设置对象
+	AtpFeedId       int64                `json:"atpFeedId,omitempty"`       // 定向包ID（0=解除绑定）
+	ProductSetId    int64                `json:"productSetId,omitempty"`    // 商品组ID
+	UnitProducts    *UnitProducts        `json:"unitProducts,omitempty"`    // 单元商品筛选设置
+	MiniProgram     string               `json:"miniProgram,omitempty"`     // 小程序信息（json字符串）
+	BroadCastInfo   string               `json:"broadCastInfo,omitempty"`   // 直播间信息（json字符串）
+	Url             string               `json:"url,omitempty"`             // 落地页
+	BjhProgram      *BjhProgram          `json:"bjhProgram,omitempty"`      // 百家号短剧合集信息
+}
+
+// AdgroupFeedUpdateReq 更新单元请求
+type AdgroupFeedUpdateReq struct {
+	AdgroupFeedTypes []AdgroupFeedUpdateType `json:"adgroupFeedTypes"` // 单元集合
+}
+
+// Format 格式化请求参数
+func (r *AdgroupFeedUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AdgroupFeedUpdateReq) Validate() error {
 	return nil
 }
