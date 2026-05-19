@@ -697,6 +697,34 @@ func TestUpdateDpaAdgroupFeedSelfBid(t *testing.T) {
 	println(fmt.Sprintf("update result: %+v", resp))
 }
 
+// TestDeleteDpaAdgroupFeedSelf 测试删除单个商品推广单元
+func TestDeleteDpaAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedDeleteReq{
+		AdgroupFeedIds: []int64{2205036260},
+	}
+	resp, err := factory.DeleteDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
+// TestDeleteDpaAdgroupFeedSelfBatch 测试批量删除商品推广单元
+func TestDeleteDpaAdgroupFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedDeleteReq{
+		AdgroupFeedIds: []int64{2205036260, 2205036261},
+	}
+	resp, err := factory.DeleteDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
 // TestUpdateDpaAdgroupFeedSelfOcpc 测试更新商品推广单元oCPC（含商品通配符lpUrl）
 func TestUpdateDpaAdgroupFeedSelfOcpc(t *testing.T) {
 	ctx := context.Background()

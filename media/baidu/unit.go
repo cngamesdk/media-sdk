@@ -113,6 +113,24 @@ func (a *BaiduAdapter) AddDpaAdgroupFeedSelf(ctx context.Context, userName strin
 	return
 }
 
+// DeleteDpaAdgroupFeedSelf 删除商品推广单元（可批量）
+// POST https://api.baidu.com/json/feed/v1/DpaAdgroupFeedService/deleteAdgroupFeed
+func (a *BaiduAdapter) DeleteDpaAdgroupFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AdgroupFeedDeleteReq) (resp *model2.AdgroupFeedDeleteDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AdgroupFeedDeleteDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.DpaAdgroupFeedDeleteServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 // UpdateDpaAdgroupFeedSelf 更新商品推广单元
 // POST https://api.baidu.com/json/feed/v1/DpaAdgroupFeedService/updateAdgroupFeed
 func (a *BaiduAdapter) UpdateDpaAdgroupFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.DpaAdgroupFeedUpdateReq) (resp *model2.DpaAdgroupFeedDataList, err error) {
