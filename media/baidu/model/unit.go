@@ -13,6 +13,8 @@ const (
 	DpaAdgroupFeedServiceURL = "/json/feed/v1/DpaAdgroupFeedService/getAdgroupFeed"
 	// DpaAdgroupFeedAddServiceURL 新建商品推广单元API端点
 	DpaAdgroupFeedAddServiceURL = "/json/feed/v1/DpaAdgroupFeedService/addAdgroupFeed"
+	// DpaAdgroupFeedUpdateServiceURL 更新商品推广单元API端点
+	DpaAdgroupFeedUpdateServiceURL = "/json/feed/v1/DpaAdgroupFeedService/updateAdgroupFeed"
 )
 
 // ID类型枚举
@@ -417,5 +419,30 @@ func (r *DpaAdgroupFeedAddReq) Format() {}
 
 // Validate 校验请求参数
 func (r *DpaAdgroupFeedAddReq) Validate() error {
+	return nil
+}
+
+// DpaAdgroupFeedUpdateType 更新商品推广单元对象
+type DpaAdgroupFeedUpdateType struct {
+	AdgroupFeedId   int64            `json:"adgroupFeedId"`             // 单元ID（必填）
+	AdgroupFeedName string           `json:"adgroupFeedName,omitempty"` // 单元名称 [1, 100]
+	Bid             float64          `json:"bid,omitempty"`             // 出价
+	Pause           *bool            `json:"pause,omitempty"`           // 暂停/启用
+	ProductSetId    int64            `json:"productSetId,omitempty"`    // 商品组ID
+	Audience        *DpaAudienceType `json:"audience,omitempty"`        // 定向设置
+	Ocpc            *DpaOcpcType     `json:"ocpc,omitempty"`            // oCPC设置
+	UnitProducts    *UnitProducts    `json:"unitProducts,omitempty"`    // 单元商品筛选设置
+}
+
+// DpaAdgroupFeedUpdateReq 更新商品推广单元请求
+type DpaAdgroupFeedUpdateReq struct {
+	AdgroupFeedTypes []DpaAdgroupFeedUpdateType `json:"adgroupFeedTypes"` // 单元列表 [1, 100]
+}
+
+// Format 格式化请求参数
+func (r *DpaAdgroupFeedUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *DpaAdgroupFeedUpdateReq) Validate() error {
 	return nil
 }

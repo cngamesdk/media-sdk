@@ -112,3 +112,21 @@ func (a *BaiduAdapter) AddDpaAdgroupFeedSelf(ctx context.Context, userName strin
 	resp = &result
 	return
 }
+
+// UpdateDpaAdgroupFeedSelf 更新商品推广单元
+// POST https://api.baidu.com/json/feed/v1/DpaAdgroupFeedService/updateAdgroupFeed
+func (a *BaiduAdapter) UpdateDpaAdgroupFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.DpaAdgroupFeedUpdateReq) (resp *model2.DpaAdgroupFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.DpaAdgroupFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.DpaAdgroupFeedUpdateServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
