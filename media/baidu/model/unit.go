@@ -9,6 +9,8 @@ const (
 	AdgroupFeedUpdateServiceURL = "/json/feed/v1/AdgroupFeedService/updateAdgroupFeed"
 	// AdgroupFeedDeleteServiceURL 删除单元API端点
 	AdgroupFeedDeleteServiceURL = "/json/feed/v1/AdgroupFeedService/deleteAdgroupFeed"
+	// DpaAdgroupFeedServiceURL 查询商品推广单元API端点
+	DpaAdgroupFeedServiceURL = "/json/feed/v1/DpaAdgroupFeedService/getAdgroupFeed"
 )
 
 // ID类型枚举
@@ -296,4 +298,95 @@ type AdgroupFeedDeleteData struct {
 // AdgroupFeedDeleteDataList 删除单元响应数据列表
 type AdgroupFeedDeleteDataList struct {
 	Data []AdgroupFeedDeleteData `json:"data"`
+}
+
+// AdgroupFeedFilter 商品推广单元过滤条件
+type AdgroupFeedFilter struct {
+	Status []int `json:"status,omitempty"` // 状态 0-有效, 1-暂停推广, 2-推广计划暂停推广
+}
+
+// DpaAdgroupFeedReq 查询商品推广单元请求
+type DpaAdgroupFeedReq struct {
+	AdgroupFeedFields []string           `json:"adgroupFeedFields"`           // 需要查询的单元属性（必填）
+	Ids               []int64            `json:"ids"`                         // 待查询计划/单元ID集合（必填）[1, 100]
+	IdType            int                `json:"idType"`                      // ID类型（必填）1-计划, 2-单元
+	AdgroupFeedFilter *AdgroupFeedFilter `json:"adgroupFeedFilter,omitempty"` // 单元过滤条件
+}
+
+// Format 格式化请求参数
+func (r *DpaAdgroupFeedReq) Format() {}
+
+// Validate 校验请求参数
+func (r *DpaAdgroupFeedReq) Validate() error {
+	return nil
+}
+
+// DpaAudienceType 商品推广单元定向设置
+type DpaAudienceType struct {
+	PaCrowd                 string `json:"paCrowd,omitempty"`                 // 自定义人群定向
+	Premium                 string `json:"premium,omitempty"`                 // 商品定向-通投
+	PaKeywords              string `json:"paKeywords,omitempty"`              // 商品定向-意图词定向
+	Interests               string `json:"interests,omitempty"`               // 商品定向-兴趣定向
+	Age                     string `json:"age,omitempty"`                     // 年龄定向
+	Sex                     string `json:"sex,omitempty"`                     // 性别定向
+	Education               string `json:"education,omitempty"`               // 学历定向
+	Device                  string `json:"device,omitempty"`                  // 平台定向
+	Net                     string `json:"net,omitempty"`                     // 网络定向
+	Region                  string `json:"region,omitempty"`                  // 地域定向
+	MediaCategoriesBindType string `json:"mediaCategoriesBindType,omitempty"` // 媒体定向
+	MediaCategories         string `json:"mediaCategories,omitempty"`         // 百青藤媒体分类
+	MediaidsBindType        string `json:"mediaidsBindType,omitempty"`        // 百青藤媒体ID定向方式
+	Mediaids                string `json:"mediaids,omitempty"`                // 百青藤媒体ID
+	MediaPackage            string `json:"mediaPackage,omitempty"`            // 百青藤媒体包
+	AutoRegion              string `json:"autoRegion,omitempty"`              // 智能地域
+	AutoExpansion           string `json:"autoExpansion,omitempty"`           // 自动扩量
+	NewInterests            string `json:"newInterests,omitempty"`            // 新版兴趣定向
+	CustomMediaPackage      string `json:"customMediaPackage,omitempty"`      // 自定义媒体包
+	DeepLink                bool   `json:"deepLink"`                          // 媒体包支持调起
+	ExcludeTrans            string `json:"excludeTrans,omitempty"`            // 排除已转化人群包
+	CustomAge               string `json:"customAge,omitempty"`               // 自定义年龄
+	RtaRedirect             int    `json:"rtaRedirect"`                       // RTA商品重定向
+	App                     string `json:"app,omitempty"`                     // APP行为
+}
+
+// DpaOcpcType 商品推广单元oCPC设置（与信息流ocpc对象一致，lpUrl可使用商品通配符）
+type DpaOcpcType struct {
+	AppTransID         int64   `json:"appTransId"`         // 转化追踪ID
+	TransFrom          int     `json:"transFrom"`          // 接入方式
+	OcpcBid            float64 `json:"ocpcBid"`            // 目标转化出价
+	LpUrl              string  `json:"lpUrl"`              // 推广URL（可使用商品通配符）
+	TransType          int     `json:"transType"`          // 目标转化
+	OptimizeDeepTrans  bool    `json:"optimizeDeepTrans"`  // 优化深度转化
+	DeepOcpcBid        float64 `json:"deepOcpcBid"`        // 深度转化出价
+	DeepTransType      int     `json:"deepTransType"`      // 深度转化类型
+	UrlType            int     `json:"urlType"`            // 落地页类型
+	UseRoi             bool    `json:"useRoi"`             // 使用ROI优化
+	RoiRatio           float64 `json:"roiRatio"`           // ROI转化率
+	MiniProgramType    int     `json:"miniProgramType"`    // 百度小程序类型
+	AppKey             string  `json:"appKey"`             // 百度小程序appkey
+	PagePath           string  `json:"pagePath"`           // 百度小程序页面路径
+	BroadCastMode      int     `json:"broadCastMode"`      // 直播间投放模式
+	AnchorId           int64   `json:"anchorId"`           // 主播ID
+	TransTypeAttribute int     `json:"transTypeAttribute"` // 付费次数优化
+}
+
+// DpaAdgroupFeedData 商品推广单元信息数据
+type DpaAdgroupFeedData struct {
+	CampaignFeedId  int64            `json:"campaignFeedId"`  // 计划ID
+	AdgroupFeedId   int64            `json:"adgroupFeedId"`   // 单元ID
+	AdgroupFeedName string           `json:"adgroupFeedName"` // 单元名称
+	Bid             float64          `json:"bid"`             // 出价
+	Status          int              `json:"status"`          // 推广单元状态
+	Pause           bool             `json:"pause"`           // 暂停/启用
+	Ftypes          []int            `json:"ftypes"`          // 投放范围
+	Producttypes    []int            `json:"producttypes"`    // 投放版位
+	ProductSetId    int64            `json:"productSetId"`    // 商品组ID
+	Audience        *DpaAudienceType `json:"audience"`        // 定向设置
+	Bidtype         int              `json:"bidtype"`         // 优化目标和付费模式
+	Ocpc            *DpaOcpcType     `json:"ocpc,omitempty"`  // oCPC设置
+}
+
+// DpaAdgroupFeedDataList 商品推广单元信息数据列表
+type DpaAdgroupFeedDataList struct {
+	Data []DpaAdgroupFeedData `json:"data"`
 }
