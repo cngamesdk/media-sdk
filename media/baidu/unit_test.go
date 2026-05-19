@@ -118,6 +118,174 @@ func TestGetAdgroupFeedSelfAllFields(t *testing.T) {
 	}
 }
 
+// TestAddAdgroupFeedSelf 测试新建单元（基础字段）
+func TestAddAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseFalse := false
+	req := &model.AdgroupFeedAddReq{
+		AdgroupFeedTypes: []model.AdgroupFeedType{
+			{
+				CampaignFeedId:  12387113,
+				AdgroupFeedName: "信息流推广单元_测试",
+				Pause:           &pauseFalse,
+				Bid:             100.0,
+				Ftypes:          []int{},
+				Bidtype:         model.BidTypeCPC,
+			},
+		},
+	}
+	resp, err := factory.AddAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("created unit: id=%d, name=%s", resp.Data[0].AdgroupFeedId, resp.Data[0].AdgroupFeedName))
+	}
+}
+
+// TestAddAdgroupFeedSelfWithOcpc 测试新建单元（oCPC出价）
+func TestAddAdgroupFeedSelfWithOcpc(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedAddReq{
+		AdgroupFeedTypes: []model.AdgroupFeedType{
+			{
+				CampaignFeedId:  12387113,
+				AdgroupFeedName: "信息流推广单元_oCPC",
+				Bid:             1.5,
+				Ftypes:          []int{model.FtypeBaiduFeed},
+				Bidtype:         model.BidTypeOCPC,
+				Ocpc: &model.AdgroupFeedOcpcType{
+					AppTransID: 23415,
+					TransFrom:  model.TransFromLeadsAPI,
+					OcpcBid:    200.0,
+					LpUrl:      "http://www.baidu.com",
+					TransType:  model.TransTypeLeaveLeads,
+				},
+			},
+		},
+	}
+	resp, err := factory.AddAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+	if len(resp.Data) > 0 && resp.Data[0].Ocpc != nil {
+		println(fmt.Sprintf("ocpc: transType=%d, ocpcBid=%.2f", resp.Data[0].Ocpc.TransType, resp.Data[0].Ocpc.OcpcBid))
+	}
+}
+
+// TestAddAdgroupFeedSelfFull 测试新建单元（完整字段）
+func TestAddAdgroupFeedSelfFull(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseFalse := false
+	req := &model.AdgroupFeedAddReq{
+		AdgroupFeedTypes: []model.AdgroupFeedType{
+			{
+				CampaignFeedId:  12387113,
+				AdgroupFeedName: "信息流推广单元_完整测试",
+				Pause:           &pauseFalse,
+				Audience:        map[string]string{},
+				Bid:             100.0,
+				Ftypes:          []int{model.FtypeBaiduFeed},
+				Bidtype:         model.BidTypeOCPC,
+				Ocpc: &model.AdgroupFeedOcpcType{
+					AppTransID:        23415,
+					TransFrom:         model.TransFromLeadsAPI,
+					OcpcBid:           200.0,
+					LpUrl:             "http://www.baidu.com",
+					TransType:         model.TransTypeLeaveLeads,
+					OptimizeDeepTrans: false,
+					DeepOcpcBid:       0.0,
+					DeepTransType:     model.TransTypePurchaseSuccess,
+					UrlType:           model.UrlTypeNormal,
+					UseRoi:            false,
+					RoiRatio:          0.0,
+					MiniProgramType:   model.MiniProgramTypeMini,
+					AppKey:            "32",
+					PagePath:          "example/page",
+					BroadCastMode:     model.BroadCastModeContinuous,
+					AnchorId:          1,
+				},
+				DeliveryType:   []int{model.DeliveryTypeAll},
+				ProductSetId:   12345678,
+				FtypeSelection: model.FtypeSelectionUnit,
+				BidSource:      model.BidSourceUnit,
+				UrlType:        model.UrlTypeNormal,
+				Url:            "http://www.baidu.com",
+			},
+		},
+	}
+	resp, err := factory.AddAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
+
+// TestAddAdgroupFeedSelfWithProducts 测试新建单元（商品推广）
+func TestAddAdgroupFeedSelfWithProducts(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedAddReq{
+		AdgroupFeedTypes: []model.AdgroupFeedType{
+			{
+				CampaignFeedId:  12387113,
+				AdgroupFeedName: "商品推广单元_测试",
+				Bid:             100.0,
+				Ftypes:          []int{},
+				Bidtype:         model.BidTypeCPC,
+				UnitProducts: &model.UnitProducts{
+					CatalogID: 1,
+					RuleProducts: []model.ProductSetRule{
+						{
+							Field:     "name",
+							Operation: model.OperationEqual,
+							Value:     "衬衫",
+						},
+					},
+				},
+			},
+		},
+	}
+	resp, err := factory.AddAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+	if len(resp.Data) > 0 && resp.Data[0].UnitProducts != nil {
+		println(fmt.Sprintf("unitProducts: catalogId=%d, rules=%+v",
+			resp.Data[0].UnitProducts.CatalogID, resp.Data[0].UnitProducts.RuleProducts))
+	}
+}
+
+// TestAddAdgroupFeedSelfWithBidSource 测试新建单元（使用计划出价）
+func TestAddAdgroupFeedSelfWithBidSource(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedAddReq{
+		AdgroupFeedTypes: []model.AdgroupFeedType{
+			{
+				CampaignFeedId:  12387113,
+				AdgroupFeedName: "使用计划出价_单元",
+				Bid:             0,
+				Ftypes:          []int{},
+				BidSource:       model.BidSourcePlan,
+				UrlType:         model.UrlTypeNormal,
+				Url:             "http://www.baidu.com",
+			},
+		},
+	}
+	resp, err := factory.AddAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
+
 // TestGetAdgroupFeedSelfWithAudience 测试查询包含定向设置的单元
 func TestGetAdgroupFeedSelfWithAudience(t *testing.T) {
 	ctx := context.Background()
