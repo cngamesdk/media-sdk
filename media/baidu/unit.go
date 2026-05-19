@@ -40,3 +40,21 @@ func (a *BaiduAdapter) AddAdgroupFeedSelf(ctx context.Context, userName string, 
 	resp = &result
 	return
 }
+
+// UpdateAdgroupFeedSelf 更新单元
+// POST https://api.baidu.com/json/feed/v1/AdgroupFeedService/updateAdgroupFeed
+func (a *BaiduAdapter) UpdateAdgroupFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AdgroupFeedUpdateReq) (resp *model2.AdgroupFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AdgroupFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.AdgroupFeedUpdateServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
