@@ -11,6 +11,8 @@ const (
 	AdgroupFeedDeleteServiceURL = "/json/feed/v1/AdgroupFeedService/deleteAdgroupFeed"
 	// DpaAdgroupFeedServiceURL 查询商品推广单元API端点
 	DpaAdgroupFeedServiceURL = "/json/feed/v1/DpaAdgroupFeedService/getAdgroupFeed"
+	// DpaAdgroupFeedAddServiceURL 新建商品推广单元API端点
+	DpaAdgroupFeedAddServiceURL = "/json/feed/v1/DpaAdgroupFeedService/addAdgroupFeed"
 )
 
 // ID类型枚举
@@ -389,4 +391,31 @@ type DpaAdgroupFeedData struct {
 // DpaAdgroupFeedDataList 商品推广单元信息数据列表
 type DpaAdgroupFeedDataList struct {
 	Data []DpaAdgroupFeedData `json:"data"`
+}
+
+// DpaAdgroupFeedType 新建/更新商品推广单元对象
+type DpaAdgroupFeedType struct {
+	CampaignFeedId  int64            `json:"campaignFeedId"`         // 计划ID（必填）
+	AdgroupFeedName string           `json:"adgroupFeedName"`        // 单元名称（必填）[1, 100]
+	Bid             float64          `json:"bid"`                    // 出价（必填）
+	Pause           *bool            `json:"pause,omitempty"`        // 暂停/启用
+	Ftypes          []int            `json:"ftypes"`                 // 投放范围（必填）
+	ProductSetId    int64            `json:"productSetId"`           // 商品组ID（与unitProducts至少填一个）
+	Audience        *DpaAudienceType `json:"audience"`               // 定向设置（必填）
+	Bidtype         int              `json:"bidtype"`                // 优化目标和付费模式（必填）1-CPC, 3-oCPC
+	Ocpc            *DpaOcpcType     `json:"ocpc,omitempty"`         // oCPC设置（bidtype=3时必填）
+	UnitProducts    *UnitProducts    `json:"unitProducts,omitempty"` // 单元商品筛选设置（与productSetId至少填一个）
+}
+
+// DpaAdgroupFeedAddReq 新建商品推广单元请求
+type DpaAdgroupFeedAddReq struct {
+	AdgroupFeedTypes []DpaAdgroupFeedType `json:"adgroupFeedTypes"` // 单元列表 [1, 100]
+}
+
+// Format 格式化请求参数
+func (r *DpaAdgroupFeedAddReq) Format() {}
+
+// Validate 校验请求参数
+func (r *DpaAdgroupFeedAddReq) Validate() error {
+	return nil
 }
