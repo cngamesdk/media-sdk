@@ -436,3 +436,97 @@ func TestGetAdgroupFeedSelfWithAudience(t *testing.T) {
 		println(fmt.Sprintf("audience: %+v", resp.Data[0].Audience))
 	}
 }
+
+// TestGetDpaAdgroupFeedSelf 测试查询商品推广单元（指定部分字段）
+func TestGetDpaAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedReq{
+		AdgroupFeedFields: []string{
+			"adgroupFeedId", "campaignFeedId", "adgroupFeedName", "pause", "status",
+			"bid", "ftypes", "bidtype", "ocpc", "productSetId",
+		},
+		Ids:    []int64{1},
+		IdType: model.IdTypeUnit,
+	}
+	resp, err := factory.GetDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("dpa unit data[0]: %+v", resp.Data[0]))
+	}
+}
+
+// TestGetDpaAdgroupFeedSelfAllFields 测试查询商品推广单元（全部字段）
+func TestGetDpaAdgroupFeedSelfAllFields(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedReq{
+		AdgroupFeedFields: []string{
+			"adgroupFeedId", "campaignFeedId", "adgroupFeedName", "bid",
+			"status", "pause", "ftypes", "producttypes", "productSetId",
+			"audience", "bidtype", "ocpc",
+		},
+		Ids:    []int64{1},
+		IdType: model.IdTypeUnit,
+	}
+	resp, err := factory.GetDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
+	if len(resp.Data) > 0 {
+		data := resp.Data[0]
+		println(fmt.Sprintf(
+			"dpa unit: id=%d, name=%s, campaignId=%d, pause=%v, status=%d, bid=%.2f, bidtype=%d",
+			data.AdgroupFeedId, data.AdgroupFeedName, data.CampaignFeedId,
+			data.Pause, data.Status, data.Bid, data.Bidtype,
+		))
+		println(fmt.Sprintf("ftypes=%v, producttypes=%v, productSetId=%d", data.Ftypes, data.Producttypes, data.ProductSetId))
+		if data.Ocpc != nil {
+			println(fmt.Sprintf("ocpc: appTransId=%d, transFrom=%d, ocpcBid=%.2f, transType=%d, lpUrl=%s",
+				data.Ocpc.AppTransID, data.Ocpc.TransFrom, data.Ocpc.OcpcBid, data.Ocpc.TransType, data.Ocpc.LpUrl))
+		}
+		if data.Audience != nil {
+			println(fmt.Sprintf("audience: premium=%s, interests=%s, age=%s, sex=%s, region=%s",
+				data.Audience.Premium, data.Audience.Interests, data.Audience.Age, data.Audience.Sex, data.Audience.Region))
+		}
+	}
+}
+
+// TestGetDpaAdgroupFeedSelfByCampaignId 测试按计划ID查询商品推广单元
+func TestGetDpaAdgroupFeedSelfByCampaignId(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedReq{
+		AdgroupFeedFields: []string{"adgroupFeedId", "adgroupFeedName", "status"},
+		Ids:               []int64{12387113},
+		IdType:            model.IdTypeCampaign,
+	}
+	resp, err := factory.GetDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
+
+// TestGetDpaAdgroupFeedSelfWithFilter 测试带状态过滤查询商品推广单元
+func TestGetDpaAdgroupFeedSelfWithFilter(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedReq{
+		AdgroupFeedFields: []string{"adgroupFeedId", "adgroupFeedName", "status"},
+		Ids:               []int64{1},
+		IdType:            model.IdTypeUnit,
+		AdgroupFeedFilter: &model.AdgroupFeedFilter{
+			Status: []int{model.UnitStatusActive},
+		},
+	}
+	resp, err := factory.GetDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result: %+v", resp))
+}
