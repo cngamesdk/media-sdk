@@ -3,6 +3,8 @@ package model
 const (
 	// AdgroupFeedServiceURL 查询单元API端点
 	AdgroupFeedServiceURL = "/json/feed/v1/AdgroupFeedService/getAdgroupFeed"
+	// AdgroupFeedAddServiceURL 新建单元API端点
+	AdgroupFeedAddServiceURL = "/json/feed/v1/AdgroupFeedService/addAdgroupFeed"
 )
 
 // ID类型枚举
@@ -45,11 +47,29 @@ const (
 	BidSourcePlan = 2 // 使用计划出价
 )
 
+// 投放范围枚举（单元级别）
+const (
+	FtypeBaiduFeed   = 1  // 自定义类-百度信息流
+	FtypeTieba       = 2  // 自定义类-贴吧
+	FtypeBaiqingteng = 4  // 百青藤
+	FtypeHaokanVideo = 8  // 自定义类-好看视频
+	FtypeBaiduNovel  = 64 // 自定义类-百度小说
+)
+
+// 投放场景枚举
+const (
+	DeliveryTypeAll    = 0 // 不限
+	DeliveryTypeSplash = 1 // 开屏
+	DeliveryTypeReward = 2 // 激励
+	DeliveryTypeNative = 4 // 原生
+)
+
 // 落地页类型枚举
 const (
 	UrlTypeNormal      = 1 // 普通落地页
 	UrlTypeMiniProgram = 2 // 百度小程序
 	UrlTypeLiveRoom    = 3 // 直播间
+	UrlTypeBaijiaHao   = 4 // 百家号
 )
 
 // 百度小程序类型枚举
@@ -164,4 +184,59 @@ type AdgroupFeedData struct {
 // AdgroupFeedDataList 推广单元信息数据列表
 type AdgroupFeedDataList struct {
 	Data []AdgroupFeedData `json:"data"`
+}
+
+// BjhProgram 百家号短剧合集信息
+type BjhProgram struct {
+	Field         string `json:"field,omitempty"`         // 字段名
+	BjhCollectId  int64  `json:"bjhCollectId,omitempty"`  // 百家号短剧合集ID
+	BjhVideoId    int64  `json:"bjhVideoId,omitempty"`    // 百家号短剧合集第一集视频ID
+	BjhTemplateId string `json:"bjhTemplateId,omitempty"` // 百家号付费面板ID
+}
+
+// AutoIdeaOptiType 自动创意优化设置
+type AutoIdeaOptiType struct {
+	TextOpti  int `json:"textOpti,omitempty"`  // 自动文案优化 0:关闭, 1:开启
+	VideoOpti int `json:"videoOpti,omitempty"` // 自动视频优化 0:关闭, 1:开启
+	ImageOpti int `json:"imageOpti,omitempty"` // 自动图片优化 0:关闭, 1:开启
+}
+
+// AdgroupFeedType 新建单元对象
+type AdgroupFeedType struct {
+	CampaignFeedId  int64                `json:"campaignFeedId"`           // 推广计划ID（必填）
+	AdgroupFeedName string               `json:"adgroupFeedName"`          // 推广单元名称（必填）[1, 100]
+	Pause           *bool                `json:"pause,omitempty"`          // 暂停/启用推广单元，默认false
+	Audience        map[string]string    `json:"audience,omitempty"`       // 定向设置
+	Bid             float64              `json:"bid"`                      // 出价（必填）
+	Ftypes          []int                `json:"ftypes"`                   // 投放范围（必填）
+	Bidtype         int                  `json:"bidtype,omitempty"`        // 优化目标和付费模式，默认1
+	Ocpc            *AdgroupFeedOcpcType `json:"ocpc,omitempty"`           // oCPC设置对象（bidtype=3时必填）
+	AtpFeedId       int64                `json:"atpFeedId,omitempty"`      // 定向包ID
+	DeliveryType    []int                `json:"deliveryType,omitempty"`   // 投放场景，默认0
+	ProductSetId    int64                `json:"productSetId,omitempty"`   // 商品组ID
+	UnitProducts    *UnitProducts        `json:"unitProducts,omitempty"`   // 单元商品筛选设置
+	FtypeSelection  int                  `json:"ftypeSelection,omitempty"` // 流量来源
+	BidSource       int                  `json:"bidSource,omitempty"`      // 出价来源
+	UrlType         int                  `json:"urlType,omitempty"`        // 落地页类型
+	MiniProgram     string               `json:"miniProgram,omitempty"`    // 小程序信息（json字符串）
+	BroadCastInfo   string               `json:"broadCastInfo,omitempty"`  // 直播间信息（json字符串）
+	Url             string               `json:"url,omitempty"`            // 落地页
+	CreateAtp       *bool                `json:"createAtp,omitempty"`      // 是否创建定向包，默认false
+	AtpName         string               `json:"atpName,omitempty"`        // 定向包名称 [0, 60]
+	AtpDesc         string               `json:"atpDesc,omitempty"`        // 定向包描述 [0, 80]
+	BjhProgram      *BjhProgram          `json:"bjhProgram,omitempty"`     // 百家号短剧合集信息（小流量）
+	AutoIdeaOpti    *AutoIdeaOptiType    `json:"autoIdeaOpti,omitempty"`   // 自动创意优化设置
+}
+
+// AdgroupFeedAddReq 新建单元请求
+type AdgroupFeedAddReq struct {
+	AdgroupFeedTypes []AdgroupFeedType `json:"adgroupFeedTypes"` // 单元集合
+}
+
+// Format 格式化请求参数
+func (r *AdgroupFeedAddReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AdgroupFeedAddReq) Validate() error {
+	return nil
 }
