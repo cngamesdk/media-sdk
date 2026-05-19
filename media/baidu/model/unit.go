@@ -7,6 +7,8 @@ const (
 	AdgroupFeedAddServiceURL = "/json/feed/v1/AdgroupFeedService/addAdgroupFeed"
 	// AdgroupFeedUpdateServiceURL 更新单元API端点
 	AdgroupFeedUpdateServiceURL = "/json/feed/v1/AdgroupFeedService/updateAdgroupFeed"
+	// AdgroupFeedDeleteServiceURL 删除单元API端点
+	AdgroupFeedDeleteServiceURL = "/json/feed/v1/AdgroupFeedService/deleteAdgroupFeed"
 )
 
 // ID类型枚举
@@ -271,4 +273,27 @@ func (r *AdgroupFeedUpdateReq) Format() {}
 // Validate 校验请求参数
 func (r *AdgroupFeedUpdateReq) Validate() error {
 	return nil
+}
+
+// AdgroupFeedDeleteReq 删除单元请求
+type AdgroupFeedDeleteReq struct {
+	AdgroupFeedIds []int64 `json:"adgroupFeedIds"` // 要删除的单元ID集合
+}
+
+// Format 格式化请求参数
+func (r *AdgroupFeedDeleteReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AdgroupFeedDeleteReq) Validate() error {
+	return nil
+}
+
+// AdgroupFeedDeleteData 删除单元响应数据
+type AdgroupFeedDeleteData struct {
+	AdgroupFeedId int64 `json:"adgroupFeedId"` // 推广单元ID
+}
+
+// AdgroupFeedDeleteDataList 删除单元响应数据列表
+type AdgroupFeedDeleteDataList struct {
+	Data []AdgroupFeedDeleteData `json:"data"`
 }

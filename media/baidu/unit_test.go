@@ -388,6 +388,34 @@ func TestUpdateAdgroupFeedSelfUrl(t *testing.T) {
 	println(fmt.Sprintf("update result: %+v", resp))
 }
 
+// TestDeleteAdgroupFeedSelf 测试删除单个单元
+func TestDeleteAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedDeleteReq{
+		AdgroupFeedIds: []int64{1},
+	}
+	resp, err := factory.DeleteAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
+// TestDeleteAdgroupFeedSelfBatch 测试批量删除单元
+func TestDeleteAdgroupFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AdgroupFeedDeleteReq{
+		AdgroupFeedIds: []int64{234112, 234113},
+	}
+	resp, err := factory.DeleteAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
 // TestGetAdgroupFeedSelfWithAudience 测试查询包含定向设置的单元
 func TestGetAdgroupFeedSelfWithAudience(t *testing.T) {
 	ctx := context.Background()
