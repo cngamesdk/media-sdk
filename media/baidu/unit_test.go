@@ -638,3 +638,86 @@ func TestGetDpaAdgroupFeedSelfWithFilter(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result: %+v", resp))
 }
+
+// TestUpdateDpaAdgroupFeedSelf 测试更新商品推广单元名称
+func TestUpdateDpaAdgroupFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.DpaAdgroupFeedUpdateType{
+			{
+				AdgroupFeedId:   12387113,
+				AdgroupFeedName: "更新后的商品单元名称",
+			},
+		},
+	}
+	resp, err := factory.UpdateDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateDpaAdgroupFeedSelfPause 测试暂停/启用商品推广单元
+func TestUpdateDpaAdgroupFeedSelfPause(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	pauseTrue := true
+	req := &model.DpaAdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.DpaAdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Pause:         &pauseTrue,
+			},
+		},
+	}
+	resp, err := factory.UpdateDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateDpaAdgroupFeedSelfBid 测试更新商品推广单元出价
+func TestUpdateDpaAdgroupFeedSelfBid(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.DpaAdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Bid:           2.5,
+			},
+		},
+	}
+	resp, err := factory.UpdateDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateDpaAdgroupFeedSelfOcpc 测试更新商品推广单元oCPC（含商品通配符lpUrl）
+func TestUpdateDpaAdgroupFeedSelfOcpc(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.DpaAdgroupFeedUpdateReq{
+		AdgroupFeedTypes: []model.DpaAdgroupFeedUpdateType{
+			{
+				AdgroupFeedId: 12387113,
+				Ocpc: &model.DpaOcpcType{
+					AppTransID: 23415,
+					TransFrom:  model.TransFromLeadsAPI,
+					OcpcBid:    180.0,
+					LpUrl:      "http://www.baidu.com?product=${product_id}",
+					TransType:  model.TransTypeLeaveLeads,
+				},
+			},
+		},
+	}
+	resp, err := factory.UpdateDpaAdgroupFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
