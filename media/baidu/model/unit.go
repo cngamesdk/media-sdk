@@ -15,6 +15,8 @@ const (
 	DpaAdgroupFeedAddServiceURL = "/json/feed/v1/DpaAdgroupFeedService/addAdgroupFeed"
 	// DpaAdgroupFeedUpdateServiceURL 更新商品推广单元API端点
 	DpaAdgroupFeedUpdateServiceURL = "/json/feed/v1/DpaAdgroupFeedService/updateAdgroupFeed"
+	// DpaAdgroupFeedDeleteServiceURL 删除商品推广单元API端点
+	DpaAdgroupFeedDeleteServiceURL = "/json/feed/v1/DpaAdgroupFeedService/deleteAdgroupFeed"
 )
 
 // ID类型枚举
