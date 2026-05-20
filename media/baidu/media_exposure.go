@@ -22,3 +22,21 @@ func (a *BaiduAdapter) GetMediaExposureSelf(ctx context.Context, userName string
 	resp = &result
 	return
 }
+
+// GetMediaPackageSelf 查询媒体包ID
+// POST https://api.baidu.com/json/feed/v1/SearchFeedService/getMediaPackages
+func (a *BaiduAdapter) GetMediaPackageSelf(ctx context.Context, userName string, accessToken string, req *model2.MediaPackageReq) (resp *model2.MediaPackageDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.MediaPackageDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.MediaPackageServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
