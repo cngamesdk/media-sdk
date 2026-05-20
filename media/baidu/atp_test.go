@@ -68,6 +68,59 @@ func TestGetAtpFeedSelfAllFields(t *testing.T) {
 	}
 }
 
+// TestAddAtpFeedSelf 测试新增定向包（基础字段）
+func TestAddAtpFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedAddReq{
+		AtpFeedTypes: []model.AtpFeedType{
+			{
+				AtpFeedName: "测试定向包",
+				AtpFeedDesc: "测试描述",
+				Ftypes:      []int{model.FtypeBaiduFeed, model.FtypeTieba},
+				Subject:     1,
+				Audience:    map[string]string{},
+			},
+		},
+	}
+	resp, err := factory.AddAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("created atp: id=%d, name=%s", resp.Data[0].AtpFeedId, resp.Data[0].AtpFeedName))
+	}
+}
+
+// TestAddAtpFeedSelfFull 测试新增定向包（完整字段含定向设置）
+func TestAddAtpFeedSelfFull(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedAddReq{
+		AtpFeedTypes: []model.AtpFeedType{
+			{
+				AtpFeedName: "完整定向包_测试",
+				AtpFeedDesc: "包含所有定向设置的完整定向包",
+				Ftypes:      []int{model.FtypeBaiduFeed},
+				Subject:     1,
+				Audience: map[string]string{
+					"age":    "25-44",
+					"sex":    "1",
+					"region": "110000",
+				},
+				DeliveryType:    []int{model.DeliveryTypeAll},
+				MiniProgramType: 3,
+			},
+		},
+	}
+	resp, err := factory.AddAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
+
 // TestGetAtpFeedSelfByKey 测试按关键字查询定向包
 func TestGetAtpFeedSelfByKey(t *testing.T) {
 	ctx := context.Background()
