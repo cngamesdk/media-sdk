@@ -121,6 +121,71 @@ func TestAddAtpFeedSelfFull(t *testing.T) {
 	println(fmt.Sprintf("add result: %+v", resp))
 }
 
+// TestUpdateAtpFeedSelf 测试更新定向包名称
+func TestUpdateAtpFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedUpdateReq{
+		AtpFeedTypes: []model.AtpFeedUpdateType{
+			{
+				AtpFeedId:   1,
+				AtpFeedName: "更新后的定向包名称",
+				AtpFeedDesc: "更新后的描述",
+			},
+		},
+	}
+	resp, err := factory.UpdateAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("updated atp: id=%d, name=%s", resp.Data[0].AtpFeedId, resp.Data[0].AtpFeedName))
+	}
+}
+
+// TestUpdateAtpFeedSelfAudience 测试更新定向包定向设置
+func TestUpdateAtpFeedSelfAudience(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedUpdateReq{
+		AtpFeedTypes: []model.AtpFeedUpdateType{
+			{
+				AtpFeedId: 1,
+				Audience: map[string]string{
+					"age":    "18-24",
+					"sex":    "0",
+					"region": "310000",
+				},
+			},
+		},
+	}
+	resp, err := factory.UpdateAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateAtpFeedSelfFtypes 测试更新定向包投放范围
+func TestUpdateAtpFeedSelfFtypes(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedUpdateReq{
+		AtpFeedTypes: []model.AtpFeedUpdateType{
+			{
+				AtpFeedId: 1,
+				Ftypes:    []int{model.FtypeBaiduFeed, model.FtypeTieba, model.FtypeBaiqingteng},
+			},
+		},
+	}
+	resp, err := factory.UpdateAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
 // TestGetAtpFeedSelfByKey 测试按关键字查询定向包
 func TestGetAtpFeedSelfByKey(t *testing.T) {
 	ctx := context.Background()

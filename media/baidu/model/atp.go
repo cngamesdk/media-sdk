@@ -5,6 +5,8 @@ const (
 	AtpFeedServiceURL = "/json/feed/v1/AtpFeedService/getAtpFeed"
 	// AtpFeedAddServiceURL 新增定向包API端点
 	AtpFeedAddServiceURL = "/json/feed/v1/AtpFeedService/addAtpFeed"
+	// AtpFeedUpdateServiceURL 更新定向包API端点
+	AtpFeedUpdateServiceURL = "/json/feed/v1/AtpFeedService/updateAtpFeed"
 )
 
 // AtpFeedReq 查询定向包请求
@@ -65,5 +67,29 @@ func (r *AtpFeedAddReq) Format() {}
 
 // Validate 校验请求参数
 func (r *AtpFeedAddReq) Validate() error {
+	return nil
+}
+
+// AtpFeedUpdateType 更新定向包对象
+type AtpFeedUpdateType struct {
+	AtpFeedId    int64             `json:"atpFeedId"`              // 定向包ID（必填）
+	AtpFeedName  string            `json:"atpFeedName,omitempty"`  // 定向包名称 [1, 60]
+	AtpFeedDesc  string            `json:"atpFeedDesc,omitempty"`  // 定向包描述 [1, 80]
+	Ftypes       []int             `json:"ftypes,omitempty"`       // 投放范围（未绑定单元时可修改）
+	Subject      int               `json:"subject,omitempty"`      // 推广对象（未绑定单元时可修改）
+	Audience     map[string]string `json:"audience,omitempty"`     // 定向设置
+	DeliveryType []int             `json:"deliveryType,omitempty"` // 投放场景（未绑定单元时可修改）
+}
+
+// AtpFeedUpdateReq 更新定向包请求
+type AtpFeedUpdateReq struct {
+	AtpFeedTypes []AtpFeedUpdateType `json:"atpFeedTypes"` // 定向包对象数组
+}
+
+// Format 格式化请求参数
+func (r *AtpFeedUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AtpFeedUpdateReq) Validate() error {
 	return nil
 }

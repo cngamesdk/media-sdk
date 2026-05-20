@@ -23,6 +23,24 @@ func (a *BaiduAdapter) GetAtpFeedSelf(ctx context.Context, userName string, acce
 	return
 }
 
+// UpdateAtpFeedSelf 更新定向包
+// POST https://api.baidu.com/json/feed/v1/AtpFeedService/updateAtpFeed
+func (a *BaiduAdapter) UpdateAtpFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AtpFeedUpdateReq) (resp *model2.AtpFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AtpFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.AtpFeedUpdateServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 // AddAtpFeedSelf 新增定向包
 // POST https://api.baidu.com/json/feed/v1/AtpFeedService/addAtpFeed
 func (a *BaiduAdapter) AddAtpFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AtpFeedAddReq) (resp *model2.AtpFeedDataList, err error) {
