@@ -3,6 +3,8 @@ package model
 const (
 	// TransTraceServiceURL 查询转化追踪API端点
 	TransTraceServiceURL = "/json/feed/v1/SearchFeedService/getOcpcTransFeed"
+	// TransTraceAddServiceURL 新增转化追踪API端点
+	TransTraceAddServiceURL = "/json/feed/v1/OcpcTransFeedService/addOcpcTransFeed"
 )
 
 // 接入方式枚举（转化追踪查询）
@@ -43,6 +45,27 @@ const (
 const (
 	TransStatusActive   = 1 // 已激活
 	TransStatusInactive = 0 // 未激活
+)
+
+// 应用类型枚举（新增转化追踪）
+const (
+	AppTypeIOS       = 1 // iOS
+	AppTypeAndroid   = 2 // Android
+	AppTypeAPILaunch = 3 // 应用API-调起
+)
+
+// 监测方式枚举（新增转化追踪）
+const (
+	MonitorModeClickExposure = 0 // 点击+曝光
+	MonitorModeClickOnly     = 1 // 点击
+)
+
+// 新增转化追踪支持的转化类型枚举
+const (
+	AddTransTypeActivate      = 4  // 激活
+	AddTransTypeDeepPageVisit = 20 // 深度页面访问
+	AddTransTypeProductOrder  = 45 // 商品下单成功
+	AddTransTypeAppLaunch     = 71 // 应用调起
 )
 
 // SearchFieldType 搜索字段
@@ -97,4 +120,37 @@ type TransTraceData struct {
 // TransTraceDataList 转化追踪信息数据列表
 type TransTraceDataList struct {
 	Data []TransTraceData `json:"data"`
+}
+
+// OcpcTransFeedType 新增转化追踪对象
+type OcpcTransFeedType struct {
+	TransFrom      int    `json:"transFrom"`                // 接入方式（必填）1=应用API, 13=应用SDK
+	TransName      string `json:"transName"`                // 转化名称（必填）≤50字符, 不能重复
+	TransTypes     []int  `json:"transTypes"`               // 转化类型（必填）4=激活, 20=深度页面访问, 45=商品下单成功, 71=应用调起
+	DeepTransTypes []int  `json:"deepTransTypes,omitempty"` // 深度转化类型（选填）
+	Mode           int    `json:"mode,omitempty"`           // 监测方式（transFrom=1必填）0=点击+曝光, 1=点击
+	DownloadUrl    string `json:"downloadUrl,omitempty"`    // 下载URL
+	MonitorUrl     string `json:"monitorUrl,omitempty"`     // 点击监测地址（transFrom=1必填, 需含{{CALLBACK_URL}}）
+	ExposureUrl    string `json:"exposureUrl,omitempty"`    // 曝光监测地址（mode=0必填）
+	AppType        int    `json:"appType"`                  // 应用类型（必填）1=iOS, 2=Android, 3=应用API-调起
+	AppName        string `json:"appName,omitempty"`        // 应用名称
+	ApkName        string `json:"apkName,omitempty"`        // 应用包名/APP Sign（transFrom=13必填）
+	Appid          int64  `json:"appid,omitempty"`          // APP Store ID（transFrom=13,appType=1必填）
+	SdkAppId       int64  `json:"sdkAppId,omitempty"`       // SDK应用ID（transFrom=13必填）
+	SdkSecretKey   string `json:"sdkSecretKey,omitempty"`   // SDK应用密钥（transFrom=13必填）
+	ChannelId      int64  `json:"channelId,omitempty"`      // Android渠道包ID
+	Docid          int64  `json:"docid,omitempty"`          // Android渠道包ID（已废弃）
+}
+
+// TransTraceAddReq 新增转化追踪请求
+type TransTraceAddReq struct {
+	OcpcTransFeedTypes []OcpcTransFeedType `json:"ocpcTransFeedTypes"` // 新增转化追踪列表
+}
+
+// Format 格式化请求参数
+func (r *TransTraceAddReq) Format() {}
+
+// Validate 校验请求参数
+func (r *TransTraceAddReq) Validate() error {
+	return nil
 }

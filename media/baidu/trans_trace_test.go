@@ -136,3 +136,108 @@ func TestGetTransTraceSelfJimuFilter(t *testing.T) {
 	}
 	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
 }
+
+// TestAddTransTraceSelfAppAPI 测试新增应用API转化追踪（iOS）
+func TestAddTransTraceSelfAppAPI(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceAddReq{
+		OcpcTransFeedTypes: []model.OcpcTransFeedType{
+			{
+				TransFrom:   model.TransTraceAppAPI,
+				TransName:   "测试应用API转化_iOS",
+				TransTypes:  []int{model.AddTransTypeActivate},
+				Mode:        model.MonitorModeClickOnly,
+				MonitorUrl:  "https://track.example.com/callback?callback={{CALLBACK_URL}}",
+				AppType:     model.AppTypeIOS,
+				AppName:     "测试iOS应用",
+				DownloadUrl: "https://apps.apple.com/test",
+			},
+		},
+	}
+	resp, err := factory.AddTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("created trans: id=%d, name=%s, status=%d",
+			resp.Data[0].AppTransId, resp.Data[0].TransName, resp.Data[0].TransStatus))
+	}
+}
+
+// TestAddTransTraceSelfAppAPIAndroid 测试新增应用API转化追踪（Android）
+func TestAddTransTraceSelfAppAPIAndroid(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceAddReq{
+		OcpcTransFeedTypes: []model.OcpcTransFeedType{
+			{
+				TransFrom:  model.TransTraceAppAPI,
+				TransName:  "测试应用API转化_Android",
+				TransTypes: []int{model.AddTransTypeActivate},
+				Mode:       model.MonitorModeClickOnly,
+				MonitorUrl: "https://track.example.com/callback?callback={{CALLBACK_URL}}",
+				AppType:    model.AppTypeAndroid,
+				ApkName:    "com.example.testapp",
+			},
+		},
+	}
+	resp, err := factory.AddTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
+
+// TestAddTransTraceSelfAppSDK 测试新增应用SDK转化追踪
+func TestAddTransTraceSelfAppSDK(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceAddReq{
+		OcpcTransFeedTypes: []model.OcpcTransFeedType{
+			{
+				TransFrom:    model.TransTraceAppSDK,
+				TransName:    "测试应用SDK转化",
+				TransTypes:   []int{model.AddTransTypeActivate},
+				AppType:      model.AppTypeAndroid,
+				AppName:      "测试SDK应用",
+				ApkName:      "com.example.sdkapp",
+				SdkAppId:     12345,
+				SdkSecretKey: "test_secret_key",
+			},
+		},
+	}
+	resp, err := factory.AddTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
+
+// TestAddTransTraceSelfFull 测试新增转化追踪（完整字段含深度转化）
+func TestAddTransTraceSelfFull(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceAddReq{
+		OcpcTransFeedTypes: []model.OcpcTransFeedType{
+			{
+				TransFrom:      model.TransTraceAppAPI,
+				TransName:      "完整转化追踪_含深度转化",
+				TransTypes:     []int{model.AddTransTypeActivate},
+				DeepTransTypes: []int{model.TransTypePurchaseSuccess, model.TransTypeRegister},
+				Mode:           model.MonitorModeClickExposure,
+				MonitorUrl:     "https://track.example.com/click?callback={{CALLBACK_URL}}",
+				ExposureUrl:    "https://track.example.com/exposure?callback={{CALLBACK_URL}}",
+				AppType:        model.AppTypeAndroid,
+				AppName:        "完整测试应用",
+				ApkName:        "com.example.fullapp",
+			},
+		},
+	}
+	resp, err := factory.AddTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("add result: %+v", resp))
+}
