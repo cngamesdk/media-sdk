@@ -9,6 +9,8 @@ const (
 	AtpFeedUpdateServiceURL = "/json/feed/v1/AtpFeedService/updateAtpFeed"
 	// AtpFeedDeleteServiceURL 删除定向包API端点
 	AtpFeedDeleteServiceURL = "/json/feed/v1/AtpFeedService/deleteAtpFeed"
+	// AtpFeedBindServiceURL 定向包绑定单元API端点
+	AtpFeedBindServiceURL = "/json/feed/v1/AtpFeedService/bindAtpFeed"
 )
 
 // AtpFeedReq 查询定向包请求
@@ -117,4 +119,34 @@ type AtpFeedDeleteData struct {
 // AtpFeedDeleteDataList 删除定向包响应数据列表
 type AtpFeedDeleteDataList struct {
 	Data []AtpFeedDeleteData `json:"data"`
+}
+
+// AtpBindFeedType 定向包绑定单元对象
+type AtpBindFeedType struct {
+	AtpFeedId      int64   `json:"atpFeedId"`      // 定向包ID（必填）
+	AdgroupFeedIds []int64 `json:"adgroupFeedIds"` // 绑定的单元ID集合 [0, 100]
+}
+
+// AtpFeedBindReq 定向包绑定单元请求
+type AtpFeedBindReq struct {
+	AtpBindFeedTypes []AtpBindFeedType `json:"atpBindFeedTypes"` // 定向包绑定对象数组
+}
+
+// Format 格式化请求参数
+func (r *AtpFeedBindReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AtpFeedBindReq) Validate() error {
+	return nil
+}
+
+// AtpBindFeedData 定向包绑定单元响应数据
+type AtpBindFeedData struct {
+	AtpFeedId      int64   `json:"atpFeedId"`      // 定向包ID
+	AdgroupFeedIds []int64 `json:"adgroupFeedIds"` // 绑定的单元ID集合
+}
+
+// AtpBindFeedDataList 定向包绑定单元响应数据列表
+type AtpBindFeedDataList struct {
+	Data []AtpBindFeedData `json:"data"`
 }

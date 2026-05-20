@@ -23,6 +23,24 @@ func (a *BaiduAdapter) GetAtpFeedSelf(ctx context.Context, userName string, acce
 	return
 }
 
+// BindAtpFeedSelf 定向包绑定单元
+// POST https://api.baidu.com/json/feed/v1/AtpFeedService/bindAtpFeed
+func (a *BaiduAdapter) BindAtpFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AtpFeedBindReq) (resp *model2.AtpBindFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AtpBindFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.AtpFeedBindServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
+
 // DeleteAtpFeedSelf 删除定向包（可批量）
 // POST https://api.baidu.com/json/feed/v1/AtpFeedService/deleteAtpFeed
 func (a *BaiduAdapter) DeleteAtpFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AtpFeedDeleteReq) (resp *model2.AtpFeedDeleteDataList, err error) {
