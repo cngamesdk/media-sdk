@@ -5,6 +5,8 @@ const (
 	TransTraceServiceURL = "/json/feed/v1/SearchFeedService/getOcpcTransFeed"
 	// TransTraceAddServiceURL 新增转化追踪API端点
 	TransTraceAddServiceURL = "/json/feed/v1/OcpcTransFeedService/addOcpcTransFeed"
+	// TransTraceUpdateServiceURL 修改转化追踪API端点
+	TransTraceUpdateServiceURL = "/json/feed/v1/TraceApiService/updateTransTrace"
 )
 
 // 接入方式枚举（转化追踪查询）
@@ -152,5 +154,28 @@ func (r *TransTraceAddReq) Format() {}
 
 // Validate 校验请求参数
 func (r *TransTraceAddReq) Validate() error {
+	return nil
+}
+
+// TransTraceUpdateType 修改转化追踪对象
+type TransTraceUpdateType struct {
+	TransId        int64  `json:"transId"`                  // 转化追踪ID（必填）
+	TransName      string `json:"transName,omitempty"`      // 转化名称 [1, 50], 不可重复
+	TransTypes     []int  `json:"transTypes,omitempty"`     // 转化类型，仅可取值为4, 不支持减少
+	DeepTransTypes []int  `json:"deepTransTypes,omitempty"` // 深度转化类型，不支持减少
+	MonitorUrl     string `json:"monitorUrl,omitempty"`     // 监测地址（需含{{CALLBACK_URL}}或ext_info=EXT_INFO）
+	ExposureUrl    string `json:"exposureUrl,omitempty"`    // 曝光地址
+}
+
+// TransTraceUpdateReq 修改转化追踪请求
+type TransTraceUpdateReq struct {
+	TransTraceUpdateTypes []TransTraceUpdateType `json:"transTraceUpdateTypes"` // 转化追踪数据对象列表
+}
+
+// Format 格式化请求参数
+func (r *TransTraceUpdateReq) Format() {}
+
+// Validate 校验请求参数
+func (r *TransTraceUpdateReq) Validate() error {
 	return nil
 }

@@ -215,6 +215,113 @@ func TestAddTransTraceSelfAppSDK(t *testing.T) {
 	println(fmt.Sprintf("add result: %+v", resp))
 }
 
+// TestUpdateTransTraceSelf 测试修改转化追踪名称
+func TestUpdateTransTraceSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceUpdateReq{
+		TransTraceUpdateTypes: []model.TransTraceUpdateType{
+			{
+				TransId:   3152984,
+				TransName: "修改后的转化名称",
+			},
+		},
+	}
+	resp, err := factory.UpdateTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("updated trans: id=%d, name=%s", resp.Data[0].AppTransId, resp.Data[0].TransName))
+	}
+}
+
+// TestUpdateTransTraceSelfTransTypes 测试修改转化追踪-更新转化类型
+func TestUpdateTransTraceSelfTransTypes(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceUpdateReq{
+		TransTraceUpdateTypes: []model.TransTraceUpdateType{
+			{
+				TransId:    3152984,
+				TransTypes: []int{model.AddTransTypeActivate},
+			},
+		},
+	}
+	resp, err := factory.UpdateTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateTransTraceSelfDeepTrans 测试修改转化追踪-更新深度转化类型
+func TestUpdateTransTraceSelfDeepTrans(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceUpdateReq{
+		TransTraceUpdateTypes: []model.TransTraceUpdateType{
+			{
+				TransId:        3152984,
+				DeepTransTypes: []int{model.TransTypePurchaseSuccess, model.TransTypeRegister, 28 /* 次日留存 */},
+			},
+		},
+	}
+	resp, err := factory.UpdateTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateTransTraceSelfMonitorUrl 测试修改转化追踪-更新监测地址
+func TestUpdateTransTraceSelfMonitorUrl(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceUpdateReq{
+		TransTraceUpdateTypes: []model.TransTraceUpdateType{
+			{
+				TransId:    3152984,
+				MonitorUrl: "http://www.baidu.com?callback={{CALLBACK_URL}}&new=1",
+			},
+		},
+	}
+	resp, err := factory.UpdateTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
+// TestUpdateTransTraceSelfBatch 测试批量修改转化追踪
+func TestUpdateTransTraceSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.TransTraceUpdateReq{
+		TransTraceUpdateTypes: []model.TransTraceUpdateType{
+			{
+				TransId:        3152984,
+				TransName:      "批量修改_转化1",
+				TransTypes:     []int{model.AddTransTypeActivate},
+				DeepTransTypes: []int{model.TransTypePurchaseSuccess, model.TransTypeRegister},
+				MonitorUrl:     "http://www.baidu.com?re={{CALLBACK_URL}}&a=1",
+				ExposureUrl:    "http://www.baidu.com?fdfs=__CALLBACK_URL__",
+			},
+			{
+				TransId:        3152983,
+				TransName:      "批量修改_转化2",
+				DeepTransTypes: []int{model.TransTypeRegister, 28 /* 次日留存 */},
+			},
+		},
+	}
+	resp, err := factory.UpdateTransTraceSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("update result: %+v", resp))
+}
+
 // TestAddTransTraceSelfFull 测试新增转化追踪（完整字段含深度转化）
 func TestAddTransTraceSelfFull(t *testing.T) {
 	ctx := context.Background()
