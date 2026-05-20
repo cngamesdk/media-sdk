@@ -215,6 +215,47 @@ func TestDeleteAtpFeedSelfBatch(t *testing.T) {
 }
 
 // TestGetAtpFeedSelfByKey 测试按关键字查询定向包
+// TestBindAtpFeedSelf 测试定向包绑定单元（单个绑定）
+func TestBindAtpFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedBindReq{
+		AtpBindFeedTypes: []model.AtpBindFeedType{
+			{
+				AtpFeedId:      1,
+				AdgroupFeedIds: []int64{1},
+			},
+		},
+	}
+	resp, err := factory.BindAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("bind result: %+v", resp))
+	if len(resp.Data) > 0 {
+		println(fmt.Sprintf("bound: atpId=%d, unitIds=%v", resp.Data[0].AtpFeedId, resp.Data[0].AdgroupFeedIds))
+	}
+}
+
+// TestBindAtpFeedSelfMulti 测试定向包绑定多个单元
+func TestBindAtpFeedSelfMulti(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedBindReq{
+		AtpBindFeedTypes: []model.AtpBindFeedType{
+			{
+				AtpFeedId:      1,
+				AdgroupFeedIds: []int64{1, 2, 3},
+			},
+		},
+	}
+	resp, err := factory.BindAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("bind result: %+v", resp))
+}
+
 func TestGetAtpFeedSelfByKey(t *testing.T) {
 	ctx := context.Background()
 	factory := NewBaiduAdapter(config.DefaultConfig())
