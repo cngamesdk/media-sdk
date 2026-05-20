@@ -7,6 +7,8 @@ const (
 	AtpFeedAddServiceURL = "/json/feed/v1/AtpFeedService/addAtpFeed"
 	// AtpFeedUpdateServiceURL 更新定向包API端点
 	AtpFeedUpdateServiceURL = "/json/feed/v1/AtpFeedService/updateAtpFeed"
+	// AtpFeedDeleteServiceURL 删除定向包API端点
+	AtpFeedDeleteServiceURL = "/json/feed/v1/AtpFeedService/deleteAtpFeed"
 )
 
 // AtpFeedReq 查询定向包请求
@@ -92,4 +94,27 @@ func (r *AtpFeedUpdateReq) Format() {}
 // Validate 校验请求参数
 func (r *AtpFeedUpdateReq) Validate() error {
 	return nil
+}
+
+// AtpFeedDeleteReq 删除定向包请求
+type AtpFeedDeleteReq struct {
+	AtpFeedIds []int64 `json:"atpFeedIds"` // 定向包ID集合，一次最多100个
+}
+
+// Format 格式化请求参数
+func (r *AtpFeedDeleteReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AtpFeedDeleteReq) Validate() error {
+	return nil
+}
+
+// AtpFeedDeleteData 删除定向包响应数据
+type AtpFeedDeleteData struct {
+	AtpFeedId int64 `json:"atpFeedId"` // 成功删除的定向包ID
+}
+
+// AtpFeedDeleteDataList 删除定向包响应数据列表
+type AtpFeedDeleteDataList struct {
+	Data []AtpFeedDeleteData `json:"data"`
 }

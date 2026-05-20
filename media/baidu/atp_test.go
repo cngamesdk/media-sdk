@@ -186,6 +186,34 @@ func TestUpdateAtpFeedSelfFtypes(t *testing.T) {
 	println(fmt.Sprintf("update result: %+v", resp))
 }
 
+// TestDeleteAtpFeedSelf 测试删除单个定向包
+func TestDeleteAtpFeedSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedDeleteReq{
+		AtpFeedIds: []int64{3739688195},
+	}
+	resp, err := factory.DeleteAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
+// TestDeleteAtpFeedSelfBatch 测试批量删除定向包
+func TestDeleteAtpFeedSelfBatch(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.AtpFeedDeleteReq{
+		AtpFeedIds: []int64{3739688195, 3739688196, 3739688197},
+	}
+	resp, err := factory.DeleteAtpFeedSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("delete result: %+v", resp))
+}
+
 // TestGetAtpFeedSelfByKey 测试按关键字查询定向包
 func TestGetAtpFeedSelfByKey(t *testing.T) {
 	ctx := context.Background()
