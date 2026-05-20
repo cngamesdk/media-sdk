@@ -1,0 +1,24 @@
+package baidu
+
+import (
+	"context"
+	model2 "github.com/cngamesdk/media-sdk/media/baidu/model"
+)
+
+// GetAtpFeedSelf 查询定向包
+// POST https://api.baidu.com/json/feed/v1/AtpFeedService/getAtpFeed
+func (a *BaiduAdapter) GetAtpFeedSelf(ctx context.Context, userName string, accessToken string, req *model2.AtpFeedReq) (resp *model2.AtpFeedDataList, err error) {
+	req.Format()
+	if validateErr := req.Validate(); validateErr != nil {
+		err = validateErr
+		return
+	}
+	var result model2.AtpFeedDataList
+	errRequest := a.RequestPostJsonBusiness(ctx, userName, accessToken, model2.BaseUrlAPI+model2.AtpFeedServiceURL, req, &result)
+	if errRequest != nil {
+		err = errRequest
+		return
+	}
+	resp = &result
+	return
+}
