@@ -3,6 +3,8 @@ package model
 const (
 	// AtpFeedServiceURL 查询定向包API端点
 	AtpFeedServiceURL = "/json/feed/v1/AtpFeedService/getAtpFeed"
+	// AtpFeedAddServiceURL 新增定向包API端点
+	AtpFeedAddServiceURL = "/json/feed/v1/AtpFeedService/addAtpFeed"
 )
 
 // AtpFeedReq 查询定向包请求
@@ -40,4 +42,28 @@ type AtpFeedData struct {
 // AtpFeedDataList 定向包信息数据列表
 type AtpFeedDataList struct {
 	Data []AtpFeedData `json:"data"`
+}
+
+// AtpFeedType 新增定向包对象
+type AtpFeedType struct {
+	AtpFeedName     string            `json:"atpFeedName"`               // 定向包名称（必填）[1, 60]
+	AtpFeedDesc     string            `json:"atpFeedDesc,omitempty"`     // 定向包描述 [1, 80]
+	Ftypes          []int             `json:"ftypes"`                    // 投放范围（必填）
+	Subject         int               `json:"subject,omitempty"`         // 推广对象
+	Audience        map[string]string `json:"audience,omitempty"`        // 定向设置
+	DeliveryType    []int             `json:"deliveryType,omitempty"`    // 投放场景
+	MiniProgramType int               `json:"miniProgramType,omitempty"` // 小程序子类型 3=微信小程序
+}
+
+// AtpFeedAddReq 新增定向包请求
+type AtpFeedAddReq struct {
+	AtpFeedTypes []AtpFeedType `json:"atpFeedTypes"` // 批量添加定向包集合 [0, 100]
+}
+
+// Format 格式化请求参数
+func (r *AtpFeedAddReq) Format() {}
+
+// Validate 校验请求参数
+func (r *AtpFeedAddReq) Validate() error {
+	return nil
 }
