@@ -42,3 +42,43 @@ func TestGetMediaExposureSelfBatch(t *testing.T) {
 		println(fmt.Sprintf("media: id=%d, name=%s, pv=%d(万)", data.Id, data.Name, data.Pv))
 	}
 }
+
+// TestGetMediaPackageSelf 测试查询媒体包ID（不包含失效）
+func TestGetMediaPackageSelf(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.MediaPackageReq{
+		IncludeUnavailable: false,
+	}
+	resp, err := factory.GetMediaPackageSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
+	for _, data := range resp.Data {
+		println(fmt.Sprintf(
+			"package: id=%d, name=%s, type=%d, available=%v, tips=%s, mediaids=%v",
+			data.Id, data.Name, data.Type, data.Available, data.Tips, data.Mediaids,
+		))
+	}
+}
+
+// TestGetMediaPackageSelfIncludeUnavailable 测试查询媒体包ID（包含失效）
+func TestGetMediaPackageSelfIncludeUnavailable(t *testing.T) {
+	ctx := context.Background()
+	factory := NewBaiduAdapter(config.DefaultConfig())
+	req := &model.MediaPackageReq{
+		IncludeUnavailable: true,
+	}
+	resp, err := factory.GetMediaPackageSelf(ctx, "test_user", "test_token", req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(fmt.Sprintf("get result count: %d", len(resp.Data)))
+	for _, data := range resp.Data {
+		println(fmt.Sprintf(
+			"package: id=%d, name=%s, type=%d, available=%v, mediaids_count=%d",
+			data.Id, data.Name, data.Type, data.Available, len(data.Mediaids),
+		))
+	}
+}
